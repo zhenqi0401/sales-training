@@ -1,0 +1,165 @@
+// Global SCSS styles
+
+// CSS custom properties
+:root {
+  --sidebar-width: 220px;
+  --sidebar-collapsed-width: 64px;
+  --header-height: 60px;
+  --primary-color: #409eff;
+  --success-color: #67c23a;
+  --warning-color: #e6a23c;
+  --danger-color: #f56c6c;
+  --info-color: #909399;
+  --bg-color: #f0f2f5;
+  --sidebar-bg: #304156;
+  --sidebar-text: #bfcbd9;
+  --sidebar-active-text: #409eff;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg-color);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#app {
+  height: 100%;
+}
+
+// Scrollbar styling
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c0c4cc;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #909399;
+}
+
+// Element Plus overrides
+.el-menu {
+  border-right: none !important;
+}
+
+.el-card {
+  border-radius: 8px;
+
+  .el-card__header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #ebeef5;
+    font-weight: 600;
+  }
+}
+
+// Page common styles
+.page-container {
+  padding: 20px;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.page-header {
+  margin-bottom: 20px;
+
+  h2 {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #303133;
+  }
+
+  p {
+    margin: 0;
+    font-size: 14px;
+    color: #909399;
+  }
+}
+
+.search-form {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.table-container {
+  background: #fff;
+  padding: 20px;
+  border-radius: 8px;
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+
+  .toolbar-left {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  .toolbar-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+}
+
+.stat-card {
+  .stat-value {
+    font-size: 28px;
+    font-weight: 700;
+    color: #303133;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 14px;
+    color: #909399;
+  }
+
+  .stat-icon {
+    font-size: 48px;
+    opacity: 0.6;
+  }
+}
+
+// Mobile responsive
+@media screen and (max-width: 768px) {
+  .page-container {
+    padding: 12px;
+  }
+
+  .search-form {
+    padding: 12px;
+    flex-direction: column;
+  }
+
+  .table-toolbar {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+}
