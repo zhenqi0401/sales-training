@@ -29,7 +29,7 @@ export function getCategoryTree(): Promise<Category[]> {
   return get<any[]>('/categories/tree').then((items) => items.map(normalizeCategory))
 }
 
-export function createCategory(params: { name: string; parentId?: number; sort?: number }): Promise<Category> {
+export function createCategory(params: { name: string; parentId?: number | null; sort?: number }): Promise<Category> {
   return post<any>('/categories/', toCategoryPayload(params)).then(normalizeCategory)
 }
 

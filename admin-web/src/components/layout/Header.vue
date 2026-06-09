@@ -4,10 +4,10 @@
       <el-button
         :icon="appStore.sidebarCollapsed ? 'Expand' : 'Fold'"
         text
-        @click="toggleSidebar"
         class="collapse-btn"
+        @click="toggleSidebar"
       />
-      <el-breadcrumb separator="›">
+      <el-breadcrumb separator="/">
         <el-breadcrumb-item
           v-for="(item, index) in breadcrumbItems"
           :key="index"
@@ -26,7 +26,7 @@
       <el-dropdown trigger="click" @command="handleCommand">
         <span class="user-info">
           <el-avatar :size="32" :icon="'UserFilled'" />
-          <span class="username">{{ authStore.username || '管理员' }}</span>
+          <span class="username">{{ authStore.userInfo?.realName || authStore.userInfo?.username || '管理员' }}</span>
           <el-icon><ArrowDown /></el-icon>
         </span>
         <template #dropdown>
@@ -84,16 +84,8 @@ function toggleFullscreen() {
 }
 
 function handleCommand(command: string) {
-  switch (command) {
-    case 'logout':
-      authStore.logout()
-      break
-    case 'profile':
-      // Navigate to profile page
-      break
-    case 'settings':
-      // Navigate to settings
-      break
+  if (command === 'logout') {
+    authStore.logout()
   }
 }
 </script>

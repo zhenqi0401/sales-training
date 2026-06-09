@@ -1,41 +1,35 @@
+import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
 import { post } from '@/api/index'
-import type { UserInfo } from '@/types'
+import type { LoginResult, UserInfo } from '@/types'
 import router from '@/router'
 
 export const useAuthStore = defineStore('auth', () => {
-  // ---- State ----
   const token = ref<string>('')
   const refreshTokenVal = ref<string>('')
   const userInfo = ref<UserInfo | null>(null)
 
-  // ---- Getters ----
   const isLoggedIn = computed(() => !!token.value)
 
-  // ---- Actions ----
   async function login(username: string, password: string) {
-    // Only send fields the backend expects (LoginRequest: username, password)
-    const res = await post('/auth/login', { username, password })
-    const t = res.access_token as string
+    const res = await post<LoginResult & { access_token?: string; user?: any }>('/auth/login', { username, password })
+    const t = (res.access_token || res.token) as string
+    const user = res.user || res.userInfo
 
     token.value = t
-    refreshTokenVal.value = t
+    refreshTokenVal.value = res.refreshToken || t
     userInfo.value = {
-      id: res.user.id,
-      username: res.user.username,
-      realName: res.user.real_name || '',
-      phone: res.user.phone || '',
-      role: res.user.role,
-      storeId: res.user.store_id,
-      status: res.user.is_active ? 1 : 0,
-      createdAt: res.user.created_at || '',
+      id: user.id,
+      username: user.username,
+      realName: user.real_name || user.realName || '',
+      phone: user.phone || '',
+      role: user.role,
+      storeId: user.store_id ?? user.storeId,
+      status: user.is_active ?? user.status ? 1 : 0,
+      createdAt: user.created_at || user.createdAt || '',
     }
 
-    // Immediately persist so the axios interceptor sees it
-    localStorage.setItem('auth-store', JSON.stringify({
-      token: t,
-    }))
+    localStorage.setItem('auth-store', JSON.stringify({ token: t }))
   }
 
   async function fetchUserInfo() {
@@ -57,6 +51,4 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   return { token, refreshTokenVal, userInfo, isLoggedIn, login, fetchUserInfo, logout }
-}, {
-  persist: false, // Disable Pinia persist — we handle localStorage ourselves
 })

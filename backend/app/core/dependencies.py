@@ -42,6 +42,12 @@ async def get_current_user(
             detail="Invalid or expired token",
         )
 
+    if payload.get("tokenType") == "refresh":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Refresh token cannot be used as access token",
+        )
+
     subject = payload.get("sub")
     if subject is None:
         raise HTTPException(

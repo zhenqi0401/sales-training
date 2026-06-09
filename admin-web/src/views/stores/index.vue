@@ -46,15 +46,15 @@
           <template #default="{ row }">
             <el-switch
               :model-value="row.status === 1"
-              @change="(val: boolean) => handleToggleStatus(row, val)"
+              @change="(val) => handleToggleStatus(row as Store, Boolean(val))"
             />
           </template>
         </el-table-column>
         <el-table-column prop="createdAt" label="创建时间" width="180" />
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
-            <el-button text type="primary" size="small" @click="openDialog(row)">编辑</el-button>
-            <el-popconfirm title="确定删除此门店吗？" @confirm="handleDelete(row.id)">
+            <el-button text type="primary" size="small" @click="openDialog(row as Store)">编辑</el-button>
+            <el-popconfirm teleported :persistent="false" popper-class="delete-popconfirm" title="确定删除此门店吗？" @confirm="handleDelete(row.id)">
               <template #reference>
                 <el-button text type="danger" size="small">删除</el-button>
               </template>

@@ -7,6 +7,7 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
+    CalendarHeatmap: typeof import('./src/components/course/CalendarHeatmap.vue')['default']
     CourseCard: typeof import('./src/components/course/CourseCard.vue')['default']
     DialogueBox: typeof import('./src/components/script/DialogueBox.vue')['default']
     EmptyState: typeof import('./src/components/common/EmptyState.vue')['default']
@@ -20,12 +21,22 @@ declare module 'vue' {
     ScriptBox: typeof import('./src/components/script/ScriptBox.vue')['default']
     TabBar: typeof import('./src/components/layout/TabBar.vue')['default']
     VanButton: typeof import('vant/es')['Button']
+    VanCell: typeof import('vant/es')['Cell']
     VanCellGroup: typeof import('vant/es')['CellGroup']
     VanCheckbox: typeof import('vant/es')['Checkbox']
+    VanEmpty: typeof import('vant/es')['Empty']
     VanField: typeof import('vant/es')['Field']
     VanForm: typeof import('vant/es')['Form']
+    VanIcon: typeof import('vant/es')['Icon']
+    VanImage: typeof import('vant/es')['Image']
+    VanLoading: typeof import('vant/es')['Loading']
     VanNavBar: typeof import('vant/es')['NavBar']
+    VanProgress: typeof import('vant/es')['Progress']
+    VanSearch: typeof import('vant/es')['Search']
+    VanTab: typeof import('vant/es')['Tab']
     VanTabbar: typeof import('vant/es')['Tabbar']
     VanTabbarItem: typeof import('vant/es')['TabbarItem']
+    VanTabs: typeof import('vant/es')['Tabs']
+    VanTag: typeof import('vant/es')['Tag']
   }
 }

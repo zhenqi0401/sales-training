@@ -7,12 +7,14 @@ import NavBar from '@/components/layout/NavBar.vue'
 const route = useRoute()
 
 const showTabBar = computed(() => route.meta?.showTabBar === true)
-const showNavBar = computed(() => route.meta?.showTabBar !== true && route.name !== 'Login')
+const showNavBar = computed(() => route.meta?.showTabBar !== true && route.name !== 'Login' && route.name !== 'InitPassword')
 
 // Dynamic page title based on route
 const pageTitle = computed(() => {
   const name = route.name as string
   const titleMap: Record<string, string> = {
+    Scripts: '话术',
+    Products: '产品知识',
     CourseList: '课程列表',
     CoursePlay: '视频学习',
     PracticeModule: '演练模块',

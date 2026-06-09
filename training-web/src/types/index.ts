@@ -10,6 +10,7 @@ export interface UserInfo {
   joinDate: string
   level: number
   point: number
+  mustChangePassword?: boolean
 }
 
 export interface AuthState {
@@ -36,13 +37,17 @@ export interface Video {
   categoryId: number
   title: string
   cover: string
+  url: string
   duration: number // seconds
   watchDuration: number // seconds watched
   completed: boolean
   progress: number // 0-100
   description: string
- 讲师: string
+  resolution?: string
+  讲师: string
   createdAt: string
+  required?: boolean
+  estDuration?: number
 }
 
 export interface LearningProgress {
@@ -51,6 +56,31 @@ export interface LearningProgress {
   watchDuration: number
   completed: boolean
   lastWatchTime: string
+}
+
+export interface LearningStats {
+  totalVideos: number
+  completedVideos: number
+  inProgressVideos: number
+  pendingVideos: number
+  totalDuration: number
+  todayDuration: number
+  streakDays: number
+}
+
+export interface Announcement {
+  id: number
+  title: string
+  content: string
+  type: 'task' | 'ranking' | 'system' | 'course'
+  publishedAt: string
+  read: boolean
+}
+
+export interface CalendarDay {
+  date: string       // YYYY-MM-DD
+  duration: number   // seconds studied that day
+  completed: number  // videos completed that day
 }
 
 // ===== Practice Modules =====
@@ -124,11 +154,12 @@ export interface ProductFAQ {
 }
 
 // ===== Exam =====
-export type ExamLevel = 'L1' | 'L2' | 'L3'
+export type ExamLevel = 'L1' | 'L2' | 'L3' | 'SPRINT' | 'WRONG'
 export type QuestionType = 'single' | 'multi' | 'judge'
 
 export interface ExamConfig {
   level: ExamLevel
+  paperId?: number
   title: string
   description: string
   questionCount: number
@@ -147,6 +178,9 @@ export interface Question {
   score: number
   analysis: string
   knowledgePoint: string
+  categoryId?: number
+  categoryName?: string
+  tags?: string[]
 }
 
 export interface QuestionOption {
@@ -158,21 +192,40 @@ export interface QuestionOption {
 export interface ExamRecord {
   id: number
   examLevel: ExamLevel
+  paperId?: number
+  paperTitle?: string
   score: number
   totalScore: number
+  passScore?: number
   passed: boolean
   duration: number
   correctCount: number
   totalCount: number
   submittedAt: string
   answers: UserAnswer[]
+  categoryScores?: CategoryScore[]
+  weakPoints?: string[]
 }
 
 export interface UserAnswer {
   questionId: number
+  question?: Question
   selected: string | string[]
+  userAnswer?: string
   correct: boolean
+  isCorrect?: boolean
+  correctAnswer?: string
   score: number
+  analysis?: string
+  knowledgePoint?: string
+}
+
+export interface CategoryScore {
+  category: string
+  score: number
+  totalScore: number
+  correctCount: number
+  totalCount: number
 }
 
 export interface WrongAnswer {

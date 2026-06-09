@@ -1,0 +1,2939 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>销售培训话术</title>
+<style>
+:root{
+  --primary:#0e7490;--primary-light:#22d3ee;--primary-dark:#155e75;
+  --success:#059669;--success-light:#a7f3d0;
+  --danger:#dc2626;--warning:#f59e0b;
+  --bg:#f0f9ff;--card:#ffffff;
+  --text:#0f172a;--text-secondary:#475569;--text-muted:#94a3b8;
+  --border:#e2e8f0;--border-light:#f1f5f9;
+  --shadow:0 1px 3px rgba(0,0,0,0.06),0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md:0 4px 6px -1px rgba(0,0,0,0.07),0 2px 4px -1px rgba(0,0,0,0.04);
+  --shadow-lg:0 10px 15px -3px rgba(0,0,0,0.08),0 4px 6px -2px rgba(0,0,0,0.03);
+  --radius:12px;--radius-sm:8px;--radius-lg:16px;
+  --transition:all 0.2s cubic-bezier(0.4,0,0.2,1);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:var(--bg);color:var(--text);line-height:1.7;-webkit-font-smoothing:antialiased}
+header{background:linear-gradient(135deg,#0e7490 0%,#0d9488 50%,#059669 100%);color:#fff;padding:28px 30px;text-align:center;position:relative;overflow:hidden}
+header::before{content:'';position:absolute;top:-50%;left:-50%;width:200%;height:200%;background:radial-gradient(circle,rgba(255,255,255,0.08) 0%,transparent 60%);animation:shimmer 8s infinite}
+@keyframes shimmer{0%,100%{transform:translate(0,0)}50%{transform:translate(10%,10%)}}
+header h1{font-size:26px;margin-bottom:6px;position:relative;font-weight:800;letter-spacing:-0.5px}
+header p{opacity:0.85;font-size:14px;position:relative;font-weight:400}
+.container{max-width:1080px;margin:0 auto;padding:24px 20px}
+/* 思维导图导航 */
+.map-nav{background:var(--card);border-radius:var(--radius-lg);padding:24px;margin-bottom:20px;box-shadow:var(--shadow);border:1px solid var(--border)}
+.map-nav h3{color:var(--primary);margin-bottom:16px;font-size:16px;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px}
+.map-root{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;padding:10px 28px;border-radius:10px;font-weight:700;font-size:15px;margin-bottom:16px;box-shadow:0 2px 8px rgba(14,116,144,0.3)}
+.map-branches{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:4px}
+.map-branch{flex:1;min-width:220px;max-width:380px;background:var(--border-light);border-radius:var(--radius);padding:16px}
+.map-branch h4{font-size:14px;padding:8px 14px;border-radius:var(--radius-sm);margin-bottom:10px;display:inline-flex;align-items:center;gap:6px;font-weight:600}
+.map-branch.theory h4{background:linear-gradient(135deg,#cffafe,#a5f3fc);color:#0e7490}
+.map-branch.practice h4{background:linear-gradient(135deg,#d1fae5,#a7f3d0);color:#059669}
+.map-branch ul{list-style:none}
+.map-branch li{font-size:13px;padding:4px 0 4px 4px;color:var(--text-secondary);cursor:pointer;transition:var(--transition);border-radius:4px;display:flex;align-items:center;gap:6px}
+.map-branch li:hover{color:var(--primary);background:rgba(14,116,144,0.05)}
+.map-branch li.sub{padding-left:16px;font-size:12px}
+.map-branch li.sub::before{content:"└";color:var(--text-muted);font-size:11px;min-width:12px}
+.map-branch li.subsub{padding-left:28px;font-size:11px}
+.map-branch li.subsub::before{content:"•";color:var(--text-muted);font-size:9px;min-width:12px}
+/* 顶部导航 */
+nav{display:flex;gap:6px;margin:0 0 20px;flex-wrap:wrap;background:var(--card);padding:12px;border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border)}
+nav button{padding:8px 16px;border:none;background:transparent;border-radius:var(--radius-sm);cursor:pointer;font-size:13px;font-weight:500;color:var(--text-secondary);transition:var(--transition)}
+nav button:hover{background:rgba(14,116,144,0.08);color:var(--primary)}
+nav button.active{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;box-shadow:0 2px 6px rgba(14,116,144,0.3)}
+.section{display:none;animation:fadeIn 0.3s ease}.section.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card{background:var(--card);border-radius:var(--radius-lg);padding:28px;margin-bottom:16px;box-shadow:var(--shadow);border:1px solid var(--border);transition:var(--transition)}
+.card:hover{box-shadow:var(--shadow-md)}
+.card h2{font-size:22px;margin-bottom:16px;color:var(--primary);font-weight:700;display:flex;align-items:center;gap:10px}
+.card h3{font-size:18px;margin:24px 0 12px;font-weight:600;color:var(--text);position:relative;padding-left:14px}
+.card h3::before{content:'';position:absolute;left:0;top:4px;bottom:4px;width:4px;background:linear-gradient(180deg,var(--primary),var(--success));border-radius:2px}
+.card h4{font-size:15px;margin:16px 0 8px;color:var(--text-secondary);font-weight:500}
+table{width:100%;border-collapse:collapse;margin:12px 0;border-radius:var(--radius-sm);overflow:hidden}
+th,td{padding:12px 16px;border:1px solid var(--border);text-align:left;font-size:14px}
+th{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);font-weight:600;color:var(--primary-dark)}
+tr:nth-child(even) td{background:#fafbfd}
+.script-box{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1px solid #a7f3d0;border-radius:var(--radius);padding:18px 20px;margin:14px 0;position:relative}
+.script-box::before{content:'🗣️';position:absolute;top:-8px;left:16px;font-size:16px;background:var(--card);padding:0 6px}
+.script-box .label{font-size:12px;color:var(--success);font-weight:700;margin-bottom:8px;text-transform:uppercase;letter-spacing:0.5px}
+.script-box .text{font-size:15px;line-height:1.9;color:#065f46}
+.script-box .copy-btn{position:absolute;top:12px;right:12px;padding:4px 10px;font-size:11px;background:#d1fae5;color:#065f46;border:1px solid #a7f3d0;border-radius:6px;cursor:pointer;opacity:0;transition:opacity 0.2s;font-family:inherit}
+.script-box:hover .copy-btn{opacity:1}
+.copy-btn.copied{background:#22c55e;color:#fff;border-color:#22c55e}
+.fav-btn{position:absolute;top:10px;right:70px;padding:4px 10px;font-size:11px;background:#fef3c7;color:#92400e;border:1px solid #fde68a;border-radius:6px;cursor:pointer;font-family:inherit;z-index:5}
+.script-box:hover .fav-btn{opacity:1}
+.fav-btn.favorited{background:#f59e0b;color:#fff;border-color:#f59e0b;opacity:1}
+.fav-btn.added{background:#22c55e;color:#fff;border-color:#22c55e}
+.wrong-box{background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca;border-radius:var(--radius-sm);padding:14px 16px;margin:8px 0;display:flex;align-items:flex-start;gap:10px}
+.wrong-box .label{font-size:12px;color:var(--danger);font-weight:700;white-space:nowrap;min-width:50px}
+.wrong-box .text{font-size:14px;color:#991b1b;font-style:italic}
+.note-box{background:linear-gradient(135deg,#ecfeff,#cffafe);border-left:4px solid var(--primary);padding:14px 18px;margin:14px 0;border-radius:0 var(--radius-sm) var(--radius-sm) 0}
+.tip-box{background:linear-gradient(135deg,#fefce8,#fef3c7);border:1px solid #fde68a;border-radius:var(--radius-sm);padding:14px 18px;margin:14px 0}
+.tip-box .label{font-weight:700;color:#92400e;margin-bottom:6px;display:block}
+.quiz-area{margin-top:24px;padding:24px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:var(--radius);border:2px dashed #cbd5e1}
+.quiz-area h4{margin-bottom:16px;color:var(--primary);font-size:16px;font-weight:600}
+.quiz-option{display:block;width:100%;padding:14px 18px;margin:8px 0;border:2px solid var(--border);border-radius:var(--radius-sm);background:var(--card);cursor:pointer;text-align:left;font-size:15px;transition:var(--transition);line-height:1.5}
+.quiz-option:hover{border-color:var(--primary);background:#f0f9ff;transform:translateX(4px)}
+.quiz-option.correct{border-color:var(--success);background:#ecfdf5;font-weight:500}
+.quiz-option.wrong{border-color:var(--danger);background:#fef2f2}
+.quiz-result{display:none;margin-top:16px;padding:16px 18px;border-radius:var(--radius-sm)}
+.quiz-result.show{display:block}
+.quiz-result.correct-result{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1px solid #a7f3d0}
+.quiz-result.wrong-result{background:linear-gradient(135deg,#fef2f2,#fee2e2);border:1px solid #fecaca}
+.m-exp{margin-top:10px;padding:10px 14px;background:#fffbeb;border-left:3px solid #f59e0b;border-radius:6px;font-size:13px;line-height:1.7}
+.m-exp .m-tag{font-weight:700;color:#7c3aed}
+.m-exp .m-correct{font-weight:600;color:#16a34a}
+.m-exp .m-text{margin-top:4px;color:#374151}
+.btn{padding:12px 28px;border:none;border-radius:var(--radius-sm);cursor:pointer;font-size:15px;font-weight:600;transition:var(--transition);display:inline-flex;align-items:center;gap:8px}
+.btn:active{transform:scale(0.98)}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;box-shadow:0 2px 8px rgba(14,116,144,0.3)}
+.btn-primary:hover{box-shadow:0 4px 12px rgba(14,116,144,0.4);transform:translateY(-1px)}
+.btn-success{background:linear-gradient(135deg,var(--success),#047857);color:#fff;box-shadow:0 2px 8px rgba(5,150,105,0.3)}
+.btn-warning{background:linear-gradient(135deg,var(--warning),#d97706);color:#fff}
+.btn-outline{background:transparent;border:2px solid var(--border);color:var(--text-secondary)}.btn-outline:hover{border-color:var(--primary);color:var(--primary);background:rgba(14,116,144,0.05)}
+.objection-card{border:1px solid var(--border);border-radius:var(--radius);padding:18px;margin-bottom:12px;cursor:pointer;transition:var(--transition);background:var(--card)}
+.objection-card:hover{border-color:var(--primary);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.objection-card .q{font-weight:600;color:var(--primary);margin-bottom:8px;font-size:15px}
+.objection-card .a{display:none;padding:14px 16px;background:linear-gradient(135deg,#ecfdf5,#f0fdf4);border-radius:var(--radius-sm);margin-top:10px;font-size:14px;line-height:1.8;border:1px solid #d1fae5}
+.objection-card.open .a{display:block}
+.parent-card{display:flex;gap:16px;padding:18px;border:2px solid var(--border);border-radius:var(--radius);margin-bottom:12px;cursor:pointer;transition:var(--transition);background:var(--card)}
+.parent-card:hover{border-color:var(--primary);background:#f0f9ff;transform:translateY(-2px);box-shadow:var(--shadow-md)}
+.parent-card .emoji{font-size:44px;flex-shrink:0}
+.parent-card .info h4{margin:0 0 4px;font-size:15px;font-weight:600}
+.parent-card .info p{font-size:13px;color:var(--text-secondary);margin:0}
+.stars{color:var(--warning);font-size:14px}
+.dialogue{background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:var(--radius);padding:18px;margin:16px 0;border:1px solid var(--border)}
+.dialogue .line{margin:8px 0;padding:10px 14px;border-radius:var(--radius-sm);line-height:1.6}
+.dialogue .line.you{background:linear-gradient(135deg,#dbeafe,#bfdbfe);margin-left:20px;margin-right:8px}
+.dialogue .line.customer{background:var(--card);border:1px solid var(--border);margin-right:20px;margin-left:8px}
+.dialogue .line .name{font-weight:700;font-size:12px;margin-bottom:3px;opacity:0.7}
+.dialogue .line.you .name{color:var(--primary)}
+.dialogue .line.customer .name{color:var(--text-secondary)}
+.chat-box{max-height:500px;overflow-y:auto;padding:18px;background:linear-gradient(135deg,#f1f5f9,#e2e8f0);border-radius:var(--radius);margin-bottom:16px;border:1px solid var(--border)}
+.chat-msg{margin-bottom:14px;display:flex}.chat-msg.parent{justify-content:flex-start}.chat-msg.student{justify-content:flex-end}
+.chat-bubble{max-width:80%;padding:12px 16px;border-radius:14px;font-size:15px;line-height:1.6;box-shadow:0 1px 2px rgba(0,0,0,0.05)}
+.chat-msg.parent .chat-bubble{background:var(--card);border:1px solid var(--border);border-bottom-left-radius:4px}
+.chat-msg.student .chat-bubble{background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;border-bottom-right-radius:4px}
+.chat-input-wrap{display:flex;gap:8px}
+.chat-input-wrap input{flex:1;padding:14px 18px;border:2px solid var(--border);border-radius:var(--radius);font-size:15px;outline:none;transition:var(--transition);background:var(--card)}
+.chat-input-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 3px rgba(14,116,144,0.1)}
+.result-box{padding:24px;border-radius:var(--radius);text-align:center;margin:20px 0}
+.result-box.pass{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:2px solid #a7f3d0}
+.result-box.fail{background:linear-gradient(135deg,#fef2f2,#fee2e2);border:2px solid #fecaca}
+.result-box .big{font-size:56px;font-weight:800;line-height:1}
+.score-bar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.score-item{flex:1;min-width:100px;text-align:center;padding:14px 10px;background:var(--border-light);border-radius:var(--radius-sm)}
+.score-item .label{font-size:12px;color:var(--text-muted);margin-bottom:4px}
+.score-item .value{font-size:28px;font-weight:700;color:var(--primary)}
+.tag{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600;gap:4px}
+.tag-l1{background:#dcfce7;color:#166534}
+.tag-l2{background:#dbeafe;color:#1e40af}
+.tag-tc{background:#fce7f3;color:#9d174d}
+.next-step{display:none;margin-top:20px;padding:20px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-radius:var(--radius);text-align:center}
+.next-step.show{display:block}
+.product-card{border:1px solid var(--border);border-radius:var(--radius);margin:12px 0;overflow:hidden;transition:var(--transition);background:var(--card)}
+.product-card:hover{box-shadow:var(--shadow-md)}
+.product-card .header{padding:16px 20px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:var(--transition)}
+.product-card .header:hover{background:var(--border-light)}
+.product-card .header h4{margin:0;font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+.product-card .header .arrow{transition:var(--transition);font-size:18px;color:var(--text-muted)}
+.product-card.open .header .arrow{transform:rotate(90deg)}
+.product-card .content{display:none;padding:0 20px 20px;border-top:1px solid var(--border)}
+.product-card.open .content{display:block}
+.master-quote{background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:var(--radius);padding:18px 20px;margin:18px 0;border-left:4px solid #f59e0b;position:relative}
+.master-quote .author{font-weight:700;color:#92400e;margin-bottom:6px;font-size:14px;display:flex;align-items:center;gap:6px}
+.master-quote .quote{font-size:16px;font-style:italic;color:#78350f;line-height:1.6}
+.knowledge-point{background:linear-gradient(135deg,#ecfeff,#cffafe);border-radius:var(--radius-sm);padding:14px 18px;margin:10px 0;border-left:3px solid var(--primary)}
+.knowledge-point .kp-title{font-weight:700;color:var(--primary);font-size:14px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.footer{text-align:center;padding:32px;color:var(--text-muted);font-size:13px;border-top:1px solid var(--border);margin-top:48px}
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:24px 0}
+.badge-row{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+@media(max-width:600px){
+  nav{gap:4px;padding:8px}
+  nav button{padding:6px 12px;font-size:12px}
+  .card{padding:20px}
+  .map-branches{flex-direction:column}
+  .map-branch{min-width:unset;max-width:unset}
+  .score-bar{flex-direction:column}
+  .dialogue .line.you,.dialogue .line.customer{margin-left:4px;margin-right:4px}
+  header h1{font-size:22px}
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>🛒 销售培训话术</h1>
+<p>理论学习 + 实践演练 | 大师理论 × 产品知识 × 实战话术</p>
+</header>
+
+<div class="container">
+
+<!-- ===== 思维导图导航 ===== -->
+<div class="map-nav">
+<h3>📋 培训框架导航</h3>
+<div class="map-root">🎯 销售培训</div>
+<div class="map-branches">
+<div class="map-branch theory">
+<h4>📘 理论学习</h4>
+<ul>
+<li onclick="showSection('learn-masters')">🧠 学习模块 → 销售大师话术</li>
+<li onclick="showSection('learn-products')">📦 学习模块 → 产品学习</li>
+<li class="sub" onclick="showSection('learn-products')">青控（高境光/星趣控/控优点/其他）</li>
+<li class="sub" onclick="showSection('learn-products')">斜弱视</li>
+<li class="sub" onclick="showSection('learn-products')">角塑</li>
+<li class="sub" onclick="showSection('learn-products')">眼镜</li>
+<li class="sub" onclick="showSection('learn-products')">周边产品</li>
+<li class="sub" onclick="showSection('learn-products')">功能性眼镜</li>
+
+
+<li onclick="showSection('exam')">📝 考核模块 → L1/L2/L3</li>
+<li onclick="showSection('records')">📊 成绩记录 → 分数/错题</li>
+</ul>
+</div>
+<div class="map-branch practice">
+<h4>🏋️ 实践演练</h4>
+<ul>
+<li onclick="showSection('reception')">👋 进店接待</li>
+<li onclick="showSection('spin')">🎯 SPIN提问</li>
+<li onclick="showSection('value')">💎 价值传递</li>
+<li onclick="showSection('objection')">💬 异议库</li>
+<li onclick="showSection('close')">🤝 成交推进</li>
+<li onclick="showSection('practice')">🎭 实战模拟</li>
+<li onclick="showSection('after')">🔄 售后维护</li>
+</ul>
+</div>
+</div>
+</div>
+
+<!-- ===== 顶部导航 ===== -->
+<nav>
+<button class="active" onclick="showSection('welcome')">🏠 首页</button>
+<button onclick="showSection('learn-masters')">🧠 大师话术</button>
+<button onclick="showSection('learn-products')">📦 产品学习</button>
+<button onclick="showSection('exam')">📝 考核</button>
+<button onclick="showSection('records')">📊 成绩</button>
+<button onclick="showSection('reception')">👋 进店接待</button>
+<button onclick="showSection('spin')">🎯 SPIN</button>
+<button onclick="showSection('value')">💎 价值</button>
+<button onclick="showSection('objection')">💬 异议</button>
+<button onclick="showSection('close')">🤝 成交</button>
+<button onclick="showSection('practice')">🎭 实战</button>
+<button onclick="showSection('after')">🔄 售后</button>
+<button onclick="showSection('favorites')">📌 话术</button>
+</nav>
+
+<!-- 🏠 首页 -->
+<div id="sec-welcome" class="section active">
+<div class="card" style="text-align:center;padding:40px 28px">
+<div style="font-size:48px;margin-bottom:16px">🛒</div>
+<h2 style="justify-content:center;font-size:24px">销售培训话术 v11</h2>
+<p style="color:var(--text-secondary);max-width:600px;margin:12px auto 24px;line-height:1.8">
+本系统按照思维导图结构组织，涵盖<strong>6位销售大师理论</strong>、<strong>6大产品品类</strong>、<strong>7个实战模块</strong>，配合考核与实战模拟，帮助视光师快速提升销售能力。
+</p>
+<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+<button class="btn btn-primary" onclick="showSection('learn-masters')" style="font-size:16px;padding:14px 32px">📘 开始理论学习</button>
+<button class="btn btn-success" onclick="showSection('reception')" style="font-size:16px;padding:14px 32px">🏋️ 开始实践演练</button>
+</div>
+<div class="divider"></div>
+
+<!-- 每日一题 -->
+<div id="daily-q-area" style="margin-top:20px"></div>
+<div class="badge-row" style="justify-content:center;margin-top:16px">
+<span class="tag tag-l1">6位大师理论</span>
+<span class="tag tag-l2">6大产品品类</span>
+<span class="tag tag-tc">20条异议话术</span>
+<span class="tag tag-l1">7个实战模块</span>
+<span class="tag tag-l2">L1/L2/L3考核</span>
+</div>
+<div style="margin-top:20px">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+<span style="font-size:14px;font-weight:600;color:var(--text-primary)">📈 学习进度</span>
+<span id="progress-text" style="font-size:13px;color:var(--text-muted)">0/9 已完成</span>
+</div>
+<div id="progress-bar-container" style="background:var(--border);border-radius:10px;height:8px;overflow:hidden">
+<div id="progress-bar-fill" style="height:100%;width:0%;background:linear-gradient(90deg,var(--primary),var(--success));border-radius:10px;transition:width 0.5s ease"></div>
+</div>
+<div id="progress-list" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px;font-size:12px">
+<div class="prog-item" id="prog-learn-masters" style="padding:6px 8px;background:var(--card);border-radius:6px;border:1px solid var(--border)">🧠 大师话术</div>
+<div class="prog-item" id="prog-learn-products" style="padding:6px 8px;background:var(--card);border-radius:6px;border:1px solid var(--border)">📦 产品学习</div>
+<div class="prog-item" id="prog-exam" style="padding:6px 8px;background:var(--card);border-radius:6px;border:1px solid var(--border)">📝 考核模块</div>
+<div class="prog-item" id="prog-reception" style="padding:6px 8px;background:var(--card);border-radius:6px;border:1px solid var(--border)">👋 进店接待</div>
+<div class="prog-item" id="prog-spin" style="padding:6px 8px;background:var(--card);border-radius:6px;border:1px solid var(--border)">🎯 SPIN提问</div>
+<div class="prog-item" id="prog-value" style="padding:6px 8px;background:var(--card);border-radius:6px;border:1px solid var(--border)">💎 价值传递</div>
+<div class="prog-item" id="prog-objection" style="padding:6px 8px;background:var(--card);border-radius:6px;border:1px solid var(--border)">💬 异议处理</div>
+<div class="prog-item" id="prog-close" style="padding:6px 8px;background:var(--card);border-radius:6px;border:1px solid var(--border)">🤝 成交推进</div>
+<div class="prog-item" id="prog-after" style="padding:6px 8px;background:var(--card);border-radius:6px;border:1px solid var(--border)">🔄 售后维护</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- 大师金句总览 -->
+<div style="margin-top:24px">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+<span style="font-size:14px;font-weight:700;color:var(--text-primary)">🏆 大师金句墙</span>
+<button onclick="showSection('learn-masters')" style="font-size:12px;padding:4px 12px;background:var(--primary);color:#fff;border:none;border-radius:20px;cursor:pointer">查看详情 →</button>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+<div style="padding:10px 12px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px;border-left:3px solid #f59e0b">
+<div style="font-size:11px;color:#92400e;font-weight:600;margin-bottom:4px">👔 德鲁克</div>
+<div style="font-size:12px;color:#78350f;font-weight:500;line-height:1.4">企业的唯一目的，是创造顾客。</div>
+</div>
+<div style="padding:10px 12px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-radius:10px;border-left:3px solid #3b82f6">
+<div style="font-size:11px;color:#1e40af;font-weight:600;margin-bottom:4px">🏆 乔·吉拉德</div>
+<div style="font-size:12px;color:#1e3a8a;font-weight:500;line-height:1.4">绝不放过每一个进门的顾客。</div>
+</div>
+<div style="padding:10px 12px;background:linear-gradient(135deg,#fce7f3,#fbcfe8);border-radius:10px;border-left:3px solid #ec4899">
+<div style="font-size:11px;color:#9d174d;font-weight:600;margin-bottom:4px">📖 汤姆·霍普金斯</div>
+<div style="font-size:12px;color:#831843;font-weight:500;line-height:1.4">从第一个问题开始，就假设顾客会买。</div>
+</div>
+<div style="padding:10px 12px;background:linear-gradient(135deg,#e0e7ff,#c7d2fe);border-radius:10px;border-left:3px solid #6366f1">
+<div style="font-size:11px;color:#3730a3;font-weight:600;margin-bottom:4px">💡 杰弗里·吉特默</div>
+<div style="font-size:12px;color:#312e81;font-weight:500;line-height:1.4">信任是成交的唯一货币。</div>
+</div>
+<div style="padding:10px 12px;background:linear-gradient(135deg,#ccfbf1,#99f6e4);border-radius:10px;border-left:3px solid #14b8a6">
+<div style="font-size:11px;color:#134e4a;font-weight:600;margin-bottom:4px">📚 奥格·曼狄诺</div>
+<div style="font-size:12px;color:#042f2e;font-weight:500;line-height:1.4">销售最大的敌人，是自己内心的恐惧。</div>
+</div>
+<div style="padding:10px 12px;background:linear-gradient(135deg,#fee2e2,#fecaca);border-radius:10px;border-left:3px solid #ef4444">
+<div style="font-size:11px;color:#991b1b;font-weight:600;margin-bottom:4px">🎯 尼尔·雷克汉姆</div>
+<div style="font-size:12px;color:#7f1d1d;font-weight:500;line-height:1.4">销售不是说话，是倾听。</div>
+</div>
+</div>
+</div>
+
+<!-- 徽章成就墙 -->
+<div style="margin-top:24px">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+<span style="font-size:14px;font-weight:700;color:var(--text-primary)">🎖️ 已获徽章</span>
+<span id="badge-count" style="font-size:12px;color:var(--text-muted);background:var(--border);padding:2px 10px;border-radius:20px">0 个</span>
+</div>
+<div id="badge-area" style="display:flex;gap:8px;flex-wrap:wrap">
+<div id="badge-empty" style="padding:16px 20px;background:var(--border-light);border-radius:10px;border:2px dashed var(--border);color:var(--text-muted);font-size:13px;text-align:center">完成模块测试即可解锁徽章</div>
+</div>
+</div>
+
+<!-- ==================== 📘 理论学习 ==================== -->
+
+<!-- 学习模块 → 销售大师话术 -->
+<style>
+.masters-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:16px 0}
+.master-tab{padding:16px 8px;border:2px solid var(--border);border-radius:var(--radius);cursor:pointer;text-align:center;transition:var(--transition);background:var(--card)}
+.master-tab:hover{border-color:var(--primary);transform:translateY(-3px);box-shadow:var(--shadow-md)}
+.master-tab.active{border-color:var(--primary);background:linear-gradient(135deg,var(--primary),var(--primary-dark));color:#fff;box-shadow:0 4px 12px rgba(14,116,144,0.3)}
+.master-tab .emoji{font-size:28px;margin-bottom:6px}
+.master-tab .name{font-size:13px;font-weight:600;line-height:1.3}
+.master-tab .title{font-size:11px;opacity:0.7;margin-top:2px}
+.master-tab.active .name,.master-tab.active .title{color:#fff;opacity:1}
+.master-content{display:none;animation:fadeIn 0.3s ease}
+.master-content.active{display:block}
+.master-header{display:flex;align-items:center;gap:16px;margin-bottom:16px;padding:16px;background:linear-gradient(135deg,#cffafe,#dbeafe);border-radius:var(--radius)}
+.master-header .emoji{font-size:40px}
+.master-header h3{margin:0;font-size:18px;color:var(--primary-dark)}
+.master-header .subtitle{font-size:13px;color:var(--text-secondary);margin-top:2px}
+.master-quote-tab{background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:var(--radius);padding:14px 18px;margin:12px 0 16px;border-left:4px solid #f59e0b}
+.master-quote-tab .author{font-weight:700;color:#92400e;margin-bottom:4px;font-size:14px}
+.master-quote-tab .quote{font-size:15px;font-style:italic;color:#78350f}
+.master-desc{color:var(--text-secondary);margin-bottom:16px;font-size:14px}
+@media(max-width:768px){.masters-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:480px){.masters-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+
+<div id="sec-learn-masters" class="section">
+<div class="card">
+<div class="master-quote" style="margin-bottom:16px"><div class="quote">"企业的唯一目的，是创造顾客。"</div><div class="author">— 彼得·德鲁克</div></div>
+<h2>🧠 销售大师话术</h2>
+<p style="color:var(--text-secondary);margin-bottom:16px">点击选择大师，查看核心思想、销售应用和推荐话术。每个大师22条实战话术。</p>
+
+<!-- 大师网格导航 -->
+<div class="masters-grid">
+<div class="master-tab active" onclick="showMaster('drucker')" id="tab-drucker">
+<div class="emoji">👔</div>
+<div class="name">彼得·德鲁克</div>
+<div class="title">现代管理学之父</div>
+</div>
+<div class="master-tab" onclick="showMaster('girard')" id="tab-girard">
+<div class="emoji">🏆</div>
+<div class="name">乔·吉拉德</div>
+<div class="title">世界销售冠军</div>
+</div>
+<div class="master-tab" onclick="showMaster('hopkins')" id="tab-hopkins">
+<div class="emoji">📖</div>
+<div class="name">汤姆·霍普金斯</div>
+<div class="title">销售教父</div>
+</div>
+<div class="master-tab" onclick="showMaster('gitomer')" id="tab-gitomer">
+<div class="emoji">💡</div>
+<div class="name">杰弗里·吉特默</div>
+<div class="title">销售圣经作者</div>
+</div>
+<div class="master-tab" onclick="showMaster('trout')" id="tab-trout">
+<div class="emoji">🎯</div>
+<div class="name">特劳特</div>
+<div class="title">定位之父</div>
+</div>
+<div class="master-tab" onclick="showMaster('burnett')" id="tab-burnett">
+<div class="emoji">🎨</div>
+<div class="name">李奥贝纳</div>
+<div class="title">品牌叙事大师</div>
+</div>
+</div>
+
+<!-- 德鲁克内容 -->
+<div class="master-content active" id="content-drucker">
+<div class="master-header"><div class="emoji">👔</div><div><h3>彼得·德鲁克 · 现代管理学之父</h3><div class="subtitle">核心思想：创造顾客 — 顾客不是买产品，是买问题的解决方案</div></div></div>
+<div class="master-quote-tab"><div class="author">🎯 核心思想</div><div class="quote">"企业的目的是创造顾客。" "顾客不是买产品，是买问题的解决方案。"</div></div>
+<p class="master-desc">德鲁克认为企业的唯一目的就是创造和留住顾客。在视光销售中，这意味着我们不是卖镜片，是帮顾客解决视力问题。</p>
+
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#1 进店第一句话：从关心孩子入手</div><div class="a"><b>🗣️ 话术：</b>"张姐，您今天来不是为了给孩子配一副眼镜，是为了找到一个能控制度数不再加深的方法，对吗？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#2 转移焦点：从产品到需求</div><div class="a"><b>🗣️ 话术：</b>"您最关心的不是镜片本身，而是孩子的视力能不能控制住，对吗？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#3 定义问题：近视防控现状</div><div class="a"><b>🗣️ 话术：**"目前全国52.7%的孩子近视，每两个孩子中有一个。您孩子现在的情况，属于早期阶段，是最佳干预时机。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#4 帮助决策：不是推销</div><div class="a"><b>🗣️ 话术：</b>"我不是推荐您买最贵的，是帮您找到最适合孩子的方案。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#5 强调预防：防重于治</div><div class="a"><b>🗣️ 话术：**"近视防控的关键在于'防'——在度数还低的时候开始控制，效果最好。等度数高了再防，就像房子漏了水才修屋顶。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#6 用数据说话</div><div class="a"><b>🗣️ 话术：**"北大医学部研究显示，角塑后平均年近视增长8度，框架眼镜则为67度。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#7 解决家长焦虑</div><div class="a"><b>🗣️ 话术：**"我理解您的担心。很多家长来店里都说孩子度数年年涨，不知道怎么办。现在有多种防控方案，我们先了解一下孩子的情况。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#8 提供解决方案</div><div class="a"><b>🗣️ 话术：**"我们有三种方案：离焦镜片、角塑镜、RGP。每种都有优缺点，我先给您讲讲区别，您再决定。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#9 教育顾客</div><div class="a"><b>🗣️ 话术：**"近视是眼球结构变化，眼轴变长。每增长1mm度数增加300度。防控就是减缓眼轴增长速度。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#10 建立专业形象</div><div class="a"><b>🗣️ 话术：**"我们店有完整的检查设备和专业验配团队，不是随便配副眼镜，是给孩子做全面的视力管理。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#11 引导行动</div><div class="a"><b>🗣️ 话术：**"要不先做个检查？检查是免费的，了解清楚了再决定，也不耽误您考虑。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#12 类比通俗化</div><div class="a"><b>🗣️ 话术：**"防控镜片就像给孩子眼睛穿雨衣，不是等淋湿了再打伞，是提前预防。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#13 强调时机</div><div class="a"><b>🗣️ 话术：**"8-12岁是近视发展最快的阶段。现在100度开始控制，比等到300度再控制容易得多。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#14 降低决策压力</div><div class="a"><b>🗣️ 话术：**"您不用今天决定。我把资料整理给您，回去和家人商量一下，有问题随时问我。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#15 对比普通眼镜</div><div class="a"><b>🗣️ 话术：**"普通眼镜只是矫正视力，不会控制度数增长。防控镜片在矫正的同时还能延缓加深。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#16 关注长期利益</div><div class="a"><b>🗣️ 话术：**"到18岁，一个可能600度，一个可能150度。高度近视会增加视网膜脱落、青光眼风险。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#17 引导体验</div><div class="a"><b>🗣️ 话术：**"让孩子来试戴一下？效果好不好，您自己感受最清楚。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#18 解答价格疑问</div><div class="a"><b>🗣️ 话术：**"防控镜片比普通眼镜贵一些，但多花的钱换来的是度数增长的控制，长远看是划算的。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#19 强调个性化</div><div class="a"><b>🗣️ 话术：**"每个孩子情况不同，适合的方案也不同。我们先检查，再根据孩子的角膜条件、度数、年龄推荐最适合的。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#20 持续跟进</div><div class="a"><b>🗣️ 话术：**"您回去后如果有任何问题，随时微信问我。我给您留个名片，有问题随时联系。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#21 建立信任</div><div class="a"><b>🗣️ 话术：**"我不做一锤子买卖。您孩子在我这配镜，我会跟踪度数变化，定期提醒您复查。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#22 创造紧迫感</div><div class="a"><b>🗣️ 话术：**"孩子度数每天都在变化。今天干预和明天干预，效果可能差很多。"</div></div>
+</div>
+
+<!-- 吉拉德内容 -->
+<div class="master-content" id="content-girard">
+<div class="master-header"><div class="emoji">🏆</div><div><h3>乔·吉拉德 · 世界销售冠军</h3><div class="subtitle">核心思想：250法则 — 绝不放过每一个进门的顾客，成交是关系的开始</div></div></div>
+<div class="master-quote-tab"><div class="author">🎯 核心思想</div><div class="quote">"绝不放过每一个进门的顾客。成交不是结束，是关系的开始。"</div></div>
+<p class="master-desc">乔·吉拉德连续12年保持世界销售冠军，他的250法则和关系经营理念，是视光销售的核心。</p>
+
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#1 250法则</div><div class="a"><b>🗣️ 话术：**"一个满意的顾客背后有250个潜在客户。服务好每一位顾客，就是服务250个家庭。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#2 绝不放弃顾客</div><div class="a"><b>🗣️ 话术：**"不管顾客说什么，我都不放弃。就算今天不买，我也要让他记住我们店。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#3 成交后24小时跟进</div><div class="a"><b>🗣️ 话术：**"张姐您好！孩子镜片戴了感觉怎么样？有没有什么不舒服的？复查时间是X月X日，到时候记得来哦！"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#4 30天跟进</div><div class="a"><b>🗣️ 话术：**"张姐，孩子戴高境光一个月了，感觉怎么样？有没有什么需要调整的？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#5 90天复查提醒</div><div class="a"><b>🗣️ 话术：**"张姐，孩子三个月没复查了。建议来检查一下，如果度数有变化，我们可以及时调整。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#6 转介绍话术</div><div class="a"><b>🗣️ 话术：**"张姐，您家孩子用了高境光效果不错。身边有没有其他家长也在为孩子近视操心？可以介绍他们来做个免费的视光检查。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#7 手写贺卡</div><div class="a"><b>🗣️ 话术：**（贺卡内容）"亲爱的张姐，祝小明生日快乐！愿他视力越来越好，学习进步！——您的视光师小李"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#8 节日问候</div><div class="a"><b>🗣️ 话术：**"张姐，新年快乐！祝全家健康幸福！孩子视力情况怎么样？有空来复查哦！"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#9 顾客生日祝福</div><div class="a"><b>🗣️ 话术：**"张姐，今天是您的生日，祝您生日快乐！我们店给您准备了一份小礼物，有空来拿哦。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#10 复购话术</div><div class="a"><b>🗣️ 话术：**"李先生，孩子半年没复查了。建议来检查一下，如果度数有变化，我们可以及时调整镜片。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#11 不放弃沉默型顾客</div><div class="a"><b>🗣️ 话术：**"您好！欢迎光临。（微笑）小朋友今年几岁啦？最近检查视力了吗？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#12 关系维护：分享知识</div><div class="a"><b>🗣️ 话术：**（微信）"张姐，最近看到一篇关于近视防控的文章，转发给您看看，希望对您有帮助。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#13 邀请参加门店活动</div><div class="a"><b>🗣️ 话术：**"张姐，本周六我们店有个视力健康讲座，邀请了眼科专家，您有空带孩子来参加吗？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#14 处理顾客投诉</div><div class="a"><b>🗣️ 话术：**"非常抱歉给您带来不好的体验。我马上帮您解决，您看这样处理可以吗？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#15 老顾客推荐新顾客</div><div class="a"><b>🗣️ 话术：**"张姐介绍的顾客，我们特别重视。张姐是我们的老顾客，她的孩子用了效果很好。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#16 建立顾客档案</div><div class="a"><b>🗣️ 话术：**"我给您建个档案，记录孩子每次检查的数据，方便跟踪度数变化。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#17 定期回访</div><div class="a"><b>🗣️ 话术：**"张姐，最近孩子戴镜片感觉怎么样？有没有什么问题需要我帮忙的？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#18 顾客忠诚度维护</div><div class="a"><b>🗣️ 话术：**"张姐是我们的老顾客了，孩子从100度到现在控制得很好。我们会一直跟踪服务。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#19 口碑传播</div><div class="a"><b>🗣️ 话术：**"张姐，您家孩子用了效果不错，身边有没有其他家长也在为孩子近视操心？可以介绍他们来。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#20 情感连接</div><div class="a"><b>🗣️ 话术：**"孩子视力好了，您也放心。我们不只是卖镜片，是帮孩子保护眼睛。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#21 长期规划</div><div class="a"><b>🗣️ 话术：**"孩子现在100度，我们目标是到18岁控制在300度以内。这个目标我们一起努力。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#22 感恩回馈</div><div class="a"><b>🗣️ 话术：**"张姐，感谢您一直以来的信任。孩子视力控制好，就是我们最大的成就。"</div></div>
+</div>
+
+<!-- 霍普金斯内容 -->
+<div class="master-content" id="content-hopkins">
+<div class="master-header"><div class="emoji">📖</div><div><h3>汤姆·霍普金斯 · 销售教父</h3><div class="subtitle">核心思想：假设成交 — 从第一个问题开始，就假设顾客会买</div></div></div>
+<div class="master-quote-tab"><div class="author">🎯 核心思想</div><div class="quote">"从第一个问题开始，就假设顾客会买。" "销售不是说话，是倾听。"</div></div>
+<p class="master-desc">霍普金斯的假设成交法和购买信号识别，是视光销售推进成交的核心技巧。</p>
+
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#1 假设成交法</div><div class="a"><b>🗣️ 话术：**"那我先给孩子安排验光，配好了我们会通知您来取。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#2 选择成交法</div><div class="a"><b>🗣️ 话术：**"您看是选1.60折射率的还是1.67的？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#3 选择成交法（颜色）</div><div class="a"><b>🗣️ 话术：**"镜框喜欢蓝色的还是黑色的？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#4 紧迫成交法</div><div class="a"><b>🗣️ 话术：**"今天活动最后一天了，明天就恢复原价。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#5 识别购买信号：询问细节</div><div class="a"><b>💡 信号：**当顾客问"这个镜片多久换一次？""售后怎么样？"时，说明已经在考虑购买了。应该及时推进成交。</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#6 识别购买信号：比较选择</div><div class="a"><b>💡 信号：**当顾客问"这个和那个有什么区别？"时，说明在对比选择。应该引导到选择成交法。</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#7 识别购买信号：价格讨论</div><div class="a"><b>💡 信号：**当顾客问"能不能便宜点？"时，说明认可产品价值，只是希望价格更好。应该价值对标后推进。</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#8 识别购买信号：身体语言</div><div class="a"><b>💡 信号：**当顾客靠近看产品、点头、反复触摸镜片时，说明有兴趣。应该用假设成交法推进。</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#9 识别购买信号：积极回应</div><div class="a"><b>💡 信号：**当顾客说"听起来不错""这个挺好的"时，说明认可。应该直接推进下一步。</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#10 倾听优先</div><div class="a"><b>🗣️ 话术：**（点头、记录）"您说的我明白了，孩子半年涨了50度，您很担心。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#11 不要说"买不买随便"</div><div class="a"><b>❌ 禁忌话术：**"买不买随便您。" <b>正确做法：</b>"您看这样，先做个检查，了解清楚了再决定？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#12 不要给说"不"的机会</div><div class="a"><b>❌ 禁忌话术：**"您要不要买？" <b>正确做法：**"您看是选1.60还是1.67的？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#13 拥有感觉</div><div class="a"><b>🗣️ 话术：**"孩子戴上这个镜片，白天不用戴眼镜，上课看黑板更清楚，运动也方便。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#14 试戴体验</div><div class="a"><b>🗣️ 话术：**"让孩子试戴一下？很多孩子试了之后觉得挺舒服的，就愿意戴了。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#15 假设已决定</div><div class="a"><b>🗣️ 话术：**"您孩子这个情况，我建议选1.60折射率的，轻薄又清晰。您看是选蓝色的镜框还是黑色的？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#16 时间紧迫</div><div class="a"><b>🗣️ 话术：**"这个度数段的孩子目前排队比较多，今天定的话下周就能取。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#17 低门槛推进</div><div class="a"><b>🗣️ 话术：**"要不先做个检查？检查是免费的，了解清楚了再决定。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#18 分步成交</div><div class="a"><b>🗣️ 话术：**"今天先做检查，然后根据结果推荐方案。您觉得可以的话我们再定。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#19 引导到下一步</div><div class="a"><b>🗣️ 话术：**"您看这样，我们先安排验光，验光结果出来后我给您详细讲解方案。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#20 确认成交</div><div class="a"><b>🗣️ 话术：**"好的，那就定1.60折射率的，蓝色镜框。我先给您安排验光。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#21 处理犹豫</div><div class="a"><b>🗣️ 话术：**"您还有什么顾虑？可以告诉我，我帮您解答。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#22 最后推进</div><div class="a"><b>🗣️ 话术：**"您看是今天做检查还是明天？今天的话我马上安排。"</div></div>
+</div>
+
+<!-- 吉特默内容 -->
+<div class="master-content" id="content-gitomer">
+<div class="master-header"><div class="emoji">💡</div><div><h3>杰弗里·吉特默 · 销售圣经作者</h3><div class="subtitle">核心思想：信任货币 — 信任是成交的唯一货币</div></div></div>
+<div class="master-quote-tab"><div class="author">🎯 核心思想</div><div class="quote">"信任是成交的唯一货币。销售 = 信任 + 价值 + 时机。"</div></div>
+<p class="master-desc">吉特默强调信任是销售的核心，没有信任就没有成交。数据和专业是建立信任的关键。</p>
+
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#1 信任是成交的唯一货币</div><div class="a"><b>🗣️ 话术：**"这些数据不是我说的，是医院联合做的临床研究结果。您可以看看这篇论文。孩子的事，我们用数据说话。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#2 倾听优先</div><div class="a"><b>🗣️ 话术：**（认真倾听后）"我明白了，您主要是担心效果。我给您看看我们的临床数据和顾客反馈。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#3 价值>价格</div><div class="a"><b>🗣️ 话术：**"我们今天的活动价其实跟网上差不多，而且包含售后，您算下来更划算。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#4 数据建立信任</div><div class="a"><b>🗣️ 话术：**"北大医学部研究表明，角塑后平均年近视增长8度，而框架眼镜则为67度。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#5 客观对比不贬低</div><div class="a"><b>🗣️ 话术：**"新乐学和星趣控都是很好的产品。高境光走的是另一条路，数据上目前是最优的。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#6 专业建立信任</div><div class="a"><b>🗣️ 话术：**"我们有完整的检查设备，包括角膜地形图、眼轴测量、验光等。检查全面，推荐才准确。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#7 诚实建立信任</div><div class="a"><b>🗣️ 话术：**"抱歉，我无法预测每个孩子能控制到什么程度。但根据数据，大部分患者明显减缓。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#8 理解顾客</div><div class="a"><b>🗣️ 话术：**"我完全理解，给孩子配眼镜确实是一笔不小的开支。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#9 用顾客语言</div><div class="a"><b>🗣️ 话术：**"76%延缓率的意思是，本来一年涨100度的，戴了之后可能只涨24度。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#10 展示案例</div><div class="a"><b>🗣️ 话术：**"我们店有个孩子，去年100度，用了一年后复查，只涨了20度。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#11 不虚假承诺</div><div class="a"><b>🗣️ 话术：**"我不能保证100%控制，但临床数据显示76%的延缓率，是目前最好的。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#12 出示证据</div><div class="a"><b>🗣️ 话术：**"这是医院的临床报告，您可以扫码查看原始论文。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#13 安全承诺</div><div class="a"><b>🗣️ 话术：**"高境光是框架眼镜，不是药物也不是手术，不存在药物副作用。物理原理，安全无创。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#14 长期服务</div><div class="a"><b>🗣️ 话术：**"您孩子在我这配镜，我会跟踪度数变化，定期提醒您复查。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#15 解答质疑</div><div class="a"><b>🗣️ 话术：**"您谨慎是对的。这些数据全部来自公开发表的学术论文，您可以自己查证。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#16 价值对标</div><div class="a"><b>🗣️ 话术：**"如果每年涨100度到18岁可能600-800度，后续配更高度数镜片反而更贵。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#17 时机把握</div><div class="a"><b>🗣️ 话术：**"孩子度数每天都在变化，越早干预效果越好。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#18 建立专业形象</div><div class="a"><b>🗣️ 话术：**"我是专业视光师，从业X年，经手上千个孩子。根据我的经验，您孩子这个情况适合……"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#19 提供选择</div><div class="a"><b>🗣️ 话术：**"我们有三种方案，各有优缺点。我给您讲讲区别，您自己决定。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#20 跟进承诺</div><div class="a"><b>🗣️ 话术：**"您回去后如果有任何问题，随时微信问我。我给您留个名片。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#21 口碑证明</div><div class="a"><b>🗣️ 话术：**"您看看这些顾客的反馈，都是真实体验。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#22 坦诚不足</div><div class="a"><b>🗣️ 话术：**"角塑镜也有不适合的情况，比如角膜条件不符合。我们先检查，看看适不适合。"</div></div>
+</div>
+
+<!-- 特劳特内容 -->
+<div class="master-content" id="content-trout">
+<div class="master-header"><div class="emoji">🎯</div><div><h3>特劳特 · 定位之父</h3><div class="subtitle">核心思想：定位理论 — 定位不是对产品做什么，是对顾客心智做什么</div></div></div>
+<div class="master-quote-tab"><div class="author">🎯 核心思想</div><div class="quote">"定位不是你对产品做什么，而是你对潜在顾客的心智做什么。"</div></div>
+<p class="master-desc">特劳特的定位理论强调在顾客心智中占据独特位置。高境光的定位=第三代近视防控镜片。</p>
+
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#1 产品定位</div><div class="a"><b>🗣️ 话术：**"高境光是第三代近视防控镜片。第一代是普通眼镜，第二代是离焦镜片，第三代是高境光。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#2 差异化定位</div><div class="a"><b>🗣️ 话术：**"新乐学和星趣控用的是离焦技术，高境光用的是ON/OFF通路调控。两种技术路线不同。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#3 抢占心智</div><div class="a"><b>🗣️ 话术：**"提到近视防控，很多家长第一时间想到的是高境光，因为数据是目前最好的。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#4 客观对比</div><div class="a"><b>🗣️ 话术：**"新乐学59%，星趣控67%，高境光76%。数据不会骗人。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#5 不贬低竞品</div><div class="a"><b>🗣️ 话术：**"新乐学和星趣控都是很好的产品。高境光走的是另一条路，数据上目前是最优的。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#6 提供对比资料</div><div class="a"><b>🗣️ 话术：**"要不我给您看看三家产品的对比资料，您看了自己判断？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#7 制造紧迫感</div><div class="a"><b>🗣️ 话术：**"8-12岁是近视发展最快的阶段。越早干预，效果越好。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#8 抢占最佳时机</div><div class="a"><b>🗣️ 话术：**"现在100度是最佳干预时机，等到300度就晚了。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#9 类比通俗化</div><div class="a"><b>🗣️ 话术：**"防控就像小树长歪了，越早矫正效果越好。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#10 对比框架眼镜</div><div class="a"><b>🗣️ 话术：**"框架眼镜只矫正不控制，防控镜片既矫正又控制。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#11 对比OK镜</div><div class="a"><b>🗣️ 话术：**"OK镜是隐形眼镜，需要每天护理。高境光是框架眼镜，安全方便。两种方式各有适用场景。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#12 抢占"第三代"心智</div><div class="a"><b>🗣️ 话术：**"三代镜片七六效，一四散射不干扰。高境光是第三代，数据是目前最好的。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#13 数据定位</div><div class="a"><b>🗣️ 话术：**"76%延缓率，14%散射面积。这些是硬数据，不是广告词。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#14 帮助看清差异</div><div class="a"><b>🗣️ 话术：**"对比不是贬低，是帮助您看清差异。选哪种，最终看您孩子的情况和您的选择。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#15 强调独特性</div><div class="a"><b>🗣️ 话术：**"高境光是唯一采用ON/OFF通路调控技术的防控镜片，这是它的独特优势。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#16 建立品类认知</div><div class="a"><b>🗣️ 话术：**"防控镜片分两种：离焦镜片（新乐学/星趣控）和非离焦镜片（高境光）。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#17 抢占"最安全"心智</div><div class="a"><b>🗣️ 话术：**"框架眼镜是所有防控方式中最安全的，不需要接触眼睛，没有感染风险。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#18 抢占"最方便"心智</div><div class="a"><b>🗣️ 话术：**"高境光不需要每天护理，不需要特殊操作，戴上就行。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#19 制造合理紧迫感</div><div class="a"><b>🗣️ 话术：**"孩子度数每天都在变化。今天干预和明天干预，效果可能差很多。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#20 引导到行动</div><div class="a"><b>🗣️ 话术：**"要不先做个检查？检查是免费的，了解清楚了再决定。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#21 抢占"数据最优"心智</div><div class="a"><b>🗣️ 话术：**"目前所有近视防控镜片中，高境光的延缓率是最高的，76%。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#22 帮助决策</div><div class="a"><b>🗣️ 话术：**"您把这三款产品的数据对比一下，哪个数据好，哪个就更适合孩子。"</div></div>
+</div>
+
+<!-- 李奥贝纳内容 -->
+<div class="master-content" id="content-burnett">
+<div class="master-header"><div class="emoji">🎨</div><div><h3>李奥贝纳 · 品牌叙事大师</h3><div class="subtitle">核心思想：品牌叙事 — 找到产品与消费者的真实连接</div></div></div>
+<div class="master-quote-tab"><div class="author">🎯 核心思想</div><div class="quote">"好广告的本质是找到产品与消费者之间的真实连接。"</div></div>
+<p class="master-desc">李奥贝纳强调不要说产品多好，要说能帮顾客解决什么问题。不要说参数，要说感受和结果。</p>
+
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#1 真实连接</div><div class="a"><b>🗣️ 话术：**"您最关心的不是镜片本身，而是孩子视力能不能控制住，对吗？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#2 感受和结果</div><div class="a"><b>🗣️ 话术：**"本来一年涨100度的，戴了之后可能只涨24度。孩子度数控制住了，您也放心。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#3 通俗翻译ON/OFF</div><div class="a"><b>🗣️ 话术：**"让眼睛'以为'在户外，主动停止近视加深。就像把户外活动的保护作用装进了镜片里。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#4 通俗翻译微透镜</div><div class="a"><b>🗣️ 话术：**"镜片上有很多小光点，像星星一样，帮眼睛接收正确的信号。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#5 通俗翻译散射面积</div><div class="a"><b>🗣️ 话术：**"镜片上只有很小一部分有特殊设计，不会影响孩子看清楚东西。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#6 拥有感觉</div><div class="a"><b>🗣️ 话术：**"孩子戴上之后，白天不用戴眼镜，上课看黑板更清楚，运动也方便。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#7 场景化描述</div><div class="a"><b>🗣️ 话术：**"想象一下，孩子上体育课不用戴眼镜，跑步打球都不受影响。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#8 情感连接</div><div class="a"><b>🗣️ 话术：**"作为家长，最担心的就是孩子视力。我能理解您的心情。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#9 用故事打动</div><div class="a"><b>🗣️ 话术：**"我们有个顾客，孩子去年100度，用了一年后只涨了20度。妈妈特别高兴，说后悔没早点来。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#10 不说产品好说解决什么</div><div class="a"><b>🗣️ 话术：**"我们不是在卖镜片，是在帮您解决孩子度数不断增长的烦恼。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#11 让家长有感觉</div><div class="a"><b>🗣️ 话术：**"如果每年涨100度，到18岁就是600-800度。高度近视会增加视网膜脱落、青光眼风险。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#12 类比理解</div><div class="a"><b>🗣️ 话术：**"防控就像给孩子眼睛穿雨衣，不是等淋湿了再打伞，是提前预防。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#13 连接核心焦虑</div><div class="a"><b>🗣️ 话术：**"您担心的不是镜片贵不贵，是孩子度数能不能控制住，对吗？"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#14 描述未来</div><div class="a"><b>🗣️ 话术：**"现在干预，到18岁可能控制在300度以内。不干预，可能600度以上。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#15 不说参数说感受</div><div class="a"><b>🗣️ 话术：**"镜片很轻薄，戴着舒服，孩子愿意戴。""14%散射面积"→"镜片上很小一部分有特殊设计"。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#16 真实案例</div><div class="a"><b>🗣️ 话术：**"您看，这是我们店一位顾客的孩子。去年100度，今年复查只涨了20度。妈妈特别满意。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#17 连接家长身份</div><div class="a"><b>🗣️ 话术：**"您今天来，说明您是个负责任的家长。孩子的事，我们一定重视。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#18 用画面感</div><div class="a"><b>🗣️ 话术：**"想象一下，孩子戴上之后，白天不用戴眼镜，上课看黑板更清楚，运动也方便。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#19 对比感受</div><div class="a"><b>🗣️ 话术：**"普通眼镜只能看清，防控镜片不仅能看清，还能控制度数增长。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#20 让家长想要拥有</div><div class="a"><b>🗣️ 话术：**"孩子度数控制住了，您也不用每年担心换镜片。一次到位，省心又省钱。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#21 故事化表达</div><div class="a"><b>🗣️ 话术：**"有位妈妈说，她孩子用了防控镜片后，度数增长明显减缓，她后悔没早点来。"</div></div>
+<div class="objection-card" onclick="this.classList.toggle('open')"><div class="q">#22 连接情感</div><div class="a"><b>🗣️ 话术：**"孩子视力好了，您也放心。我们不只是卖镜片，是帮孩子保护眼睛。"</div></div>
+</div>
+
+<!-- 小测试 -->
+
+</div>
+<div class="quiz-area" id="quiz-masters"></div>
+</div>
+</div>
+
+<script>
+function showMaster(id){
+  // Remove active from all tabs
+  document.querySelectorAll('.master-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.master-content').forEach(c=>c.classList.remove('active'));
+  // Activate selected
+  document.getElementById('tab-'+id).classList.add('active');
+  document.getElementById('content-'+id).classList.add('active');
+}
+</script>
+
+
+
+<!-- 学习模块 → 产品学习 -->
+<div id="sec-learn-products" class="section">
+<div class="card">
+<div class="master-quote" style="margin-bottom:16px"><div class="quote">"销售 = 信任 + 价值 + 时机。"</div><div class="author">— 杰弗里·吉特默</div></div>
+<h2>📦 产品学习</h2>
+<p style="color:var(--text-secondary);margin-bottom:20px">按产品分类学习，点击展开查看详情。</p>
+
+<!-- 离焦产品 -->
+<div class="product-card open">
+<div class="header" onclick="this.parentElement.classList.toggle('open')">
+<h4><span style="font-size:20px">🔵</span> 青控产品</h4>
+<span class="arrow">▶</span>
+</div>
+<div class="content">
+<div class="knowledge-point"><div class="kp-title">📌 三代演进</div>
+<table>
+<tr><th>代次</th><th>产品</th><th>原理</th><th>效果</th></tr>
+<tr><td>第一代</td><td>普通单光镜片</td><td>仅矫正视力</td><td>无控制效果</td></tr>
+<tr><td>第二代</td><td>离焦镜片</td><td>周边离焦技术</td><td>延缓30-60%</td></tr>
+<tr><td><b>第三代</b></td><td><b>高境光</b></td><td><b>ON/OFF通路调控</b></td><td><b>延缓76%</b></td></tr>
+</table>
+</div>
+
+<h4 style="color:var(--success);margin-top:20px">🟢 高境光</h4>
+<table>
+<tr><th>参数</th><th>数值</th></tr>
+<tr><td>技术原理</td><td>ON/OFF通路调控 + 微透镜团簇</td></tr>
+<tr><td>延缓率</td><td><b>76%</b>（2年临床数据）</td></tr>
+<tr><td>散射面积</td><td><b>14%</b></td></tr>
+<tr><td>适用年龄</td><td>6-18岁</td></tr>
+<tr><td>适用度数</td><td>近视0-1000度，散光0-400度</td></tr>
+<tr><td>更换周期</td><td>1-2年</td></tr>
+</table>
+<div class="script-box"><div class="label">一句话介绍</div><div class="text">"高境光是第三代近视防控镜片，通过模拟户外自然光环境，让孩子眼睛'以为'自己在外面玩，从而主动停止近视加深。"</div></div>
+<div class="tip-box"><div class="label">💡 速记口诀</div><p>"三代镜片七六效，一四散射不干扰，六到十八都能戴，千度以内都有效。"</p></div>
+
+<h4 style="color:#6366f1;margin-top:24px">🟣 星趣控（依视路）</h4>
+<table>
+<tr><th>参数</th><th>数值</th></tr>
+<tr><td>品牌</td><td>依视路集团，全球镜片龙头</td></tr>
+<tr><td>技术</td><td>H.A.L.T. 高非球微透镜</td></tr>
+<tr><td>微透镜数量</td><td>1021个</td></tr>
+<tr><td>延缓率</td><td>约<b>67%</b></td></tr>
+<tr><td>适用年龄</td><td>6-18岁</td></tr>
+</table>
+
+<h4 style="color:var(--warning);margin-top:24px">🟡 控优点（尼康）</h4>
+<table>
+<tr><th>参数</th><th>数值</th></tr>
+<tr><td>品牌</td><td>尼康（Nikon）</td></tr>
+<tr><td>技术</td><td>DOT® 点扩散近视控制技术</td></tr>
+<tr><td>技术原理</td><td>通过降低视网膜对比度信号实现近视控制</td></tr>
+<tr><td>临床数据</td><td>CYPRESS研究，256名儿童，4年随访</td></tr>
+<tr><td>延缓率</td><td>约<b>59%</b></td></tr>
+<tr><td>适用年龄</td><td>6-18岁</td></tr>
+</table>
+
+<h4 style="color:var(--text-muted);margin-top:24px">⚪ 其他离焦品牌</h4>
+<div class="note-box"><b>常见品牌：</b>蔡司成长乐、明月轻松控、万新等。<br><b>共同特点：</b>都属于第二代离焦技术，延缓率30-60%不等。</div>
+
+<h4 style="margin-top:24px">📊 三款主力产品对比</h4>
+<table>
+<tr><th>对比维度</th><th>控优点</th><th>星趣控</th><th>高境光</th></tr>
+<tr><td>技术路线</td><td>DOT®点扩散近视控制</td><td>H.A.L.T.高非球微透镜</td><td>ON/OFF通路调控</td></tr>
+<tr><td>延缓率</td><td>59%</td><td>67%</td><td><b style="color:var(--success)">76%</b></td></tr>
+<tr><td>技术代数</td><td>第二代</td><td>第二代</td><td><b style="color:var(--success)">第三代</b></td></tr>
+<tr><td>控制方式</td><td>被动离焦</td><td>被动离焦</td><td><b style="color:var(--success)">主动调控</b></td></tr>
+<tr><td>散射面积</td><td>较大</td><td>较大</td><td><b style="color:var(--success)">仅14%</b></td></tr>
+</table>
+
+
+</div>
+</div>
+
+<!-- 斜弱视 -->
+<div class="product-card">
+<div class="header" onclick="this.parentElement.classList.toggle('open')"><h4><span style="font-size:20px">🟠</span> 斜弱视</h4><span class="arrow">▶</span></div>
+<div class="content">
+<div class="knowledge-point"><div class="kp-title">📌 核心知识点</div>
+<ul style="margin-left:20px;margin-top:4px"><li><b>弱视</b>：矫正视力低于0.8，无明显器质性病变</li><li><b>斜视</b>：双眼视轴不平行，分内斜、外斜、上斜</li><li><b>黄金治疗期</b>：3-6岁（视觉发育关键期）</li><li><b>常见产品</b>：遮盖疗法、视觉训练仪</li></ul>
+</div>
+<div class="script-box"><div class="label">推荐话术</div><div class="text">"弱视的黄金治疗期是3-6岁，越早干预效果越好。我们有专业的视觉训练方案。"</div></div>
+</div>
+</div>
+
+<!-- 角塑 -->
+<div class="product-card">
+<div class="header" onclick="this.parentElement.classList.toggle('open')"><h4><span style="font-size:20px">🟢</span> 角塑（角膜塑形镜）</h4><span class="arrow">▶</span></div>
+<div class="content">
+
+<div class="knowledge-point"><div class="kp-title">📌 什么是角膜塑形镜</div>
+<p>角膜塑形镜是一种特殊设计的<b>硬性透气隐形眼镜</b>，只需<b>夜间戴镜</b>，白天不需戴任何眼镜，就能获得清晰视力并有效<b>控制近视发展</b>。采用<b>第四代4区5弧逆几何设计</b>，透氧值达100以上，是目前控制青少年近视最有效的方法之一。</p>
+</div>
+
+<div class="knowledge-point"><div class="kp-title">📌 工作原理</div>
+<p>通过<b>旁中心离焦控制</b>原理，减少或消除戴普通框架眼镜所产生的视网膜周边部远视性离焦，进而控制眼轴拉长。同时通过<b>机械力学及流体力学作用</b>改变角膜前表面上皮层分布，重塑角膜屈光力，达到矫正近视的作用。该效果类似激光手术，只是手术是永久切削角膜，而角塑是可逆的物理塑形。</p>
+</div>
+
+<div class="knowledge-point"><div class="kp-title">📌 核心参数</div>
+<table>
+<tr><th>项目</th><th>数值</th></tr>
+<tr><td>适用年龄</td><td><b>8岁以上</b>（无上限，成人也可佩戴）</td></tr>
+<tr><td>适用度数</td><td>近视-0.75D ~ -6.00D，散光顺规≤-1.50D</td></tr>
+<tr><td>透氧值</td><td>≥100（符合国家夜戴透氧值>90标准）</td></tr>
+<tr><td>镜片寿命</td><td>1-1.5年</td></tr>
+<tr><td>治疗期</td><td>7-10天（最长1个月）达到理想视力</td></tr>
+<tr><td>戴镜时间</td><td>每晚8-10小时（治疗期），维持期可缩短</td></tr>
+</table>
+</div>
+
+<div class="knowledge-point"><div class="kp-title">📌 复查流程</div>
+<p>戴镜后<b>第1天、第1周、第2周、第1个月</b>复查，之后每月一次。前三个月每月复查，之后每三个月复查。即使不配角塑，每年也应至少2次眼睛检查。</p>
+</div>
+
+<div class="knowledge-point"><div class="kp-title">📌 角塑 vs 十年前OK镜</div>
+<table>
+<tr><th>对比项</th><th>十年前OK镜</th><th>现代角膜塑形镜</th></tr>
+<tr><td>透氧值</td><td>38</td><td>100+</td></tr>
+<tr><td>设计原理</td><td>机械性压迫</td><td>泪液流体力学效应</td></tr>
+<tr><td>镜片设计</td><td>简单设计</td><td>4区5弧段设计</td></tr>
+<tr><td>验配体系</td><td>无规范体系</td><td>完整无忧验配体系</td></tr>
+<tr><td>售后体系</td><td>混乱</td><td>规范医疗机构开展</td></tr>
+</table>
+</div>
+
+<div class="knowledge-point"><div class="kp-title">📌 角塑 vs 软性隐形眼镜</div>
+<table>
+<tr><th>对比项</th><th>软性隐形眼镜</th><th>角膜塑形镜</th></tr>
+<tr><td>材质</td><td>软镜，亲水性材料</td><td>硬镜，高透氧高分子聚合材料</td></tr>
+<tr><td>直径</td><td>覆盖整个角膜</td><td>小于角膜</td></tr>
+<tr><td>年龄限制</td><td>18岁以下不推荐</td><td>8岁以上可佩戴</td></tr>
+<tr><td>泪液交换</td><td>易吸收泪液，造成干眼</td><td>不影响泪液交换，对眼睛健康</td></tr>
+<tr><td>近视控制</td><td>无控制效果</td><td><b>有效控制近视发展</b></td></tr>
+<tr><td>销售渠道</td><td>眼镜店可销售</td><td>需医疗机构规范验配</td></tr>
+</table>
+</div>
+
+<div class="knowledge-point"><div class="kp-title">❌ 不适合佩戴人群</div>
+<ul style="margin-left:20px;margin-top:4px">
+<li>低于<b>8岁</b>的小孩</li>
+<li>近视度数大于-6.00D，散光逆规大于-2.00D（不适合夜戴）</li>
+<li>角膜上皮细胞点染者、重度沙眼、角膜炎、干眼症</li>
+<li>自理能力差、个人卫生习惯差</li>
+<li>圆锥角膜患者</li>
+<li>感冒生病期间（身体抵抗力下降）</li>
+</ul>
+</div>
+
+<div class="knowledge-point"><div class="kp-title">📌 效果与预期</div>
+<ul style="margin-left:20px;margin-top:4px">
+<li>试戴2小时，近视度数平均降低100度</li>
+<li>600度以内，<b>一周内</b>达到最大降幅，裸眼视力理想</li>
+<li>一个月后趋于稳定</li>
+<li>300度以下：3-5天视力可达1.0</li>
+<li>300-500度：约一周达1.0</li>
+<li>500-600度：约10天达较理想效果</li>
+<li>北大医学部研究：角塑后平均年近视增长<b>8度</b>，框架眼镜为<b>67度</b></li>
+<li>香港理工大学研究：角塑二年后，眼轴增长只有戴框架眼镜的<b>一半</b></li>
+</ul>
+</div>
+
+<div class="knowledge-point"><div class="kp-title">⚠️ 重要说明</div>
+<ul style="margin-left:20px;margin-top:4px">
+<li><b>不能彻底治愈近视</b> — 近视是眼球结构变化（眼轴变长、视网膜变薄），目前没有任何医疗手段可以彻底治疗近视</li>
+<li>停戴后最长<b>30天</b>，角膜曲率即会恢复原样，不会留下后遗症</li>
+<li>停戴后近视度数加深恢复到使用前的增长水平，不会加速</li>
+<li>对以后做激光手术<b>没有影响</b>，停戴一个月左右检查后即可手术</li>
+<li>超过600度仍可佩戴，但可能有残余度数需辅助低度数框架眼镜</li>
+<li>属于<b>自费项目</b>，不在医保范围内</li>
+</ul>
+</div>
+
+<div class="knowledge-point"><div class="kp-title">🔧 护理与保养</div>
+<ul style="margin-left:20px;margin-top:4px">
+<li><b>必须使用专用护理产品</b>，软镜护理液不能用</li>
+<li>镜片<b>不能用高温杀菌</b>（遇高温会变形失效）</li>
+<li>清洗镜片一般<b>60次左右</b>，以干净为主</li>
+<li>正常肥皂洗手即可，不推荐洗手液</li>
+<li>戴镜前点润眼液：保护角膜缓冲刺激，防止气泡</li>
+<li>摘镜前点润眼液：解除镜片与角膜液压，保护角膜</li>
+<li>泡镜片液体需保持干净，瓶盖必须盖好</li>
+<li>镜片掉地上不会碎（氟硅材料有韧性），但需小心拾取避免磨损</li>
+</ul>
+</div>
+
+<div class="knowledge-point"><div class="kp-title">🔧 常见问题速查</div>
+<table>
+<tr><th>问题</th><th>处理方法</th></tr>
+<tr><td>戴镜后眼红</td><td>初期不适应正常，短时间减轻；如持续需检查配适</td></tr>
+<tr><td>戴镜后流泪</td><td>初次配戴不适应，15-20分钟后逐渐适应</td></tr>
+<tr><td>异物感</td><td>辅助点舒润液；闭眼朝下看；一般不超过一周适应</td></tr>
+<tr><td>重影/复视</td><td>塑形初期正常，稳定后消失；如持续需调整镜片配适</td></tr>
+<tr><td>看近模糊</td><td>摘镜后休息15-30分钟逐渐消失</td></tr>
+<tr><td>镜片偏位</td><td>与趴着睡有关，几小时内自然恢复；仰睡最佳</td></tr>
+<tr><td>戴镜时间不够8小时</td><td>度数低无影响；度数高可睡觉前提前戴</td></tr>
+<tr><td>镜片取不下来</td><td>确认在角膜上→点舒润液→眨眼转动→吸棒吸附边缘轻旋</td></tr>
+<tr><td>戴镜后半夜疼</td><td>可能原因：过敏、炎症、偏位、镜片脏、片下异物</td></tr>
+<tr><td>镜片划痕</td><td>轻微不影响效果；重划痕需换镜</td></tr>
+<tr><td>色素环</td><td>泪液中铁血黄素沉积，停戴后逐渐减退消失，无害</td></tr>
+</table>
+</div>
+
+<div class="knowledge-point"><div class="kp-title">💰 价格</div>
+<p>根据度数和镜片类型决定，约<b>7000-12000元</b>不等。统一售价，目前无优惠。价格包含透氧材料成本、设计专利费用、复杂工艺（磁悬浮数控机床、免抛光切削、等离子表面处理等）。</p>
+</div>
+
+<div class="script-box"><div class="label">推荐话术：家长问"角塑和框架眼镜选哪个"</div><div class="text">"框架眼镜只能矫正视力，度数发展快，每年换镜片。角塑镜晚上戴，白天视力正常，不影响孩子活动，坚持戴还能减缓近视加深。我们先检查一下孩子的角膜条件是否适合。"</div></div>
+
+<div class="script-box"><div class="label">推荐话术：家长说"太贵了"</div><div class="text">"角塑镜是医疗级别的近视控制手段，透氧材料成本高，每片都是根据孩子角膜形态定制。相比每年换框架眼镜的费用，角塑镜能用1-1.5年，还能有效控制度数增长，长远看更划算。"</div></div>
+
+<div class="tip-box"><div class="label">⚠️ 销售红线</div>
+<ul style="margin-left:20px;margin-top:4px">
+<li>❌ 不能说"治愈近视"（近视不可治愈）</li>
+<li>❌ 不能保证"一定能控制到多少度"（个体差异无法预测）</li>
+<li>❌ 不能说"完全没有风险"（需强调规范护理和定期复查）</li>
+<li>❌ 不能承诺"停戴后度数不会涨"（停戴后恢复原有增长水平）</li>
+<li>✅ 可以说"有效控制近视发展"、"大部分患者明显减缓"</li>
+</ul>
+</div>
+
+</div>
+</div>
+
+<!-- 角塑标准问答话术 -->
+<div class="product-card">
+<div class="header" onclick="this.parentElement.classList.toggle('open')"><h4><span style="font-size:20px">💬</span> 角塑标准问答话术（销售大师版）</h4><span class="arrow">▶</span></div>
+<div class="content">
+
+<h4 style="color:var(--primary);margin-top:8px">📌 常识类问答</h4>
+
+<div class="objection-card">
+<div class="q">Q1：什么是角膜塑形镜？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 德鲁克 × 李奥贝纳</div></div>
+<p><b>推荐话术：</b>"角膜塑形镜是一种特殊设计的硬性透气隐形眼镜，只需<b>夜间佩戴</b>，白天不戴任何眼镜就能获得清晰视力，同时可以<b>有效控制近视发展</b>。它已经有40多年历史，目前发展到第四代，透氧值达100以上。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>从解决顾客问题出发（德鲁克），用通俗语言建立连接（李奥贝纳），强调"夜间戴、白天自由"的核心利益点。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q2：能否彻底治愈近视？戴了之后近视就会消失吗？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 特劳特</div></div>
+<p><b>推荐话术：</b>"我理解您的期望。但目前<b>没有任何医疗手段可以彻底治疗近视</b>，因为近视是眼球结构的变化（眼轴变长、视网膜变薄），不是简单的度数问题。角膜塑形镜和激光手术一样，改变的是角膜曲率，从视力角度看确实'矫正'了近视，但眼球的整体结构没有改变。所以我们说<b>控制</b>而不是治愈，这也是对您负责。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>先理解感受（吉特默信任原则），用客观事实建立信任，不说做不到的承诺（合规），反而增强信任感。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q3：角膜塑形镜为什么这么贵？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 李奥贝纳</div></div>
+<p><b>推荐话术：</b>"您问得好。价格确实不低，但我们算一笔账：角塑镜能用1-1.5年，相比每年换框架眼镜的费用，长远看并不贵。更重要的是，它不只是矫正视力，还能<b>有效控制度数增长</b>。如果孩子每年涨100度，用角塑镜可能只涨8-20度。这省下的度数增长，远比镜片本身的价值大。而且角塑镜的透氧材料成本高，每片都是根据孩子角膜形态定制，加上设计专利和复杂工艺（磁悬浮数控机床、等离子表面处理等），这些都是成本的组成部分。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>价值对标（吉特默），把价格转化为投资（李奥贝纳），用具体数字让家长有感觉。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q4：和十年前的OK镜有什么区别？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 特劳特 × 吉特默</div></div>
+<p><b>推荐话术：</b>"OK镜其实就是角膜塑形镜的旧称。十年前我们叫OK镜，现在已经发展到第四代了。区别很大：<b>透氧值从38提升到100+</b>，设计从机械压迫变成流体力学效应，镜片从简单设计变成4区5弧段，验配从没有规范到现在完整的无忧体系，售后从混乱到规范医疗机构开展。现在的角塑镜和十年前的OK镜，已经是完全不同的产品了。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>客观对比数据（特劳特定位理论），用表格化对比让差异一目了然（吉特默数据信任）。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q5：配戴后会不会留下后遗症？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 德鲁克</div></div>
+<p><b>推荐话术：</b>"您的担心完全正常，毕竟是戴在孩子眼睛上的东西。角塑镜是<b>物理性的治疗过程</b>，作用在角膜上皮层，仅使角膜上皮细胞重新排列分布，改变角膜曲率。它不对角膜的生理结构和性能造成实质性改变。<b>停戴后最长30天，角膜就会恢复原样</b>，因此不会留下后遗症。这也是为什么角塑镜被称为'可逆'的近视控制方法。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>先理解担忧（吉特默倾听），用科学原理解释（德鲁克解决问题），强调"可逆"降低顾虑。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q6：戴角膜塑形镜到底能不能完全控制近视？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 霍普金斯</div></div>
+<p><b>推荐话术：</b>"根据临床报告，配戴角塑镜和配戴框架眼镜的患者相比，角塑镜的控制效果<b>远远大于</b>框架眼镜。北大医学部研究表明，角塑后平均年近视增长只有<b>8度</b>，而框架眼镜为<b>67度</b>。香港理工大学研究也证实，角塑二年后眼轴增长只有戴框架眼镜的<b>一半</b>。当然，由于个体差异，我们无法预测某个特定孩子能控制到什么程度，但<b>大部分患者近视加深明显减缓</b>，不少患者能够完全控制。如果注意用眼习惯，科学用眼，控制效果会更好。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>用权威数据说话（吉特默信任），不承诺100%（合规），但用"大部分明显减缓"建立信心（霍普金斯假设成交）。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q7：能预测佩戴后能控制近视吗？控制到什么程度？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 德鲁克</div></div>
+<p><b>推荐话术：</b>"抱歉，我无法给您一个确切的预测。尽管大部分人有非常明显的近视控制效果，但由于个体差异（角膜弹性、眼轴长度、用眼习惯等），我们目前还无法预测某个特定孩子能够控制到什么程度。不过，根据我们的临床经验和研究数据，<b>大部分患者近视加深明显减缓</b>，不少患者能够完全控制。我们建议您先给孩子做个全面检查，看看孩子的角膜条件是否适合，试戴后观察效果。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>诚实是最好的策略（吉特默信任），不说做不到的承诺，引导到下一步行动（德鲁克创造顾客）。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q8：小孩100多度近视，需要佩戴角膜塑形镜吗？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 乔·吉拉德 × 特劳特</div></div>
+<p><b>推荐话术：</b>"100度近视刚刚处于近视的早期阶段。在我们周围，<b>很少能够看到100度近视不再增长的</b>，更多的是后悔应用这项技术晚了，或者以前听说过但没有及时用，现在度数比3个月或半年前增长了很多，有些甚至因为度数增长过快，超过了600度，失去了应用塑形镜的机会。<b>越早干预，效果越好</b>，就像小树长歪了，越早矫正越容易。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>绝不放弃顾客（乔·吉拉德），用"后悔晚了"制造合理紧迫感（特劳特定位），类比"小树长歪"通俗易懂。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q9：超过600度近视，还能戴角膜塑形镜吗？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 霍普金斯</div></div>
+<p><b>推荐话术：</b>"可以，但效果不能确定，要根据眼球结构进行预测。可能会有一些度数残余，需要辅助佩戴一副低度数的框架眼镜。不过，<b>即使会有残余度数，对于控制近视增长，仍然有较好的作用</b>。这已经有临床研究证明了。国家也规定了塑形镜降幅最多500-600度，大家要理性对待高度数情况下的降度效果。另外，还可以验配日戴型RGP，对近视控制也有作用。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>坦诚说明限制（吉特默信任），但不放弃任何顾客（乔·吉拉德），提供替代方案（RGP）。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q10：为什么以前没人推荐？是不是刚刚才出来？怎么没广告？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 德鲁克</div></div>
+<p><b>推荐话术：</b>"角膜塑形镜在美国诞生已经有<b>40多年历史</b>，目前发展到第四代。在国内，上海五官科医院、温州眼视光医院等权威视光机构一直都在研究和验配，已经超过10年。不过，由于售价较高、技术要求也高，以往一直在比较小的范围内验配。近年来随着各大医院对儿童视光门诊的重视，角塑镜才慢慢得到推广。<b>角塑镜属于医疗行为，不同于普通商品，一般宣传都是科普性文章，所以不能做大面积广告，更不能发布夸大其辞的不实广告。</b>"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>用历史数据建立信任（吉特默），解释"不做广告"的原因反而增强可信度（诚实=信任）。</p>
+</div>
+</div>
+
+<h4 style="color:var(--primary);margin-top:24px">📌 异议处理类问答</h4>
+
+<div class="objection-card">
+<div class="q">Q11：在别的医院为什么没有医生介绍这种产品？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 特劳特</div></div>
+<p><b>推荐话术：</b>"角塑镜验配检查流程复杂，不是所有医院都具备开展条件，或者对这项技术没有全面了解。不过现在已经有越来越多的大型医院眼科或者专业眼科医院在开展该项业务了。<b>我们医院有完整的验配体系和售后体系，从检查到试戴到定制到复查，全程都有专业团队跟进。</b>"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>不贬低其他医院（吉特默），强调自身优势（特劳特差异化），用"完整体系"建立信任。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q12：我带眼镜几十年了，也没什么问题，小孩子近视就近视了！</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 乔·吉拉德 × 吉特默</div></div>
+<p><b>推荐话术：</b>"我理解您的想法。不过近视目前已成为一个全球性问题，一定要重视起来。<b>近视了会影响孩子以后的生活、择业、报考学校</b>。而且高度近视易引起眼底疾病：视网膜脱落、黄斑部病变、眼底出血等。我们建议您先给孩子做个全面检查，了解孩子的视力状况，再决定是否需要干预。<b>检查是免费的，不耽误您考虑。</b>"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>先理解家长想法（吉特默倾听），列举实际影响（吉特默价值），提供免费检查降低门槛（乔·吉拉德绝不放弃）。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q13：你们把他说的那么好，为什么你们自己还带眼镜啊？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 霍普金斯</div></div>
+<p><b>推荐话术：</b>"您这个问题问得很好。目前角塑镜的应用还是以<b>控制青少年近视</b>方面的作用居多，有一定的适配人群。像我们成年后，视力已经稳定，选择的方法比较多，主要还是从方便使用的角度出发。就像医院里一样，做激光手术的医生大部分都是佩戴框架眼镜。<b>这不代表产品不好，只是选择不同。</b>"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>认可家长问题（吉特默），用类比化解质疑（医生也戴眼镜），客观解释不回避。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q14：有这么神奇吗？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 霍普金斯 × 吉特默</div></div>
+<p><b>推荐话术：</b>"让视力立竿见影地提高，<b>您是可以通过试戴立刻体验到的</b>。我们建议您先试戴两个小时，一般近视度数平均能降低100度。效果好不好，您自己感受最清楚。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>假设成交（霍普金斯），引导试戴体验（让顾客自己感受），不说"神奇"说"可体验"。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q15：现在市面上有很多比如眼保姆、针灸之类的产品，角塑和它们一样吗？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 特劳特 × 吉特默</div></div>
+<p><b>推荐话术：</b>"完全不一样。眼保姆、针灸的主要作用是放松眼睛，刺激眼部血液循环，对于<b>假性近视</b>有一定效果，但对于真性近视没有作用。角塑镜主要针对<b>真性近视</b>，通过佩戴可以减缓眼轴增长的速度，从而控制近视快速加深。这是有临床研究数据支持的，不是简单的放松手段。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>客观区分（特劳特差异化），不贬低竞品（合规），用数据支撑（吉特默信任）。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q16：孩子近视了而且度数加深很快，有什么办法？（如何引出角塑）</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 德鲁克 × 霍普金斯</div></div>
+<p><b>推荐话术：</b>"就目前的科技，<b>近视是不可根治的，只可以矫正</b>。有两种途径：要么配眼镜，要么戴角塑镜。配眼镜只能矫正视力，度数还是会涨。角塑镜白天不用戴，坚持使用可以一定程度上控制近视加深。<b>我们先给孩子做个全面检查，看看哪种方案更适合孩子。</b>"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>从解决问题出发（德鲁克），给出两个选择引导决策（霍普金斯选择成交法），不强迫推进。</p>
+</div>
+</div>
+
+<h4 style="color:var(--primary);margin-top:24px">📌 产品对比类问答</h4>
+
+<div class="objection-card">
+<div class="q">Q17：近视为什么要戴塑形镜，而不戴框架眼镜？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 李奥贝纳</div></div>
+<p><b>推荐话术：</b>"框架眼镜只能够起到矫正视力的作用，但度数发展快，需要每年换镜片，白天学习和生活也不方便，长期戴眼睛还会变形。角塑镜只要晚上戴，白天视力正常，不影响小孩活动，<b>而且坚持戴还能减缓近视加深</b>。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>对比框架眼镜的不便（吉特默价值），强调角塑镜的利益点（李奥贝纳连接），让顾客感受"拥有的感觉"。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q18：角塑镜控制近视加深的效果有什么临床验证吗？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 德鲁克</div></div>
+<p><b>推荐话术：</b>"有的。近视发展的一个重要因素是眼轴的增长，一般情况下，<b>眼轴每增加1mm，近视度数增加300度</b>。根据香港理工大学研究，角塑二年后，眼轴的增长只有佩戴框架眼镜的<b>一半</b>。北大医学部研究表明，角塑后平均年近视增长<b>8度</b>，而框架眼镜则为<b>67度</b>。这些数据说明，角塑镜能够有效遏制近视加深。<b>孩子的事，我们用数据说话。</b>"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>用权威研究数据说话（吉特默信任），先讲原理再给数据（德鲁克解决问题），最后用"用数据说话"增强信任。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q19：小孩子等上几年，成年后可以进行激光手术，为什么还要佩戴角膜塑形镜？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 德鲁克</div></div>
+<p><b>推荐话术：</b>"激光手术对近视度数有很高的要求，近视度数越高，切削角膜组织就越多，存在的风险也会增加。近视发展成为高度近视，易引起眼底并发症：视网膜脱落、眼底出血、黄斑部病变等。<b>与其等到成年后冒着更大风险做手术，不如现在就控制度数增长</b>。角塑镜停戴一个月后就可以做激光手术，两者并不冲突。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>用长远眼光解决问题（德鲁克），对比现在干预和未来手术的风险（吉特默价值），强调"不冲突"消除顾虑。</p>
+</div>
+</div>
+
+<h4 style="color:var(--primary);margin-top:24px">📌 价格与决策类问答</h4>
+
+<div class="objection-card">
+<div class="q">Q20：镜片的价格是多少？能优惠吗？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 霍普金斯</div></div>
+<p><b>推荐话术：</b>"价格是根据眼睛近视的度数和所选择的镜片类型决定的，从<b>7千到1.2万</b>不等，分为好几种。你需要具体到医院检查试戴后才确定。我们是统一售价，目前没有优惠。<b>不过相比每年换框架眼镜的费用，角塑镜能用1-1.5年，还能有效控制度数增长，长远看更划算。</b>"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>不急于报价（霍普金斯），先检查再定价（专业），价值对标（吉特默），统一售价反而增强信任。</p>
+</div>
+</div>
+
+<div class="objection-card">
+<div class="q">Q21：角膜塑形镜是自费还是医保？</div>
+<div class="a">
+<div class="master-quote" style="margin:8px 0;padding:10px 14px"><div class="author" style="font-size:12px">🧠 吉特默 × 德鲁克</div></div>
+<p><b>推荐话术：</b>"目前是<b>自费项目</b>。必要时我们会申明：该项目是自费，并且是大额的费用，我们开具的是厂家的销售凭证。"</p>
+<p style="color:var(--text-muted);font-size:13px;margin-top:8px">💡 <b>销售技巧：</b>坦诚说明（吉特默信任），提前管理预期（德鲁克），避免后续纠纷。</p>
+</div>
+</div>
+
+</div>
+</div>
+
+<!-- 眼镜 -->
+<div class="product-card">
+<div class="header" onclick="this.parentElement.classList.toggle('open')"><h4><span style="font-size:20px">🔵</span> 眼镜</h4><span class="arrow">▶</span></div>
+<div class="content">
+<div class="knowledge-point"><div class="kp-title">📌 产品清单</div>
+<ul style="margin-left:20px;margin-top:4px"><li><b>普通单光镜片</b>：仅矫正视力</li><li><b>渐进多焦点</b>：适合有调节lag的儿童</li><li><b>防蓝光镜片</b>：减少电子屏幕蓝光</li><li><b>变色镜片</b>：室内外自动变色</li></ul>
+</div>
+<div class="script-box"><div class="label">推荐话术</div><div class="text">"普通眼镜只是矫正视力，不会控制度数增长。如果孩子每年涨100度，防控镜片可以帮您把增长控制在更低的水平。"</div></div>
+</div>
+</div>
+
+<!-- 周边产品 -->
+<div class="product-card">
+<div class="header" onclick="this.parentElement.classList.toggle('open')"><h4><span style="font-size:20px">🟣</span> 周边产品</h4><span class="arrow">▶</span></div>
+<div class="content">
+<div class="knowledge-point"><div class="kp-title">📌 产品清单</div>镜框、镜片清洁套装、防蓝光夹片、镜盒/镜布、视力表/眼保健操工具</div>
+<div class="script-box"><div class="label">推荐话术</div><div class="text">"配镜的同时，建议带一套清洁套装。镜片保持干净，孩子看东西更清楚，防控效果也更好。"</div></div>
+</div>
+</div>
+
+<!-- 功能性眼镜 -->
+<div class="product-card">
+<div class="header" onclick="this.parentElement.classList.toggle('open')"><h4><span style="font-size:20px">🟡</span> 功能性眼镜</h4><span class="arrow">▶</span></div>
+<div class="content">
+<div class="knowledge-point"><div class="kp-title">📌 产品清单</div>
+<ul style="margin-left:20px;margin-top:4px"><li><b>运动眼镜</b>：防冲击、防滑落</li><li><b>阅读眼镜</b>：缓解近距离用眼疲劳</li><li><b>驾驶眼镜</b>：偏光镜片，减少眩光</li><li><b>电脑眼镜</b>：防蓝光+抗疲劳</li></ul>
+</div>
+<div class="script-box"><div class="label">推荐话术</div><div class="text">"孩子平时运动多吗？可以配一副运动眼镜，防滑防冲击，运动时更安全。"</div></div>
+</div>
+</div>
+
+<!-- 竞品对比 -->
+<div class="product-card">
+<div class="header" onclick="this.parentElement.classList.toggle('open')"><h4><span style="font-size:20px">⚖️</span> 竞品对比</h4><span class="arrow">▶</span></div>
+<div class="content">
+<div class="knowledge-point"><div class="kp-title">📌 核心原则（吉特默）</div><p><b>不诋毁竞品，客观对比，突出差异化价值。</b>竞品不是敌人，是帮助顾客做选择的参考。</p></div>
+
+<h4 style="color:var(--primary);margin-top:20px">📊 三大近视控制镜片横向对比</h4>
+<table>
+<tr><th>维度</th><th>控优点</th><th>星趣控</th><th>高境光</th></tr>
+<tr><td>品牌</td><td>尼康（Nikon）</td><td>依视路集团，全球镜片龙头</td><td>国产新锐</td></tr>
+<tr><td>技术</td><td>DOT®点扩散近视控制</td><td>H.A.L.T.高非球微透镜</td><td>ON/OFF通路调控</td></tr>
+<tr><td>延缓率</td><td>59%</td><td>67%</td><td><b style="color:var(--success)">76%</b></td></tr>
+<tr><td>技术代数</td><td>第二代</td><td>第二代</td><td><b style="color:var(--success)">第三代</b></td></tr>
+<tr><td>控制方式</td><td>被动离焦</td><td>被动离焦</td><td><b style="color:var(--success)">主动调控</b></td></tr>
+<tr><td>散射面积</td><td>较大</td><td>较大</td><td><b style="color:var(--success)">仅14%</b></td></tr>
+<tr><td>上市时间</td><td>2018年（最早）</td><td>2021年</td><td>2023年（最新）</td></tr>
+</table>
+
+<div class="script-box"><div class="label">客观对比话术</div><div class="text">"这三款都是目前市场上主流的近视控制镜片。新乐学上市最早，临床数据最充分；星趣控控制效果数据最好，达到67%；高境光是第三代，主动调控，延缓率76%目前最优。三款各有优势，关键是看孩子适合哪一款。"</div></div>
+
+<h4 style="color:#6366f1;margin-top:24px">📊 OK镜 vs 框架近视控制镜片</h4>
+<table>
+<tr><th>维度</th><th>OK镜（角膜塑形镜）</th><th>框架近视控制镜片</th></tr>
+<tr><td>佩戴方式</td><td>夜间佩戴</td><td>白天佩戴</td></tr>
+<tr><td>白天视力</td><td>裸眼清晰</td><td>需要戴眼镜</td></tr>
+<tr><td>控制效果</td><td>40%-60%</td><td>40%-76%</td></tr>
+<tr><td>价格</td><td>8000-15000元/年</td><td>2000-3500元</td></tr>
+<tr><td>护理要求</td><td>高（每天清洁消毒）</td><td>低（正常清洁）</td></tr>
+<tr><td>安全性</td><td>需要严格卫生，有感染风险</td><td>安全性高</td></tr>
+</table>
+
+<div class="script-box"><div class="label">OK镜 vs 框架对比话术</div><div class="text">"OK镜和框架镜片都是控制近视的有效方式。OK镜的优势是白天不用戴眼镜，但需要每天护理，价格也比较高。框架镜片更安全、更经济，但白天需要一直戴着。您可以根据孩子的年龄、配合度和预算来选择。"</div></div>
+
+<h4 style="margin-top:24px">🏪 线下配镜 vs 网上配镜</h4>
+<table>
+<tr><th>维度</th><th>线下实体店</th><th>网上配镜</th></tr>
+<tr><td>验光精度</td><td>专业验光，数据准确</td><td>依赖自带验光单，可能不准</td></tr>
+<tr><td>试戴体验</td><td>现场试戴，确保合适</td><td>无法试戴</td></tr>
+<tr><td>瞳距/瞳高</td><td>精准测量</td><td>容易偏差</td></tr>
+<tr><td>镜框调整</td><td>专业调整，确保舒适</td><td>自行调整，容易变形</td></tr>
+<tr><td>售后服务</td><td>免费复查、调整、维修</td><td>基本无售后</td></tr>
+<tr><td>专业指导</td><td>有视光师全程指导</td><td>无</td></tr>
+</table>
+
+<div class="script-box"><div class="label">线下 vs 网上对比话术</div><div class="text">"网上配镜确实便宜一些，但眼镜是半成品，需要专业验光和调整才能发挥效果。特别是孩子的眼镜，瞳距、瞳高这些数据差一点都会影响效果。我们提供验光、试戴、调整、复查一条龙服务，这些是网上做不到的。"</div></div>
+
+<h4 style="margin-top:24px">🚫 竞品对比禁忌</h4>
+<table>
+<tr><th>❌ 不要说</th><th>✅ 应该说</th></tr>
+<tr><td>"XX品牌不好"</td><td>"XX品牌有自己的特点，我们的优势在…"</td></tr>
+<tr><td>"网上配的不行"</td><td>"网上配镜有它的便利，但专业验光…"</td></tr>
+<tr><td>"别家都是骗人的"</td><td>"不同店的服务标准不一样，我们…"</td></tr>
+<tr><td>"便宜没好货"</td><td>"价格差异主要在于…"</td></tr>
+</table>
+
+<div class="tip-box"><div class="label">🏆 竞品对比万能模板</div><p><b>公式：</b>认同顾客 → 客观对比 → 突出优势 → 引导体验<br><b>示例：</b>"您提到的XX品牌确实不错（认同）。它们和我们主要的区别在技术和价格上（对比）。我们的优势是XX（优势）。您可以让孩子试戴一下，感受一下区别（引导）。"</p></div>
+
+</div>
+</div>
+
+</div>
+<div class="quiz-area" id="quiz-products"></div>
+</div>
+
+<!-- 📝 考核模块 -->
+<div id="sec-exam" class="section">
+<div class="card">
+<h2>📝 考核模块</h2>
+<p style="color:var(--text-secondary);margin-bottom:20px">三个级别，逐级挑战。</p>
+<div style="display:flex;gap:10px;flex-wrap:wrap">
+<button class="btn btn-primary" onclick="startQuiz('l1')">L1 入门考（80%通过）</button>
+<button class="btn btn-outline" onclick="startQuiz('l2')">L2 熟练考（85%通过）</button>
+<button class="btn btn-warning" onclick="startQuiz('l3')">L3 进阶考（90%通过）</button>
+</div>
+</div>
+<div id="quiz-area"></div>
+
+<!-- 考前冲刺 -->
+<div class="card" style="margin-top:20px;padding:20px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border:2px solid #8b5cf6;border-radius:12px">
+<h3 style="margin:0 0 8px;color:#6d28d9">🎯 考前冲刺模式</h3>
+<p style="margin:0 0 14px;font-size:13px;color:#7c3aed">按类别闯关，逐个击破薄弱环节。全部通关解锁终极徽章！</p>
+<div id="sprint-status" style="margin-bottom:12px"></div>
+<div id="sprint-area"></div>
+<button onclick="startSprint()" id="sprint-start-btn" style="padding:10px 20px;background:#7c3aed;color:#fff;border:none;border-radius:8px;font-size:14px;cursor:pointer;font-weight:600">🚀 开始冲刺</button>
+</div>
+</div>
+
+<!-- 📊 成绩记录 -->
+<div id="sec-records" class="section">
+<div class="card">
+<h2>📊 成绩记录</h2>
+<div style="display:flex;gap:10px;margin-bottom:20px">
+<button class="btn btn-outline" onclick="showRecordTab('scores')" style="flex:1">📊 分数记录</button>
+<button class="btn btn-outline" onclick="showRecordTab('errors')" style="flex:1">❌ 错题记录</button>
+</div>
+<div id="score-area"><p style="color:var(--text-muted);text-align:center;padding:20px">暂无考核记录，完成考核后自动显示。</p></div>
+<div id="error-area" style="display:none"><p style="color:var(--text-muted);text-align:center;padding:20px">暂无错题记录。</p></div>
+</div>
+</div>
+
+<!-- ==================== 🏋️ 实践演练 ==================== -->
+
+<!-- 👋 进店接待 -->
+<div id="sec-reception" class="section">
+<div class="card">
+<div class="master-quote" style="margin-bottom:16px"><div class="quote">"绝不放过每一个进门的顾客。"</div><div class="author">— 乔·吉拉德</div></div>
+<h2>👋 进店接待</h2>
+<p><span class="tag tag-l1">必学</span> 顾客进店的前30秒，决定了整个销售流程的走向。</p>
+
+<h3>⏱️ 3秒法则</h3>
+<div class="tip-box"><div class="label">⚡ 核心规则</div><p>顾客进店<b>3秒内</b>必须有回应，让顾客感受到"我被重视了"。</p></div>
+
+<h3>📋 通用迎宾话术</h3>
+<table>
+<tr><th>场景</th><th>话术</th></tr>
+<tr><td>顾客独自进店</td><td>"您好，欢迎光临！我是这里的视光师，您叫我小X就行。今天来是想看看什么？我帮您参谋参谋。"</td></tr>
+<tr><td>家长带孩子进店</td><td>"您好！小朋友真可爱，几岁啦？今天是来检查视力还是想换副眼镜呀？您放心，我们这儿很多小朋友，我来帮您看看。"</td></tr>
+<tr><td>顾客看起来有目的</td><td>"您好！看您是来做些什么的？配镜、复查还是有其他需求？您说，我来帮您安排。"</td></tr>
+<tr><td>顾客随便看看</td><td>"您好！您随便看，有任何需要随时叫我。对了，最近我们刚到几款新款镜片，挺受欢迎的，您感兴趣我可以拿给您看看。"</td></tr>
+</table>
+
+<h3>👥 不同类型顾客的接待策略</h3>
+
+<h4>👩 家长型顾客（为孩子配镜）</h4>
+<div class="script-box"><div class="label">第一步：建立信任</div><div class="text">"您好！带孩子来检查视力是吧？您坐您坐，先喝杯水。孩子叫什么名字呀？几年级啦？"</div></div>
+<div class="script-box"><div class="label">第二步：表达关心</div><div class="text">"现在孩子用眼多，近视确实普遍。您别太担心，我们这儿很多孩子，我来帮您好好看看情况。"</div></div>
+<div class="script-box"><div class="label">第三步：引导专业检查</div><div class="text">"我先给孩子做个详细的检查，了解一下度数、瞳距、用眼习惯，然后我再帮您分析一下适合什么样的方案。您看可以吗？"</div></div>
+
+<h4>👨 成人型顾客（自己配镜）</h4>
+<div class="script-box"><div class="label">第一步：轻松开场</div><div class="text">"您好！今天想看看什么？换眼镜还是第一次来？您说需求，我帮您推荐合适的。"</div></div>
+<div class="script-box"><div class="label">第二步：了解使用场景</div><div class="text">"平时用电脑多不多？开车多不多？这对镜片选择挺重要的，我帮您分析一下。"</div></div>
+
+<h4>👴 老年型顾客</h4>
+<div class="script-box"><div class="label">第一步：耐心关怀</div><div class="text">"您好！您是来看老花镜的还是想换副眼镜？不着急，您慢慢说，我来帮您。"</div></div>
+<div class="script-box"><div class="label">第二步：简化信息</div><div class="text">"我给您介绍几款简单好用的，您戴着舒服最重要。"</div></div>
+
+<h3>🏆 第一句话的黄金公式</h3>
+<div class="note-box"><b>公式：</b>问候 + 自我介绍 + 开放式提问 + 表达服务意愿<br><b>示例：</b>"您好！（问候）我是这里的视光师小X。（自我介绍）今天来是想看看什么？（开放式提问）我来帮您参谋参谋。（服务意愿）"</div>
+
+<h3>❌ 常见错误说法</h3>
+<table>
+<tr><th>❌ 不要说</th><th>✅ 应该说</th></tr>
+<tr><td>"想买什么？"</td><td>"今天来是想看看什么？我帮您参谋。"</td></tr>
+<tr><td>"随便看"</td><td>"您随便看，有需要随时叫我。"</td></tr>
+<tr><td>沉默不语</td><td>3秒内必须有回应</td></tr>
+<tr><td>一上来就推产品</td><td>先了解需求再推荐</td></tr>
+<tr><td>让顾客站着说话</td><td>主动引导就座</td></tr>
+</table>
+
+<h3>🤝 肢体语言配合</h3>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
+<div style="padding:10px 14px;background:#f0f9ff;border-radius:8px;font-size:13px">😊 <b>微笑</b> — 第一表情必须是微笑</div>
+<div style="padding:10px 14px;background:#f0f9ff;border-radius:8px;font-size:13px">👁️ <b>目光接触</b> — 看着顾客说话</div>
+<div style="padding:10px 14px;background:#f0f9ff;border-radius:8px;font-size:13px">👋 <b>手势引导</b> — 引导顾客就座</div>
+<div style="padding:10px 14px;background:#f0f9ff;border-radius:8px;font-size:13px">↔️ <b>保持距离</b> — 给顾客舒适感</div>
+<div style="padding:10px 14px;background:#f0f9ff;border-radius:8px;font-size:13px">💧 <b>主动倒水</b> — 建立信任的小动作</div>
+</div>
+
+<h3>🎭 实战演练</h3>
+<div class="dialogue">
+<div class="line customer"><div class="name">👩 妈妈带8岁男孩进店</div>（走进店里，四处看看）</div>
+<div class="line you"><div class="name">👤 视光师</div>您好！欢迎光临！小朋友真精神，几岁啦？</div>
+<div class="line customer"><div class="name">👩 妈妈</div>8岁了，上二年级。</div>
+<div class="line you"><div class="name">👤 视光师</div>二年级啦，真乖。您坐您坐，我先倒杯水。今天是来检查视力还是想换眼镜呀？</div>
+<div class="line customer"><div class="name">👩 妈妈</div>老师说孩子看不清黑板了，来检查一下。</div>
+<div class="line you"><div class="name">👤 视光师</div>好的好的，现在孩子用眼确实多。您别担心，我先给孩子做个详细检查，了解清楚情况后再帮您分析适合的方案。来，小朋友，跟叔叔到这边走。</div>
+</div>
+<div class="note-box"><b>✅ 成功建立信任，进入检查环节。</b></div>
+
+<div class="tip-box"><div class="label">⏱️ 30秒黄金法则</div><p>第1秒微笑 → 第3秒打招呼 → 第10秒建立信任 → 第30秒SPIN提问</p></div>
+
+</div>
+<div class="quiz-area" id="quiz-reception"></div>
+</div>
+
+<!-- 🎯 SPIN提问 -->
+<div id="sec-spin" class="section">
+<div class="card">
+<div class="master-quote" style="margin-bottom:16px"><div class="quote">"销售不是说话，是倾听。"</div><div class="author">— 尼尔·雷克汉姆</div></div>
+<h2>🎯 SPIN提问</h2>
+<p><span class="tag tag-l2">核心</span> 需求挖掘的核心技巧。通过提问引导顾客自己发现需求。</p>
+
+<h3>📋 SPIN四步法</h3>
+<table>
+<tr><th>步骤</th><th>全称</th><th>目的</th><th>话术示例</th></tr>
+<tr><td><b>S</b></td><td>Situation 现状</td><td>了解基本信息</td><td>"孩子现在多大了？近视多久了？"</td></tr>
+<tr><td><b>P</b></td><td>Problem 问题</td><td>发现不满和痛点</td><td>"现在戴的眼镜效果怎么样？度数有没有变化？"</td></tr>
+<tr><td><b>I</b></td><td>Implication 影响</td><td>放大问题严重性</td><td>"如果每年涨100度，到18岁可能600度以上。"</td></tr>
+<tr><td><b>N</b></td><td>Need-payoff 价值</td><td>引导顾客发现需求</td><td>"如果有产品能减缓76%，您有兴趣了解吗？"</td></tr>
+</table>
+
+<h3>👩 家长型顾客完整提问清单</h3>
+
+<h4>S（现状）— 了解基本情况</h4>
+<div class="script-box"><div class="label">S1-S7</div><div class="text">
+"孩子现在多大了？上几年级？"<br>
+"近视多久了？现在度数是多少？"<br>
+"现在戴的是什么眼镜？戴了多久？"<br>
+"平时学习用眼多吗？每天大概看屏幕多长时间？"<br>
+"之前在哪配的镜？感觉怎么样？"<br>
+"孩子的坐姿和阅读距离您注意过吗？"<br>
+"家里有人近视吗？"
+</div></div>
+
+<h4>P（问题）— 挖掘痛点</h4>
+<div class="script-box"><div class="label">P1-P6</div><div class="text">
+"孩子现在这副眼镜戴着，您觉得效果怎么样？度数有没有涨？"<br>
+"孩子有没有说过看不清黑板？或者经常眯眼睛？"<br>
+"您有没有发现孩子看书离得越来越近？"<br>
+"换眼镜的频率是不是越来越高了？"<br>
+"孩子戴眼镜运动方不方便？会不会容易滑下来？"<br>
+"您担心孩子的度数继续加深吗？"
+</div></div>
+
+<h4>I（影响）— 放大问题严重性</h4>
+<div class="script-box"><div class="label">I1-I6</div><div class="text">
+"如果度数每年涨100度，您想过几年后孩子的度数会到多少吗？"<br>
+"度数高了以后，孩子以后想做什么职业可能会受限？"<br>
+"高度近视将来可能会有什么眼部健康风险，您了解过吗？"<br>
+"如果孩子在学校看不清黑板，会不会影响学习成绩和自信心？"<br>
+"孩子如果因为眼镜不方便不爱运动，对身体发育有没有影响？"<br>
+"每换一次眼镜都要重新适应，对孩子来说是不是也挺困扰的？"
+</div></div>
+
+<h4>N（价值）— 引导解决方案</h4>
+<div class="script-box"><div class="label">N1-N6</div><div class="text">
+"如果有产品能有效控制度数增长，您有兴趣了解一下吗？"<br>
+"假如一副眼镜能让孩子度数涨得慢一些，是不是能减少以后很多麻烦？"<br>
+"如果有一款镜片既轻便又耐摔，孩子运动也不怕，您觉得怎么样？"<br>
+"如果能帮孩子把度数控制在某个范围内，是不是就不用那么担心了？"<br>
+"您觉得现在投入一些控制度数，和以后度数高了再补救，哪个更划算？"<br>
+"如果孩子能有一副合适的眼镜，学习和运动都不受影响，是不是两全其美？"
+</div></div>
+
+<h3>👨 成人型顾客精简提问清单</h3>
+<div class="script-box"><div class="label">S + P + N</div><div class="text">
+"S: 您平时工作用电脑多吗？一天大概多长时间？"<br>
+"S: 现在这副眼镜戴了多久？感觉哪里不太满意？"<br>
+"P: 现在这副眼镜看久了会不会眼睛累？"<br>
+"P: 晚上开车有没有觉得眩光比较严重？"<br>
+"I: 眼睛长期疲劳的话，会不会影响工作效率？"<br>
+"I: 晚上开车看不清的话，安全问题您考虑过吗？"<br>
+"N: 如果有一副眼镜能让眼睛不那么容易疲劳，您愿意试试吗？"<br>
+"N: 如果开车时视野更清晰、眩光更少，是不是安全很多？"
+</div></div>
+
+<h3>📖 SPIN提问流程模板</h3>
+<div class="note-box"><b>流程：</b>Step 1: S（现状）→ 了解基本情况（2-3个问题） → Step 2: P（问题）→ 挖掘痛点（1-2个问题） → Step 3: I（影响）→ 放大问题严重性（1-2个问题） → Step 4: N（价值）→ 引导解决方案（1-2个问题）</div>
+
+<h3>🎭 完整对话示例</h3>
+<div class="dialogue">
+<div class="line you"><div class="name">👤 你（S）</div>小朋友今年几岁啦？近视多长时间了？</div>
+<div class="line customer"><div class="name">👩 家长</div>8岁，去年查出来100度。</div>
+<div class="line you"><div class="name">👤 你（S）</div>现在度数多少？戴眼镜多久了？</div>
+<div class="line customer"><div class="name">👩 家长</div>150度，戴了半年了。</div>
+<div class="line you"><div class="name">👤 你（P）</div>这半年度数有没有变化？</div>
+<div class="line customer"><div class="name">👩 家长</div>上次复查涨到200度了，涨得挺快的。</div>
+<div class="line you"><div class="name">👤 你（I）</div>半年涨了50度，您有没有想过照这个速度，一年可能就涨100度？小学还没毕业可能就三四百度了，以后高度近视的风险也会增加。</div>
+<div class="line customer"><div class="name">👩 家长</div>是啊，我也很担心。</div>
+<div class="line you"><div class="name">👤 你（N）</div>如果有一款镜片能有效减缓度数增长，让您不用那么焦虑，您有兴趣了解一下吗？</div>
+<div class="line customer"><div class="name">👩 家长</div>有啊，你们有什么推荐？</div>
+</div>
+<div class="note-box"><b>✅ 成功引导，进入产品推荐环节。</b></div>
+
+</div>
+<div class="quiz-area" id="quiz-spin"></div>
+</div>
+
+<!-- 💎 价值传递 -->
+<div id="sec-value" class="section">
+<div class="card">
+<div class="master-quote" style="margin-bottom:16px"><div class="quote">"不要卖产品，要卖'拥有的感觉'。"</div><div class="author">— 汤姆·霍普金斯</div></div>
+<h2>💎 价值传递</h2>
+<p><span class="tag tag-l2">核心</span> 把专业术语翻译成家长听得懂的话。</p>
+<div class="master-quote"><div class="author">🎨 李奥贝纳 · 品牌叙事大师</div><div class="quote">"好广告的本质是找到产品与消费者之间的真实连接。"</div></div>
+<h3>专业 → 通俗翻译表</h3>
+<table>
+<tr><th>专业术语</th><th>❌ 错误说法</th><th>✅ 正确话术</th></tr>
+<tr><td>ON/OFF通路调控</td><td>"我们用了ON/OFF通路技术"</td><td>"让眼睛'以为'在户外，主动停止近视加深"</td></tr>
+<tr><td>微透镜团簇</td><td>"上面有微透镜团簇设计"</td><td>"镜片上有很多小光点，像星星一样帮眼睛接收信号"</td></tr>
+<tr><td>76%延缓率</td><td>"临床数据76%延缓率"</td><td>"本来一年涨100度，戴了之后可能只涨24度"</td></tr>
+</table>
+<h3>价值传递三步法</h3>
+<div class="script-box"><div class="label">第一步：翻译</div><div class="text">把专业术语翻译成家长听得懂的话</div></div>
+<div class="script-box"><div class="label">第二步：连接</div><div class="text">"您最关心的不是镜片本身，而是孩子视力能不能控制住，对吗？"</div></div>
+<div class="script-box"><div class="label">第三步：具象化</div><div class="text">"本来一年涨100度，用了之后可能只涨24度"</div></div>
+
+</div>
+<div class="quiz-area" id="quiz-value"></div>
+</div>
+
+<!-- 💬 异议处理 -->
+<div id="sec-objection" class="section">
+<div class="card">
+<div class="master-quote" style="margin-bottom:16px"><div class="quote">"销售最大的敌人，是自己内心的恐惧。"</div><div class="author">— 奥格·曼狄诺</div></div>
+<h2>💬 异议库</h2>
+<p><span class="tag tag-tc">必备</span> 通用公式：<b>理解 → 回应 → 推进</b></p>
+
+<!-- 搜索框 -->
+<div style="margin:16px 0">
+<input type="text" id="obj-search" placeholder="🔍 搜索问题关键词，如：太贵、OK镜、治愈、后遗症..." oninput="filterObjections()" style="width:100%;padding:14px 18px;border:2px solid var(--border);border-radius:var(--radius);font-size:15px;outline:none;background:var(--card);transition:var(--transition)" onfocus="this.style.borderColor='var(--primary)';this.style.boxShadow='0 0 0 3px rgba(14,116,144,0.1)'" onblur="this.style.borderColor='var(--border)';this.style.boxShadow='none'">
+</div>
+
+<!-- 分类筛选 -->
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+<button class="btn btn-outline" onclick="filterByTag('all')" id="tag-all" style="padding:6px 14px;font-size:13px">全部</button>
+<button class="btn btn-outline" onclick="filterByTag('防控')" id="tag-防控" style="padding:6px 14px;font-size:13px">防控镜片</button>
+<button class="btn btn-outline" onclick="filterByTag('角塑')" id="tag-角塑" style="padding:6px 14px;font-size:13px">角膜塑形镜</button>
+<button class="btn btn-outline" onclick="filterByTag('价格')" id="tag-价格" style="padding:6px 14px;font-size:13px">价格相关</button>
+<button class="btn btn-outline" onclick="filterByTag('效果')" id="tag-效果" style="padding:6px 14px;font-size:13px">效果疑虑</button>
+<button class="btn btn-outline" onclick="filterByTag('竞品')" id="tag-竞品" style="padding:6px 14px;font-size:13px">竞品对比</button>
+<button class="btn btn-outline" onclick="filterByTag('拖延')" id="tag-拖延" style="padding:6px 14px;font-size:13px">拖延犹豫</button>
+</div>
+
+<p style="color:var(--text-muted);font-size:14px;margin-bottom:12px">共 <b id="obj-count">0</b> 条异议话术</p>
+<div id="objection-list"></div>
+
+<!-- 家长反应分类 -->
+<div style="margin-top:20px;padding-top:16px;border-top:2px dashed var(--border)">
+<h3 style="font-size:14px;color:var(--primary);margin-bottom:12px">🎯 家长反应分类与应对策略</h3>
+<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:8px">
+<div style="padding:12px;background:linear-gradient(135deg,#fef2f2,#fee2e2);border-radius:10px;border-left:3px solid #ef4444">
+<div style="font-size:12px;font-weight:700;color:#991b1b;margin-bottom:6px">❌ 拒绝型</div>
+<div style="font-size:12px;color:#7f1d1d;line-height:1.6"><b>表现：</b>"不用了"/"我考虑考虑"<br><b>应对：</b>先认同+找突破口，不要直接反驳。用SPIN引导。</div>
+</div>
+<div style="padding:12px;background:linear-gradient(135deg,#fff7ed,#ffedd5);border-radius:10px;border-left:3px solid #f97316">
+<div style="font-size:12px;font-weight:700;color:#9a3412;margin-bottom:6px">💰 价格型</div>
+<div style="font-size:12px;color:#7c2d12;line-height:1.6"><b>表现：</b>"太贵了"/"网上便宜"<br><b>应对：</b>算长期账+价值对标，不要直接降价。</div>
+</div>
+<div style="padding:12px;background:linear-gradient(135deg,#f0fdf4,#dcfce7);border-radius:10px;border-left:3px solid #22c55e">
+<div style="font-size:12px;font-weight:700;color:#15803d;margin-bottom:6px">✅ 认可型</div>
+<div style="font-size:12px;color:#14532d;line-height:1.6"><b>表现：</b>"效果怎么样？""安全吗？"<br><b>应对：</b>这是购买信号！及时推进+提供证据。</div>
+</div>
+<div style="padding:12px;background:linear-gradient(135deg,#f5f3ff,#ede9fe);border-radius:10px;border-left:3px solid #8b5cf6">
+<div style="font-size:12px;font-weight:700;color:#6d28d9;margin-bottom:6px">🔍 调研型</div>
+<div style="font-size:12px;color:#4c1d95;line-height:1.6"><b>表现：</b>"新乐学不是更好吗？"<br><b>应对：</b>客观对比数据，不贬低竞品，尊重选择权。</div>
+</div>
+</div>
+</div>
+
+</div>
+<div class="quiz-area" id="quiz-objection"></div>
+</div>
+
+<!-- 🤝 成交推进 -->
+<div id="sec-close" class="section">
+<div class="card">
+<div class="master-quote" style="margin-bottom:16px"><div class="quote">"从第一个问题开始，就假设顾客会买。"</div><div class="author">— 汤姆·霍普金斯</div></div>
+<h2>🤝 成交推进</h2>
+<p><span class="tag tag-l2">核心</span> 汤姆·霍普金斯说："从第一个问题开始，就假设顾客会买。"</p>
+<h3>五种购买信号</h3>
+<table>
+<tr><th>信号</th><th>表现</th><th>应对</th></tr>
+<tr><td>询问细节</td><td>"这个镜片多久换一次？""售后怎么样？"</td><td>及时推进成交</td></tr>
+<tr><td>比较选择</td><td>"这个和那个有什么区别？"</td><td>引导到选择成交</td></tr>
+<tr><td>价格讨论</td><td>"能不能便宜点？"</td><td>价值对标后推进</td></tr>
+<tr><td>身体语言</td><td>靠近看产品、点头</td><td>假设成交法推进</td></tr>
+<tr><td>积极回应</td><td>"听起来不错"</td><td>直接推进下一步</td></tr>
+</table>
+<h3>三种推进成交方法</h3>
+<div class="script-box"><div class="label">方法一：假设成交法</div><div class="text">"那我先给孩子安排验光，配好了我们会通知您来取。"</div></div>
+<div class="script-box"><div class="label">方法二：选择成交法</div><div class="text">"您看是选1.60折射率的还是1.67的？镜框喜欢蓝色的还是黑色的？"</div></div>
+<div class="script-box"><div class="label">方法三：紧迫成交法</div><div class="text">"今天活动最后一天了，明天就恢复原价。"</div></div>
+<h3>❌ 成交禁忌</h3>
+<div class="wrong-box"><span class="label">禁忌1</span><span class="text">"您要不要买？" — 给顾客说"不"的机会</span></div>
+<div class="wrong-box"><span class="label">禁忌2</span><span class="text">"买不买随便" — 放弃推进</span></div>
+<div class="wrong-box"><span class="label">禁忌3</span><span class="text">"一定能退轴/降度数" — 过度承诺</span></div>
+
+</div>
+<div class="quiz-area" id="quiz-close"></div>
+</div>
+
+<div id="sec-practice" class="section">
+<div class="card" id="parent-select">
+<div class="master-quote" style="margin-bottom:16px"><div class="quote">"成交不是结束，是关系的开始。"</div><div class="author">— 乔·吉拉德</div></div>
+<h2>🎭 实战模拟</h2>
+<p style="color:var(--text-secondary);margin-bottom:16px">选择一位家长角色，练习刚才学的技巧和话术。对话过程中会自动识别你使用的销售技巧并给出反馈！</p>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+<span class="tag" style="background:#ec4899;color:#fff">情感连接</span>
+<span class="tag" style="background:#8b5cf6;color:#fff">SPIN提问</span>
+<span class="tag" style="background:#f59e0b;color:#fff">价值传递</span>
+<span class="tag" style="background:#10b981;color:#fff">异议处理</span>
+<span class="tag" style="background:#3b82f6;color:#fff">成交推进</span>
+</div>
+<div id="parent-list"></div>
+</div>
+<div class="card" id="chat-area" style="display:none">
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<h3 id="chat-title" style="margin:0"></h3>
+<button class="btn btn-warning" onclick="endChat()" style="padding:8px 16px;font-size:13px">🏁 结束对话</button>
+</div>
+<div id="skill-bar" style="margin-bottom:12px;padding:10px 14px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:10px;border:1px solid var(--border);min-height:44px;display:flex;align-items:center;flex-wrap:wrap">
+<span style="font-size:12px;color:var(--text-muted)">发送消息后，这里会显示你用到的销售技巧</span>
+</div>
+<div class="chat-box" id="chat-box" style="max-height:420px"></div>
+<div class="chat-input-wrap">
+<input type="text" id="chat-input" placeholder="输入你的回应..." onkeydown="if(event.key==='Enter')sendChat()" style="flex:1">
+<button class="btn btn-primary" onclick="sendChat()">发送</button>
+</div>
+</div>
+</div>
+
+<!-- 🔄 售后维护 -->
+<div id="sec-after" class="section">
+<div class="card">
+<div class="master-quote" style="margin-bottom:16px"><div class="quote">"成交不是结束，是关系的开始。"</div><div class="author">— 乔·吉拉德</div></div>
+<h2>🔄 售后维护</h2>
+<p><span class="tag tag-l1">必学</span> 乔·吉拉德说："成交不是结束，是关系的开始。"</p>
+
+<h3>📅 完整跟进节奏</h3>
+<table>
+<tr><th>时间节点</th><th>方式</th><th>话术</th></tr>
+<tr><td><b>成交当天</b></td><td>送别+指导</td><td>"您放心，回去后孩子戴镜有什么不舒服随时联系我。这是我的微信，有问题直接找我。"</td></tr>
+<tr><td><b>24小时</b></td><td>微信/电话</td><td>"您好，孩子昨天配的眼镜戴着还舒服吗？有没有说哪里不适应？"</td></tr>
+<tr><td><b>3天</b></td><td>微信</td><td>"孩子戴了几天了，适应得怎么样？看东西清楚吗？有任何问题随时跟我说。"</td></tr>
+<tr><td><b>2周</b></td><td>到店复查</td><td>"来，我给孩子检查一下，看看度数稳不稳定。镜框我帮您调一下。"</td></tr>
+<tr><td><b>1个月</b></td><td>微信/电话</td><td>"孩子戴镜一个月了，感觉怎么样？学校老师说看得清楚了吗？"</td></tr>
+<tr><td><b>3个月</b></td><td>到店复查</td><td>"三个月了，我来看看孩子的度数变化。控制效果不错。"</td></tr>
+<tr><td><b>6个月</b></td><td>到店复查</td><td>"半年了，我来看看孩子的度数变化。跟上次比涨了XX度。"</td></tr>
+<tr><td><b>12个月</b></td><td>年度总结</td><td>"一年了，我给您一份年度度数变化报告和下一年度建议。"</td></tr>
+</table>
+
+<h3>✉️ 手写贺卡（乔·吉拉德核心动作）</h3>
+<table>
+<tr><th>类型</th><th>频率</th><th>内容</th></tr>
+<tr><td>生日贺卡</td><td>每年1次</td><td>"亲爱的[名字]：祝你生日快乐！🎂 希望你每天都开开心心，学习进步！记得保护眼睛哦。"</td></tr>
+<tr><td>节日贺卡</td><td>重大节日</td><td>"[节日]快乐！感谢您一直以来的信任和支持。祝您全家身体健康，万事如意！"</td></tr>
+<tr><td>感谢贺卡</td><td>成交后1个月</td><td>"感谢您的信任。孩子视力控制好，就是我们最大的成就。"</td></tr>
+<tr><td>复查提醒</td><td>复查前1周</td><td>"您好，孩子该复查了。下周有空来店里，我给孩子检查一下。"</td></tr>
+</table>
+
+<h3>🔄 转介绍机制（250法则）</h3>
+<table>
+<tr><th>时机</th><th>话术</th></tr>
+<tr><td>顾客主动表扬时</td><td>"谢谢您的认可！如果您身边有朋友孩子也有类似情况，欢迎介绍过来，我帮您朋友也做个免费检查。"</td></tr>
+<tr><td>复查效果好时</td><td>"孩子度数控制得很好！您身边如果有朋友孩子也近视，可以介绍过来，我给他们也做个检查。"</td></tr>
+<tr><td>成交后1个月</td><td>"孩子适应得不错吧？如果身边有朋友需要配镜，随时介绍过来，我给您的朋友安排VIP服务。"</td></tr>
+</table>
+
+<h3>🏆 激励制</h3>
+<table>
+<tr><th>推荐数量</th><th>奖励</th></tr>
+<tr><td>1人</td><td>免费复查1次</td></tr>
+<tr><td>3人</td><td>镜片优惠券XX元</td></tr>
+<tr><td>5人</td><td>免费换镜框1次</td></tr>
+</table>
+
+<h3>👥 顾客分级维护</h3>
+<table>
+<tr><th>类型</th><th>特征</th><th>维护方式</th></tr>
+<tr><td><b>A类</b>（高价值）</td><td>客单价高、复购意愿强、愿意转介绍</td><td>生日礼物、节日贺卡、优先预约、专属优惠</td></tr>
+<tr><td><b>B类</b>（普通）</td><td>正常消费、偶尔复购</td><td>定期复查提醒、节日问候</td></tr>
+<tr><td><b>C类</b>（低活跃）</td><td>一年以上未到店</td><td>电话回访、激活优惠</td></tr>
+</table>
+
+</div>
+<div class="quiz-area" id="quiz-after"></div>
+</div>
+
+</div>
+
+<!-- 📌 话术收藏本 -->
+<div id="sec-favorites" class="section">
+<div class="card">
+<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+<h2 style="margin:0">📌 我的话术收藏</h2>
+<button onclick="clearFavorites()" style="font-size:12px;padding:6px 14px;background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:8px;cursor:pointer">🗑️ 清空</button>
+</div>
+<div id="fav-list" style="color:var(--text-muted);text-align:center;padding:32px;font-size:14px">点击话术卡片的⭐收藏，添加到收藏本</div>
+</div>
+</div>
+
+<div class="footer">销售培训话术 v11.0 | 8大实战模块 · 56+异议话术 · L1/L2/L3考核 | C端销售大师龙虾 🛒</div>
+
+<script>
+// ===== 学习进度追踪 =====
+function loadProgress(){
+  try{
+    var p=JSON.parse(localStorage.getItem('toc_progress')||'{}');
+  }catch(e){var p={};}
+  var keys=Object.keys(p);
+  var total=9;
+  var done=keys.filter(function(k){return p[k];}).length;
+  var pct=Math.round(done/total*100);
+  if(document.getElementById('progress-text')){
+    document.getElementById('progress-text').textContent=done+'/'+total+' 已完成';
+  }
+  if(document.getElementById('progress-bar-fill')){
+    document.getElementById('progress-bar-fill').style.width=pct+'%';
+  }
+  var idMap={learnMasters:'learn-masters',learnProducts:'learn-products',exam:'exam',reception:'reception',spin:'spin',value:'value',objection:'objection',close:'close',afterAfter:'after'};
+  for(var k in idMap){
+    var el=document.getElementById('prog-'+idMap[k]);
+    if(!el)continue;
+    if(p[k]){
+      el.style.background='linear-gradient(135deg,#ecfdf5,#d1fae5)';
+      el.style.border='1px solid #86efac';
+      el.style.color='#15803d';
+      el.innerHTML='✅ '+el.innerHTML.replace('✅ ','');
+    }else{
+      el.style.background='var(--card)';
+      el.style.border='1px solid var(--border)';
+      el.style.color='var(--text-primary)';
+      el.innerHTML=el.innerHTML.replace('✅ ','');
+    }
+  }
+  // 渲染徽章
+  var earned=Object.keys(p).filter(function(k){return p[k];});
+  if(document.getElementById('badge-count'))document.getElementById('badge-count').textContent=earned.length+' 个';
+  var badgeArea=document.getElementById('badge-area');
+  if(!badgeArea)return;
+  if(earned.length===0){
+    badgeArea.innerHTML='<div id="badge-empty" style="padding:16px 20px;background:var(--border-light);border-radius:10px;border:2px dashed var(--border);color:var(--text-muted);font-size:13px;text-align:center">完成模块测试即可解锁徽章</div>';
+    return;
+  }
+  var html='';
+  earned.forEach(function(k){
+    var b=badges[k];
+    if(!b)return;
+    html+='<div style="padding:12px 14px;background:linear-gradient(135deg,#fefce8,#fef3c7);border-radius:10px;border:1px solid #fde68a;text-align:center;min-width:90px">';
+    html+='<div style="font-size:24px;margin-bottom:4px">'+b.icon+'</div>';
+    html+='<div style="font-size:11px;font-weight:700;color:#92400e">'+b.name.replace(/^[^\s]+\s/,'')+'</div>';
+    html+='<div style="font-size:10px;color:#78350f;margin-top:2px">'+b.desc+'</div>';
+    html+='</div>';
+  });
+  badgeArea.innerHTML=html;
+}
+function markProgress(key){
+  try{
+    var p=JSON.parse(localStorage.getItem('toc_progress')||'{}');
+  }catch(e){var p={};}
+  p[key]=true;
+  localStorage.setItem('toc_progress',JSON.stringify(p));
+  loadProgress();
+}
+// 导航
+function showSection(id){
+document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+document.getElementById('sec-'+id).classList.add('active');
+document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+const labels=['welcome','learn-masters','learn-products','exam','records','reception','spin','value','objection','close','practice','after','favorites'];
+const idx=labels.indexOf(id);
+if(idx>=0)document.querySelectorAll('nav button')[idx].classList.add('active');
+window.scrollTo({top:0,behavior:'smooth'});
+if(id==='exam')startSprint();
+if(id==='records')renderScores();
+if(id==='favorites'){renderFavorites();initCopyButtons();}
+if(id==='welcome'){loadProgress();renderDailyQuestion();}
+if(id==='practice'){renderParents();}
+}
+
+
+// ===== 模块小测试题库 =====
+const moduleQuizzes = {
+// 销售大师话术
+masters:[
+{q:"德鲁克说'企业的目的是什么'？",o:["A) 赚取利润","B) 扩大规模","C) 创造顾客","D) 降低成本"],a:2,
+ master:"彼得·德鲁克",
+ e:"德鲁克在《管理的实践》中提出：'企业的唯一目的就是创造顾客。'利润是企业存在的结果，而非目的。在眼镜店销售中，这意味着我们的核心任务不是卖镜片，而是帮助家长解决孩子近视防控的问题。当你专注于'创造顾客价值'，利润自然随之而来。"},
+{q:"乔·吉拉德的250法则是？",o:["A) 顾客付250元","B) 每个顾客背后有250个潜在客户","C) 每天接待250个顾客","D) 每月寄250张贺卡"],a:1,
+ master:"乔·吉拉德",
+ e:"乔·吉拉德的'250法则'——每个顾客背后约有250个亲朋好友。你放弃一个顾客，可能失去250个机会！他把顾客当作一生的朋友，每月寄手写贺卡。在眼镜店，一位满意的家长可能带来整个家长群；一位不满的家长也可能让整个群流失。绝不放弃每一个进门的顾客！"},
+{q:"汤姆·霍普金斯的成交理念是？",o:["A) 顾客决定再推销","B) 从第一个问题开始就假设顾客会买","C) 价格低才能成交","D) 多说产品优点"],a:1,
+ master:"汤姆·霍普金斯",
+ e:"汤姆·霍普金斯的'假设成交法'——从你开口说的第一句话开始，就假设顾客会买。这不是强迫，而是用成交的心态来组织你的沟通：问对的问题、展示对的解决方案。同时，要善于识别购买信号（如'这个效果怎么样？'），一旦识别到，及时推进成交，不要犹豫。"},
+{q:"吉特默说'成交的唯一货币'是什么？",o:["A) 价格","B) 信任","C) 品牌","D) 质量"],a:1,
+ master:"杰弗里·吉特默",
+ e:"吉特默的核心公式：销售 = 信任 + 价值 + 时机。信任是成交的唯一货币，没有信任，再好的产品也卖不出去。如何建立信任？先倾听，再回应。你的个人品牌比产品更重要——家长信不信你这个人，比信不信你推荐的产品更关键。"},
+{q:"特劳特定位理论的核心是？",o:["A) 产品越好卖得越好","B) 对潜在顾客的心智做什么","C) 价格越低越好","D) 广告越多越好"],a:1,
+ master:"阿尔·里斯 & 杰克·特劳特",
+ e:"特劳特的定位理论核心是：定位不是你对产品做什么，而是你对潜在顾客的心智做什么。在近视防控领域，高境光的定位是'延缓率最高的防控镜片'——76%的临床数据就是占据心智的利器。不要跟竞品拼价格，要拼定位。"},
+{q:"李奥贝纳品牌叙事理论强调？",o:["A) 产品参数要说清楚","B) 找到产品与消费者的真实连接","C) 价格要有竞争力","D) 广告要夸张"],a:1,
+ master:"李奥贝纳",
+ e:"李奥贝纳说：'找到产品与消费者之间的真实连接。'在防控镜片销售中，这个连接不是'76%延缓率'这个数据本身，而是'孩子不用每个月都担心度数又涨了'这个感受。参数是冰冷的，连接是温暖的。用家长能感同身受的方式讲故事。"},
+{q:"以下哪种话术体现了德鲁克'创造顾客'理念？",o:["A) 这款镜片现在打折","B) 您最关心的是孩子视力能不能控制住，对吗？","C) 我们是最好的品牌","D) 不买也没关系"],a:1,
+ master:"彼得·德鲁克",
+ e:"选项B体现了'创造顾客'——你关注的不是卖产品，而是理解顾客的核心需求（控制孩子近视）。当你把对话聚焦在顾客的问题上，顾客自然会被你'创造'出来。打折话术（A）是交易思维，不是创造顾客思维。"},
+{q:"乔·吉拉德'成交是关系的开始'意味着？",o:["A) 卖完就不用管了","B) 成交后持续维护顾客关系","C) 只关注新顾客","D) 价格是最重要的"],a:1,
+ master:"乔·吉拉德",
+ e:"乔·吉拉德的核心信条：成交不是结束，是关系的开始。他每月给顾客寄手写贺卡，记住顾客的生日和重要日子。在眼镜店，这意味着：成交后24小时发感谢信息，30天跟进佩戴情况，90天提醒复查，持续维护，让顾客成为你的终身朋友。"},
+],
+// 产品学习
+products:[
+{q:"高境光属于第几代近视防控镜片？",o:["A) 第一代","B) 第二代","C) 第三代","D) 第四代"],a:2,
+ master:"产品知识 + 吉特默价值传递",
+ e:"高境光属于第三代近视防控镜片（周边离焦技术）。第一代是普通单光镜片，第二代是渐进多焦点，第三代是周边离焦技术。运用吉特默的价值传递：先让家长了解技术演进的逻辑，再说明第三代技术的优势。这不是'卖产品'，而是'帮助顾客做出最优选择'。"},
+{q:"高境光的临床延缓率是多少？",o:["A) 30%","B) 59%","C) 67%","D) 76%"],a:3,
+ master:"产品知识 + 汤姆·霍普金斯具象化",
+ e:"高境光的临床延缓率是76%，这是目前市场上最高的数据。用霍普金斯的'具象化'技巧：不要只说'76%'，要说'本来一年涨100度，用了高境光之后可能只涨24度'。让抽象的数据变成家长能直观感受到的效果，顾客才会心动。"},
+{q:"星趣控的延缓率约为多少？",o:["A) 50%","B) 59%","C) 67%","D) 76%"],a:2,
+ master:"产品知识 + 吉特默客观对比",
+ e:"星趣控的延缓率约为67%。记住吉特默的原则：客观对比，不贬低竞品。你可以说：'星趣控是一款非常优秀的产品，延缓率67%，采用的是高非球微透镜技术。高境光的延缓率是76%，采用的是ON/OFF通路调控技术。两者都很优秀，您可以根据孩子的情况选择。'尊重顾客的选择权。"},
+{q:"控优点（尼康）的延缓率约为多少？",o:["A) 30%","B) 59%","C) 67%","D) 76%"],a:1,
+ master:"产品知识 + SPIN价值引导",
+ e:"尼康控优点的延缓率约为59%（CYPRESS 4年研究数据）。了解竞品数据不是为了贬低，而是为了专业地回应顾客的疑问。用SPIN的Need-payoff：'您了解这些不同产品的效果差异后，就能为孩子做出最合适的选择了。'让顾客感受到你的专业度和真诚。"},
+{q:"高境光的适用年龄范围是？",o:["A) 3-12岁","B) 4-15岁","C) 6-18岁","D) 8-20岁"],a:2,
+ master:"产品知识 + 乔·吉拉德绝不放弃",
+ e:"高境光适用于6-18岁的儿童青少年。乔·吉拉德说'绝不放弃每一个进门的顾客'——如果顾客的孩子不在这个年龄段，不要直接放弃，可以推荐其他适合的方案，或者留下联系方式，等孩子到了适用年龄再联系。每个顾客都值得认真对待。"},
+{q:"高境光镜片散射面积是？",o:["A) 5%","B) 14%","C) 25%","D) 50%"],a:1,
+ master:"产品知识 + 奥格·曼狄诺心态法则",
+ e:"高境光镜片的散射面积是14%。散射面积与离焦效果的均匀性相关，14%是经过临床验证的最佳比例。向家长解释时，用曼狄诺的积极心态：'家长，我们选择的每一项参数都是经过科学验证的，为的就是给孩子最好的保护。'让顾客感受到你的专业和用心。"},
+{q:"高境光的核心技术原理是？",o:["A) 周边近视离焦","B) ON/OFF通路调控","C) 角膜塑形","D) 药物干预"],a:1,
+ master:"产品知识 + 吉特默信任法则",
+ e:"高境光的核心技术是ON/OFF通路调控——通过调控视网膜的ON/OFF通路，形成持续的近视离焦信号，延缓眼轴增长。用吉特默的信任法则：先用专业度建立信任，再用通俗语言让家长理解。'简单说，就是让孩子的眼睛'以为'在户外，主动停止近视加深。'"},
+{q:"高境光的更换周期建议是？",o:["A) 1-3个月","B) 6-12个月","C) 1-2年","D) 不用更换"],a:2,
+ master:"产品知识 + 乔·吉拉德关系维护",
+ e:"高境光建议1-2年更换一次。这正是乔·吉拉德'关系维护'的好机会——每次复查都是一次深度接触，让顾客感受到持续的关怀，也为转介绍创造了条件。"},
+{q:"控优点（尼康）的延缓率约为？",o:["A) 30%","B) 59%","C) 67%","D) 76%"],a:1,
+ master:"竞品知识 + 吉特默客观对比",
+ e:"尼康控优点的延缓率约为59%（CYPRESS 4年研究）。了解竞品数据不是为了贬低，而是为了专业地回应顾客的疑问。吉特默说：客观对比，不贬竞品。你可以说：'控优点是一款非常优秀的产品，延缓率59%。高境光的延缓率是76%。两者都很优秀，关键看哪个更适合孩子。'"},
+{q:"OK镜和框架近视控制镜片的主要区别是？",o:["A) 价格不同","B) OK镜夜间佩戴白天裸眼清晰，框架镜片白天佩戴","C) 品牌不同","D) 没有区别"],a:1,
+ master:"产品知识 + 吉特默",
+ e:"OK镜（角膜塑形镜）夜间佩戴，白天裸眼清晰，但需要每天护理，价格8000-15000元/年。框架近视控制镜片白天佩戴，更安全经济，但需要一直戴眼镜。两者都是有效的控制方式，根据孩子情况选择。"},
+{q:"顾客说'网上更便宜'，你应该强调什么？",o:["A) 我们也很便宜","B) 网上都是假货","C) 专业验配+售后保障的价值","D) 那你去网上买吧"],a:2,
+ master:"吉特默价值传递",
+ e:"网上确实可能便宜，但缺少了专业验配和售后保障。正确做法：强调线下购买的价值——'眼镜不是普通商品，需要专业验光、试戴调试、定期复查。我们不只是卖镜片，是给孩子提供一套完整的视力管理方案。'"},
+{q:"竞品对比的正确公式是？",o:["A) 贬低竞品→吹嘘自己","B) 认同顾客→客观对比→突出优势→引导体验","C) 直接报价","D) 不回应"],a:1,
+ master:"特劳特定位 + 吉特默",
+ e:"竞品对比的正确公式：认同顾客（'您提到的XX品牌确实不错'）→ 客观对比（'它们和我们主要的区别在…'）→ 突出优势（'我们的优势是…'）→ 引导体验（'您可以让孩子试戴一下'）。不贬低竞品，客观对比，尊重选择。"},
+{q:"以下哪种做法违反了竞品对比原则？",o:["A) 客观对比数据","B) 强调差异化价值","C) 贬低竞品","D) 尊重顾客选择"],a:2,
+ master:"吉特默",
+ e:"贬低竞品违反了销售原则。吉特默说：不贬低竞品，客观对比。贬低竞品会让顾客觉得你不可信。正确做法是客观对比，突出自身优势，让顾客自己做出选择。"},
+],
+// 进店接待
+reception:[
+{q:"家长带孩子进店，你的第一句话应该是？",o:["A) 您好，需要帮忙吗？","B) 您想配什么价位的？","C) 您好！小朋友今年几岁啦？最近检查视力了吗？","D) 高境光现在打折，要不要看看？"],a:2,
+ master:"乔·吉拉德 + 汤姆·霍普金斯",
+ e:"乔·吉拉德说：'绝不放过每一个进门的顾客。'进店第一句话要建立信任、体现专业。从关心孩子入手（选项C）而不是直接问价格，体现的是'帮助'而非'推销'。记住：成交从第一句话就开始了，用霍普金斯的'假设成交'心态接待每一位家长。"},
+{q:"进店接待的30秒黄金法则，第10秒应该做什么？",o:["A) 微笑","B) 打招呼","C) 说出第一句建立信任的话","D) 开始SPIN提问"],a:2,
+ master:"汤姆·霍普金斯",
+ e:"30秒黄金法则：0-3秒微笑，5秒打招呼，10秒说出第一句建立信任的话。这句话要体现专业和关怀，比如：'孩子最近视力有没有什么问题？'前10秒决定了顾客是否愿意继续和你交流。"},
+{q:"以下哪种做法是正确的进店接待？",o:["A) 等顾客主动开口","B) 直接推荐产品","C) 从关心孩子入手建立信任","D) 先问预算"],a:2,
+ master:"杰弗里·吉特默 + 乔·吉拉德",
+ e:"吉特默说：信任是成交的唯一货币。乔·吉拉德说：把顾客当朋友。从关心孩子入手，是建立信任的最快方式。先问预算（B）或直接推荐产品（B/D）会让顾客感到被'推销'，而不是被'帮助'。"},
+{q:"乔·吉拉德说'绝不放过每一个进门的顾客'，意味着？",o:["A) 强迫每个顾客购买","B) 热情接待每一位进店的顾客","C) 只接待看起来有钱的顾客","D) 跟着顾客不放"],a:1,
+ master:"乔·吉拉德",
+ e:"'绝不放过'不是强迫购买，而是热情接待每一位顾客，即使今天不买，也要建立信任、留下好印象。每个进门的顾客都是潜在的金矿——不只是眼前的成交，还有未来的转介绍。吉拉德的250法则告诉我们：放弃一个顾客，可能失去250个潜在客户。"},
+{q:"家长进店后四处看看不说话，你应该？",o:["A) 跟着不说话","B) 直接介绍产品","C) 用轻松的方式破冰，从孩子入手","D) 等家长主动询问"],a:2,
+ master:"汤姆·霍普金斯 + 杰弗里·吉特默",
+ e:"沉默型顾客需要破冰。吉特默说：销售是倾听。霍普金斯说：用轻松的方式建立连接。可以说：'小朋友好可爱，今年上几年级啦？'从孩子入手是最自然的破冰方式。跟着不说话（A）或等家长主动（D）会错失建立信任的黄金时间。"},
+{q:"以下哪种说法是错误的进店接待？",o:["A) 小朋友今年几岁啦？","B) 您好，需要帮忙吗？","C) 您想配什么价位的？","D) B和C都是"],a:3,
+ master:"杰弗里·吉特默 + 奥格·曼狄诺",
+ e:"选项D是错误的。'您想配什么价位的？'让顾客感到被评判、被分类。用曼狄诺的心态：销售是帮助，不是判断。'您好，需要帮忙吗？'（B）虽然不如（A）温暖，但不算错误，只是少了些关怀。进店第一句话应该是建立信任，而不是谈价格。"},
+{q:"进店接待的核心目标是？",o:["A) 立即成交","B) 建立信任","C) 展示产品","D) 询问预算"],a:1,
+ master:"杰弗里·吉特默 + 乔·吉拉德",
+ e:"进店接待的核心目标是建立信任（吉特默：信任是成交的唯一货币）。乔·吉拉德把顾客当朋友，不是交易对象。立即想成交（A）或问预算（D）会让你显得急功近利，破坏信任。展示产品（C）应该是在信任建立之后。建立信任是销售的第一步，也是最重要的一步。"},
+],
+// SPIN提问
+spin:[
+{q:"SPIN中的'I'（Implication）目的是什么？",o:["A) 了解顾客基本信息","B) 放大问题的严重性，让顾客意识到不解决的后果","C) 引导顾客发现解决方案的价值","D) 发现顾客的不满和痛点"],a:1,
+ master:"尼尔·雷克汉姆（SPIN）",
+ e:"SPIN中的'I'（Implication，影响问题）的目的是：放大问题的严重性，让顾客意识到'不解决的后果'。比如：'您知道吗？如果近视度数持续加深，高度近视会增加视网膜脱落、青光眼等风险。'通过放大影响，让顾客产生紧迫感，从而更愿意选择解决方案。"},
+{q:"SPIN四步的正确顺序是？",o:["A) P-S-I-N","B) S-P-I-N","C) S-I-P-N","D) N-I-P-S"],a:1,
+ master:"尼尔·雷克汉姆（SPIN）",
+ e:"SPIN的正确顺序是S-P-I-N：Situation（现状）→ Problem（问题）→ Implication（影响）→ Need-payoff（价值）。先了解现状（S），再挖掘问题（P），放大影响（I），最后引导解决方案的价值（N）。跳步骤会让顾客感到被'推销'而不是被'帮助'。"},
+{q:"SPIN中的'N'代表什么？",o:["A) Need 需求","B) Name 名字","C) Need-payoff 价值","D) New 新的"],a:2,
+ master:"尼尔·雷克汉姆（SPIN）",
+ e:"SPIN中的'N'代表Need-payoff（价值问题），不是简单的'Need需求'。Need-payoff的核心是：让顾客自己说出解决方案的价值。比如：'如果有一款产品能让孩子一年少涨50度，您觉得这对孩子的未来意味着什么？'让顾客参与价值的定义，比你直接说'产品很好'更有说服力。"},
+{q:"家长说'孩子半年涨了50度'，接下来应该问什么类型的问题？",o:["A) S 现状问题","B) P 问题问题","C) I 影响问题","D) N 价值问题"],a:1,
+ master:"尼尔·雷克汉姆（SPIN）",
+ e:"家长说'孩子半年涨了50度'，这属于S（现状问题）。接下来应该问P（问题问题）：'这半年涨50度，对孩子的日常生活有没有什么影响？比如学习、运动、或者报考专业？'通过P问题进一步挖掘，让家长意识到问题的紧迫性。"},
+{q:"以下哪个是SPIN中的S（现状）问题？",o:["A) 如果每年涨100度会怎样？","B) 现在的眼镜戴着感觉怎么样？","C) 孩子现在多大了？近视多久了？","D) 如果有产品能减缓76%您有兴趣吗？"],a:2,
+ master:"尼尔·雷克汉姆（SPIN）",
+ e:"选项C是S（现状）问题——了解顾客的基本情况。选项A是I（影响）问题，选项B是P（问题）问题，选项D是N（价值）问题。S问题的目的是收集事实信息，为后续的P-I-N问题做铺垫。不要跳过S直接问P，那样会让顾客感到被'审问'。"},
+{q:"SPIN提问法的核心价值是？",o:["A) 让顾客多花钱","B) 让顾客自己产生需求","C) 快速成交","D) 展示专业知识"],a:1,
+ master:"尼尔·雷克汉姆 + 杰弗里·吉特默",
+ e:"SPIN的核心价值是：让顾客自己产生需求（而非你强加给顾客）。吉特默说：销售不是说话，是倾听。SPIN通过一系列提问，让顾客自己意识到问题的严重性、影响和解决方案的价值。这样顾客买得心甘情愿，你也不用'推销'。"},
+{q:"家长说'戴了半年涨到150度'，这是SPIN中的哪一步？",o:["A) S 现状","B) P 问题","C) I 影响","D) N 价值"],a:1,
+ master:"尼尔·雷克汉姆（SPIN）",
+ e:"家长说'戴了半年涨到150度'，这是S（现状问题）——顾客在陈述一个事实。接下来你应该用P问题跟进：'孩子度数涨了这么多，对日常生活有影响吗？'或者用I问题放大：'如果按照这个速度涨下去，到18岁成年时度数会达到多少？'"},
+{q:"以下哪个做法是错误的SPIN应用？",o:["A) 按S-P-I-N顺序提问","B) 跳过SPIN直接推荐产品","C) 用通俗语言提问","D) 根据顾客回答灵活调整"],a:1,
+ master:"尼尔·雷克汉姆（SPIN） + 汤姆·霍普金斯",
+ e:"选项B是错误的。跳过SPIN直接推荐产品，是最常见的销售错误。霍普金斯说：销售是帮助，不是推销。直接推荐产品会让顾客感到被'塞'了一个解决方案，而不是自己'选择'了它。正确的做法是用SPIN引导顾客自己得出结论。"},
+],
+// 价值传递
+value:[
+{q:"家长问'ON/OFF通路是什么意思'，最好的回答是？",o:["A) ON/OFF通路是一种光学调控技术","B) 简单说，就是让孩子眼睛'以为'在户外，主动停止近视加深","C) 这是我们的专利核心技术","D) 就是调节视网膜本底照度的机制"],a:1,
+ master:"杰弗里·吉特默 + 汤姆·霍普金斯",
+ e:"选项B是最好的回答——用通俗易懂的语言让顾客理解专业概念。吉特默说：你的个人品牌比产品更重要，专业度要让顾客能感受到。霍普金斯说：销售是帮助，不是解释。用'让孩子眼睛以为在户外'这个类比，比说'ON/OFF通路调控视网膜本底照度'更容易让家长理解和信任。"},
+{q:"李奥贝纳品牌叙事理论强调什么？",o:["A) 说产品多好","B) 说参数","C) 找到产品与消费者的真实连接","D) 说价格多低"],a:2,
+ master:"李奥贝纳",
+ e:"李奥贝纳说：'找到产品与消费者之间的真实连接。'在眼镜销售中，这个连接不是镜片本身，而是'保护孩子的眼睛健康'。比如：不说'高境光延缓率76%'，而说'您可以少担心孩子的度数上涨，把精力放在陪伴孩子成长上'。参数是冰冷的，情感连接是温暖的。"},
+{q:"价值传递三步法是？",o:["A) 报价→砍价→成交","B) 翻译→连接→具象化","C) 介绍→演示→成交","D) 倾听→推荐→成交"],a:1,
+ master:"汤姆·霍普金斯 + 杰弗里·吉特默",
+ e:"价值传递三步法是：翻译→连接→具象化。【翻译】把专业参数翻译成家长听得懂的话；【连接】把产品价值和家长的核心焦虑连接起来；【具象化】用具体的场景让家长'感受'到价值。比如：'本来一年涨100度，用了之后可能只涨24度'就是具象化。"},
+{q:"'76%延缓率'的通俗说法是？",o:["A) 临床数据76%延缓率","B) 76%的孩子有效","C) 本来一年涨100度，戴了之后可能只涨24度","D) 76天见效"],a:2,
+ master:"汤姆·霍普金斯 + 李奥贝纳",
+ e:"霍普金斯强调'具象化'，李奥贝纳强调'情感连接'。'76%延缓率'的通俗说法应该是：'本来一年涨100度，戴了之后可能只涨24度。'让家长能直观感受到：以前每年担心，现在基本不用担心了。这比说'76%的孩子有效'更有画面感，更有冲击力。"},
+{q:"以下哪种说法体现了'具象化'？",o:["A) 我们的产品延缓率很高","B) 这是最好的技术","C) 本来一年涨100度，用了之后可能只涨24度","D) 我们的产品很专业"],a:2,
+ master:"汤姆·霍普金斯",
+ e:"选项C体现了'具象化'——把抽象的数据变成具体的场景。霍普金斯说：不要卖产品，要卖'拥有的感觉'。'以前每年涨100度，现在只涨24度'让家长脑海中有一个具体的画面：孩子度数稳定了，我的担心减少了。具象化是价值传递的关键技巧。"},
+{q:"家长说'听不懂你说的专业术语'，你应该？",o:["A) 继续用专业术语解释","B) 用通俗的类比和感受来解释","C) 说家长不懂","D) 换一个产品推荐"],a:1,
+ master:"杰弗里·吉特默 + 乔·吉拉德",
+ e:"吉特默说：销售是倾听。乔·吉拉德说：把顾客当朋友。当家长说听不懂时，应该用更通俗的方式解释。比如用类比：'您可以把ON/OFF理解成...就像室内灯和户外阳光的区别，让孩子眼睛以为在户外，自然就停止过度生长了。'说家长不懂（A/C）或换产品（D）都是错误的做法。"},
+{q:"以下哪个是错误的价值传递方式？",o:["A) 用家长听得懂的话","B) 连接到家长的核心焦虑","C) 堆砌专业术语","D) 用具体数字让家长有感觉"],a:2,
+ master:"杰弗里·吉特默 + 汤姆·霍普金斯",
+ e:"选项C是错误的价值传递方式。堆砌专业术语是销售中最常见的错误——你觉得自己很专业，但顾客听不懂，反而失去信任。吉特默说：信任是成交的唯一货币。霍普金斯说：销售是帮助，不是展示学问。用家长听得懂的话（A/B/D）才是正确的价值传递方式。"},
+],
+// 异议处理
+objection:[
+{q:"家长说'太贵了'，你应该先做什么？",o:["A) 立即降价","B) 说'不贵的，我们最便宜了'","C) 先理解家长的感受，再算长期账进行价值对标","D) 说'那您看看其他的吧'"],a:2,
+ master:"汤姆·霍普金斯 + 奥格·曼狄诺",
+ e:"霍普金斯说：'太贵了'不是拒绝，是顾客在寻求更多价值。曼狄诺说：销售是帮助，不是推销。正确的做法是：先认同家长的感受（'我理解您在意价格'），再算长期账——一副延缓效果好的镜片，看似一次性投入大，但减少了后续换镜、近视加深的风险，是值得的。立即降价（A/B）是销售大忌，会破坏信任。"},
+{q:"异议处理的通用公式是？",o:["A) 反驳→说服→成交","B) 理解→回应→推进","C) 降价→妥协→成交","D) 无视→忽略→成交"],a:1,
+ master:"汤姆·霍普金斯 + 杰弗里·吉特默",
+ e:"异议处理的正确公式是：理解→回应→推进。吉特默说：信任是成交的唯一货币。霍普金斯说：销售是帮助。首先认同家长的顾虑（理解），然后提供解决方案（回应），最后引导下一步行动（推进）。反驳（A）、降价（C）、无视（D）都会破坏信任，让成交更远。"},
+{q:"家长说'我回去考虑一下'，最好的回应是？",o:["A) 好的，慢慢考虑","B) 别考虑了，今天必须定","C) 先认同，再制造合理紧迫感，提供低门槛选项","D) 考虑什么？您还担心什么？"],a:2,
+ master:"汤姆·霍普金斯 + 奥格·曼狄诺",
+ e:"选项C是正确的。霍普金斯说：识别购买信号后要及时推进，但要用对方式。曼狄诺说：销售是帮助，不是强迫。'我回去考虑一下'是常见的购买信号，说明家长已经动心了，但需要一些推动。正确做法：认同（'我理解您想多考虑一下'）+ 合理紧迫感（'孩子度数还在变化，早配早控制'）+ 低门槛选项（'先给孩子做个全面检查，不一定要今天定'）。"},
+{q:"家长说'新乐学不是更好吗'，正确的回应方式是？",o:["A) 新乐学不行，效果差","B) 客观对比数据，不贬低竞品","C) 别听他们忽悠","D) 新乐学已经过时了"],a:1,
+ master:"杰弗里·吉特默 + 乔·吉拉德",
+ e:"吉特默说：尊重顾客的选择权，不要贬低竞品。乔·吉拉德说：把顾客当朋友。正确的做法是客观对比：'新乐学是很好的产品，延缓率59%，临床数据也不错。高境光的延缓率是76%，采用的是不同的技术路线。两者各有优势，关键看哪个更适合您孩子的情况。'贬低竞品（A/C/D）会让家长觉得你不可信。"},
+{q:"家长说'孩子不愿意戴'，你应该？",o:["A) 那没办法了","B) 说'您得说服孩子'","C) 让孩子来试戴，体验后愿意戴","D) 不戴就算了"],a:2,
+ master:"汤姆·霍普金斯 + 乔·吉拉德",
+ e:"霍普金斯说：让顾客'体验'产品比说一百句话更有说服力。乔·吉拉德说：绝不放弃每一个顾客。'孩子不愿意戴'不是拒绝，是机会。说'那没办法'（A）或'不戴就算了'（D）是放弃。说'您得说服孩子'（B）是把责任推给家长。正确做法：邀请带孩子来试戴，让孩子自己感受——很多孩子试戴后发现其实很舒服，就愿意戴了。"},
+{q:"以下哪种做法违反了异议处理原则？",o:["A) 先理解家长感受","B) 立即降价","C) 提供具体解决方案","D) 引导下一步行动"],a:1,
+ master:"汤姆·霍普金斯 + 杰弗里·吉特默",
+ e:"选项B'立即降价'违反了异议处理原则。吉特默说：信任是成交的唯一货币，降价会破坏信任。霍普金斯说：价格不是最重要的，价值才是。正确的异议处理是：先理解（A）→ 提供解决方案（C）→ 引导下一步（D）。降价只会让家长觉得你的产品本来就不值钱。"},
+{q:"家长说'网上更便宜'，你应该强调什么？",o:["A) 我们也很便宜","B) 网上都是假货","C) 专业验配+售后保障的价值","D) 那你去网上买吧"],a:2,
+ master:"杰弗里·吉特默 + 乔·吉拉德",
+ e:"吉特默说：销售是信任，不是价格。网上确实可能便宜，但缺少了专业验配和售后保障。正确做法：强调线下购买的价值——'眼镜不是普通商品，需要专业验光、试戴调试、定期复查。我们不只是卖镜片，是给孩子提供一套完整的视力管理方案。'说'网上都是假货'（B）或'那你去买吧'（D）会破坏信任。"},
+{q:"家长说'之前用过防控镜片效果不好'，你应该？",o:["A) 说'之前用的肯定不好'","B) 了解之前用的什么产品，解释技术差异","C) 说'那算了'","D) 说'我们的产品肯定好'"],a:1,
+ master:"杰弗里·吉特默 + 汤姆·霍普金斯",
+ e:"选项B是正确的。吉特默说：倾听是销售最重要的技巧。霍普金斯说：销售是帮助，不是争辩。家长说'之前效果不好'，不要急于否定（会显得不专业），也不要盲目吹捧自己的产品。先了解情况：'您之前用的是什么产品？戴了多久？效果不理想具体是什么情况？'了解清楚后，再从技术差异角度解释为什么高境光可能更适合。"},
+],
+// 成交推进
+close:[
+{q:"家长反复问价格和售后政策，这说明什么？",o:["A) 家长不想买","B) 这是购买信号，说明家长已经在考虑购买后的事了","C) 家长在浪费时间","D) 家长只是随便问问"],a:1,
+ master:"汤姆·霍普金斯 + 杰弗里·吉特默",
+ e:"选项B是正确的。反复问价格和售后政策，说明家长已经在心里'计算'了，这是典型的购买信号。吉特默说：识别购买信号后要把握时机。霍普金斯说：不要犹豫，及时推进。可以说：'您问的这个问题很好，我来给您详细介绍一下我们的售后政策...'顺势推进成交。"},
+{q:"以下哪个是购买信号？",o:["A) 顾客看手机","B) 顾客询问售后细节","C) 顾客看手表","D) 顾客叹气"],a:1,
+ master:"汤姆·霍普金斯",
+ e:"选项B（询问售后细节）是购买信号。霍普金斯说：要善于观察顾客的微表情和言语。顾客看手机（A）、看手表（C）、叹气（D）通常是想离开或不耐烦的信号。而询问售后细节说明顾客已经在考虑'买了之后'的事情，说明已经动心了。"},
+{q:"'选择成交法'的例子是？",o:["A) 您到底买不买？","B) 您看选1.60折射率还是1.67的？","C) 买不买随便","D) 您回去再想想"],a:1,
+ master:"汤姆·霍普金斯",
+ e:"选项B是'选择成交法'。霍普金斯说：不要问'您要不要买'，而是问'您要A还是B'。选择成交法让顾客在两个选项中选，而不是'买或不买'。1.60和1.67都是成交，只是折射率不同。运用这个技巧，让顾客感觉自己在做选择，而不是被推销。"},
+{q:"以下哪个是成交禁忌？",o:["A) 您要不要买？","B) 我先给您安排验光","C) 您看选哪个颜色？","D) 今天活动最后一天"],a:0,
+ master:"汤姆·霍普金斯 + 乔·吉拉德",
+ e:"选项A'您要不要买？'是成交禁忌。吉特默说：不要问开放式问题让顾客有拒绝的借口。霍普金斯说：要用假设成交法，已经假设顾客会买了，就不要说'您要不要'这种给顾客压力的话。选项B是中性行为，选项C是选择成交法，选项D是紧迫感（要在合理范围内使用）。"},
+{q:"汤姆·霍普金斯的成交理念是？",o:["A) 顾客决定再推销","B) 从第一个问题开始就假设顾客会买","C) 价格低才能成交","D) 多说产品优点"],a:1,
+ master:"汤姆·霍普金斯",
+ e:"霍普金斯的核心成交理念是'假设成交'——从第一个问题开始就假设顾客会买。这意味着你从接待的第一刻起，就用一种积极、自信、帮助导向的方式与顾客交流。你不是在'卖'，你是在'帮助顾客做出正确的选择'。这种心态让顾客感受到你的专业和真诚，成交是自然的结果。"},
+{q:"家长表现出明显的购买意向，最合适的推进方式是？",o:["A) '您到底买不买？'","B) '您看选1.60还是1.67的？'","C) '买不买随便您'","D) '您回去再想想吧'"],a:1,
+ master:"汤姆·霍普金斯 + 乔·吉拉德",
+ e:"选项B是正确的——用选择成交法推进。霍普金斯说：识别购买信号后不要犹豫。乔·吉拉德说：从不放弃任何一个机会。家长已经表现出购买意向时，用'您看选1.60还是1.67的？'把对话导向成交。选项A（逼问）和选项D（赶客）都是错误的。"},
+{q:"以下哪种紧迫成交话术是合理的？",o:["A) 今天不买明天就没货了","B) 今天活动最后一天了，明天恢复原价","C) 你再不买就没了","D) 这是最后机会"],a:1,
+ master:"汤姆·霍普金斯",
+ e:"选项B是合理的紧迫成交话术——基于真实的事实（活动确实最后一天），给家长合理的紧迫感。霍普金斯说：紧迫感要有事实依据，不能编造。选项A（没货）和C/D（威胁感）是虚假或过度施压，会破坏信任。合理紧迫感：'今天是我们近视防控月的最后一天，明天恢复原价。'"},
+{q:"识别到购买信号后，应该？",o:["A) 继续聊天","B) 及时推进成交","C) 降价","D) 等顾客主动说买"],a:1,
+ master:"汤姆·霍普金斯 + 杰弗里·吉特默",
+ e:"选项B是正确的。霍普金斯说：识别购买信号后及时推进，不要犹豫。吉特默说：时机是销售的第三个要素。顾客已经发出购买信号，说明时机成熟了。继续聊天（A）会错失时机，降价（C）会降低利润，等顾客主动（D）太被动。及时用选择成交法或其他技巧推进成交。"},
+],
+// 售后维护
+after:[
+{q:"成交后24小时内应该做什么？",o:["A) 什么都不做","B) 发送感谢信息，确认佩戴情况，告知复查时间","C) 催顾客转介绍","D) 推销其他产品"],a:1,
+ master:"乔·吉拉德 + 汤姆·霍普金斯",
+ e:"乔·吉拉德说：成交不是结束，是关系的开始。成交后24小时是建立长期关系的关键窗口。应该：发送感谢信息（表达感谢）→ 确认佩戴情况（关心使用体验）→ 告知复查时间（专业服务）。催转介绍（C）或推销（D）太急功近利，会让顾客感觉被利用。"},
+{q:"乔·吉拉德的250法则意味着？",o:["A) 顾客要付250元","B) 每个顾客背后有250个潜在客户","C) 每天接待250个顾客","D) 每月寄250张贺卡"],a:1,
+ master:"乔·吉拉德",
+ e:"250法则是乔·吉拉德最著名的理论：每个顾客背后约有250个潜在客户（家人、朋友、同事等）。你服务好一个顾客，可能带来250个潜在客户；你得罪一个顾客，可能失去250个潜在客户。这告诉我们：每个成交的顾客都值得用心维护，因为他们的满意会成为你最好的广告。"},
+{q:"关系维护四步法的第一步是？",o:["A) 30天跟进","B) 成交后24小时","C) 90天复查提醒","D) 持续维护"],a:1,
+ master:"乔·吉拉德 + 杰弗里·吉特默",
+ e:"关系维护四步法：①成交后24小时 → ②30天跟进 → ③90天复查提醒 → ④持续维护。第一步是成交后24小时。吉特默说：小额客户忠诚 = 大额重复购买。24小时内主动联系，让顾客感受到你的重视，为后续的维护打下基础。"},
+{q:"以下哪个是正确的转介绍话术？",o:["A) 你给我介绍个客户吧","B) 您家孩子用了效果不错，身边有没有其他家长也在为孩子近视操心？","C) 不介绍就算了","D) 介绍客户有优惠"],a:1,
+ master:"乔·吉拉德 + 汤姆·霍普金斯",
+ e:"选项B是正确的转介绍话术。乔·吉拉德的250法则：每个顾客背后有250个潜在客户。转介绍不是'要'来的，而是'创造'出来的。霍普金斯说：让顾客自己说出来。用这个话术：先肯定效果（'您家孩子戴了效果不错'），再自然引出转介绍（'身边有没有其他家长也在为孩子近视操心？'）。直接'要'客户（A/C/D）会让顾客反感。"},
+{q:"成交后多久应该第一次跟进？",o:["A) 一周后","B) 一个月后","C) 24小时内","D) 三个月后"],a:2,
+ master:"乔·吉拉德 + 汤姆·霍普金斯",
+ e:"成交后24小时内应该第一次跟进。乔·吉拉德说：成交不是结束，是关系的开始。成交后马上联系顾客，体现你的重视和专业的售后服务。太晚跟进，顾客的感受会变淡，你也可能错过及时解决问题的时机（如果有佩戴问题的话）。"},
+{q:"乔·吉拉德建议的情感维护方式是？",o:["A) 发短信","B) 打电话","C) 每月寄出手写贺卡","D) 发邮件"],a:2,
+ master:"乔·吉拉德",
+ e:"乔·吉拉德每个月给顾客寄手写贺卡，这是他250法则的核心实践之一。在数字化时代，手写贺卡更能体现真诚和重视。吉特默说：你的个人品牌比产品更重要。一张手写贺卡，让顾客记住的不是镜片，而是你这个人和你的用心。在眼镜店场景，可以：节假日祝福、孩子生日提醒、复查到期提醒等。"},
+{q:"顾客复查时度数有变化，你应该？",o:["A) 说'正常，不用管'","B) 建议调整镜片，体现专业服务","C) 说'换更贵的'","D) 说'我们的镜片没问题'"],a:1,
+ master:"杰弗里·吉特默 + 乔·吉拉德",
+ e:"复查时度数有变化，要体现专业服务（选项B）。吉特默说：建立信任是最重要的。乔·吉拉德说：成交是关系的开始。说'正常不用管'（A）或'没问题'（D）会让家长觉得你不专业。说'换更贵的'（C）会让家长觉得你在骗钱。正确做法：了解变化情况，分析原因（用眼习惯、镜片磨损等），建议调整方案，体现你的专业和负责任的态度。"},
+{q:"售后维护的最终目标是？",o:["A) 让顾客不再来","B) 建立长期关系，促进复购和转介绍","C) 一次性交易","D) 减少顾客投诉"],a:1,
+ master:"乔·吉拉德 + 杰弗里·吉特默",
+ e:"售后维护的最终目标是建立长期关系，促进复购和转介绍。乔·吉拉德说：成交不是结束，是关系的开始。吉特默说：小额客户忠诚 = 大额重复购买。一次交易后就不再联系（A/C）是浪费资源。售后维护做得好，顾客会复购（换镜片、加购其他产品），也会转介绍（新顾客）。"},
+]
+};
+
+// 渲染模块小测试（多题模式）
+function renderModuleQuiz(quizId){
+  if(!moduleQuizzes[quizId]) return;
+  const area = document.getElementById('quiz-'+quizId);
+  if(!area) return;
+  // 初始化状态
+  if(!window._quizState) window._quizState = {};
+  if(!window._quizState[quizId]){
+    // Shuffle questions
+    const qs = [...moduleQuizzes[quizId]];
+    for(let i=qs.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[qs[i],qs[j]]=[qs[j],qs[i]];}
+    window._quizState[quizId] = {questions: qs, current:0, correct:0, total: qs.length, answered:false};
+  }
+  renderModuleQuestion(quizId);
+}
+
+function renderModuleQuestion(quizId){
+  const state = window._quizState[quizId];
+  if(!state) return;
+  const area = document.getElementById('quiz-'+quizId);
+  if(state.current >= state.total){
+    // 显示最终得分
+    const pct = Math.round(state.correct/state.total*100);
+    const pass = pct >= 70;
+    if(pass){
+      var progMap = {masters:'learnMasters',products:'learnProducts',reception:'reception',spin:'spin',value:'value',objection:'objection',close:'close',after:'afterAfter'};
+      markProgress(progMap[quizId]||quizId);
+    }
+    let html = `<div class="result-box ${pass?'pass':'fail'}">`;
+    html += `<p style="font-size:18px;margin-bottom:8px">${pass?'🎉 太棒了！':'💪 继续加油！'}</p>`;
+    html += `<div class="big">${pct}分</div>`;
+    html += `<p style="margin-top:4px">${state.correct}/${state.total} 正确</p>`;
+    html += `<p style="margin-top:8px;font-size:14px">通过线：70%</p>`;
+    html += `<div style="margin-top:16px"><button class="btn btn-outline" onclick="resetModuleQuiz('${quizId}')" style="margin-right:8px">🔄 重测</button>`;
+    // 添加下一课按钮
+    const nextMap = {masters:'learn-products',products:'reception',reception:'spin',spin:'value',value:'objection',objection:'close',close:'practice',after:'welcome'};
+    const nextLabel = {masters:'📦 产品学习',products:'👋 进店接待',reception:'🎯 SPIN提问',spin:'💎 价值传递',value:'💬 异议库',objection:'🤝 成交推进',close:'🎭 实战模拟',after:'🏠 回到首页'};
+    if(nextMap[quizId]){
+      html += `<button class="btn btn-primary" onclick="showSection('${nextMap[quizId]}')">${nextLabel[quizId]} →</button>`;
+    }
+    html += `</div></div>`;
+    area.innerHTML = html;
+    return;
+  }
+  const q = state.questions[state.current];
+  let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">`;
+  html += `<span style="font-size:13px;color:var(--text-muted)">第 ${state.current+1}/${state.total} 题</span>`;
+  html += `<span style="font-size:13px;color:var(--text-muted)">✅ ${state.correct} 正确</span>`;
+  html += `</div>`;
+  html += `<div class="progress-bar" style="margin-bottom:16px"><div class="progress-fill" style="width:${(state.current/state.total)*100}%"></div></div>`;
+  html += `<h4 style="margin-bottom:12px;font-size:16px">${q.q}</h4>`;
+  q.o.forEach((opt,i)=>{
+    html += `<button class="quiz-option" onclick="answerModuleQ('${quizId}',this,${i},${q.a})">${opt}</button>`;
+  });
+  html += `<div class="quiz-result" id="result-${quizId}"></div>`;
+  html += `<div style="margin-top:12px"><button class="btn btn-primary" id="next-${quizId}" style="display:none" onclick="nextModuleQ('${quizId}')">下一题 →</button></div>`;
+  area.innerHTML = html;
+}
+
+function answerModuleQ(quizId,btn,selected,correct){
+  const state = window._quizState[quizId];
+  if(state.answered) return;
+  state.answered = true;
+  const opts = btn.parentElement.querySelectorAll('.quiz-option');
+  const isCorrect = selected === correct;
+  if(isCorrect) state.correct++;
+  else {
+    // 保存错题
+    const q = state.questions[state.current];
+    const qName = {masters:'大师理论',products:'产品知识',reception:'进店接待',spin:'SPIN提问',value:'价值传递',objection:'异议处理',close:'成交推进',after:'售后维护'}[quizId] || quizId;
+    const userAns = q.o[selected] || '未作答';
+    const correctAns = q.o[correct] || '正确答案';
+    var expText = q.master ? ('💡 '+q.master+'\n') : '';
+    expText += q.e || '请参考大师理念进行解答';
+    addWrongAnswer(qName, q.q, userAns, correctAns, expText);
+  }
+  opts.forEach((o,i)=>{
+    if(i===correct) o.classList.add('correct');
+    if(i===selected && !isCorrect) o.classList.add('wrong');
+    o.style.pointerEvents = 'none';
+  });
+  const q = state.questions[state.current];
+  const result = document.getElementById('result-'+quizId);
+  result.className = 'quiz-result show '+(isCorrect?'correct-result':'wrong-result');
+  var resultText = isCorrect ? '<b>✅ 正确！</b>' : '<b>❌ 答错了！</b>';
+  result.innerHTML = resultText;
+  if(!isCorrect && q.e){
+    var exp = '<div class="m-exp">';
+    if(q.master) exp += '<div class="m-tag">💡 '+q.master+'</div>';
+    exp += '<div class="m-correct">✅ '+q.o[q.a]+'</div>';
+    exp += '<div class="m-text">'+q.e+'</div>';
+    exp += '</div>';
+    result.innerHTML += exp;
+  }
+  document.getElementById('next-'+quizId).style.display = 'inline-block';
+}
+
+function nextModuleQ(quizId){
+  const state = window._quizState[quizId];
+  state.current++;
+  state.answered = false;
+  renderModuleQuestion(quizId);
+}
+
+function resetModuleQuiz(quizId){
+  if(window._quizState && window._quizState[quizId]){
+    delete window._quizState[quizId];
+  }
+  renderModuleQuiz(quizId);
+}
+
+// 错题库初始化
+function initWrongAnswers(){
+  try {
+    var stored = localStorage.getItem('toc_wrong_answers');
+    window.tocWrongAnswers = stored ? JSON.parse(stored) : [];
+  } catch(e){ window.tocWrongAnswers = []; }
+  renderWrongAnswers();
+}
+function saveWrongAnswers(){
+  try {
+    localStorage.setItem('toc_wrong_answers', JSON.stringify(window.tocWrongAnswers));
+  } catch(e){}
+}
+function addWrongAnswer(quizId, question, userAnswer, correctAnswer, explanation){
+  window.tocWrongAnswers.push({
+    quizId: quizId,
+    question: question,
+    userAnswer: userAnswer,
+    correctAnswer: correctAnswer,
+    explanation: explanation,
+    date: new Date().toLocaleDateString('zh-CN')
+  });
+  saveWrongAnswers();
+}
+function renderWrongAnswers(){
+  var container = document.getElementById('wrong-answers-list');
+  if(!container) return;
+  if(window.tocWrongAnswers.length === 0){
+    container.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:20px">🎉 暂无错题，太棒了！</p>';
+    return;
+  }
+  var html = '';
+  window.tocWrongAnswers.forEach(function(item, idx){
+    html += '<div style="margin-bottom:16px;padding:16px;background:#fff;border-radius:12px;border-left:4px solid #ef4444">';
+    var masterTag = '';
+    var explainText = item.explanation || '';
+    if(explainText.indexOf('💡 ')===0){
+      var colonIdx = explainText.indexOf('\n');
+      if(colonIdx>0){
+        masterTag = explainText.substring(0,colonIdx).replace('💡 ','');
+        explainText = explainText.substring(colonIdx+1);
+      }
+    }
+    if(masterTag){
+      html += '<div style="margin-bottom:8px;font-size:12px;font-weight:700;color:#7c3aed;background:#f3e8ff;padding:4px 10px;border-radius:20px;display:inline-block">💡 '+masterTag+'</div>';
+    }
+    html += '<p style="margin:0 0 8px;font-weight:600">Q'+(idx+1)+': '+item.question+'</p>';
+    html += '<p style="margin:0 0 4px;font-size:13px"><span style="color:#ef4444">❌ 你的答案: </span>'+item.userAnswer+'</p>';
+    html += '<p style="margin:0 0 8px;font-size:13px"><span style="color:#22c55e">✅ 正确答案: </span>'+item.correctAnswer+'</p>';
+    html += '<p style="margin:0;font-size:13px;color:var(--text-muted);line-height:1.7">'+explainText+'</p>';
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+function clearWrongAnswers(){
+  if(confirm('确定要清空错题库吗？')){
+    window.tocWrongAnswers = [];
+    saveWrongAnswers();
+    renderWrongAnswers();
+  }
+}
+
+// 页面加载时初始化所有模块测试
+// ===== 每日一题 =====
+window.dailyQuestions=[
+{q:"家长说'太贵了'，你应该？",o:["A) 直接降价","B) 算长期账+价值对标","C) 说别家更便宜","D) 不解释直接推产品"],a:1,m:"异议处理",tip:"价格异议要先认同，再用长期价值说服，不要直接降价。"},
+{q:"乔·吉拉德250法则告诉我们？",o:["A) 每天发250张名片","B) 每个顾客背后有250个潜在客户","C) 成交要达到250分","D) 每月跟进250个顾客"],a:1,m:"大师理论",tip:"250法则是乔·吉拉德的核心：服务好一个顾客，可能带来250个新顾客。"},
+{q:"SPIN中'I'的目的是？",o:["A) 了解基本信息","B) 放大问题的影响","C) 直接推荐产品","D) 询问价格预算"],a:1,m:"SPIN提问",tip:"Implication（影响问题）是放大痛点，让顾客意识到不解决的后果。"},
+{q:"汤姆·霍普金斯假设成交法的核心是？",o:["A) 顾客决定再推销","B) 从第一个问题假设顾客会买","C) 价格低才能成交","D) 多打电话催促"],a:1,m:"成交推进",tip:"假设成交让你从接待的第一刻就用成交的心态沟通。"},
+{q:"家长带孩子进店，第一句话应该说？",o:["A) 高境光打折要不要看","B) 您想配什么价位","C) 小朋友几岁啦？最近检查视力了吗？","D) 需要帮忙吗"],a:2,m:"进店接待",tip:"从关心孩子入手建立信任，而不是直接问价格或推销。"},
+{q:"杰弗里·吉特默认为成交的唯一货币是？",o:["A) 价格","B) 品牌","C) 信任","D) 产品"],a:2,m:"大师理论",tip:"信任是成交的唯一货币，没有信任再好的产品也卖不出去。"},
+{q:"新乐学的离焦量是？",o:["A) +1.50D","B) +3.50D","C) +2.00D","D) +4.00D"],a:1,m:"产品知识",tip:"新乐学的离焦量是+3.50D，星趣控是+3.50D，高境光更高达+5.00D。"},
+{q:"德鲁克说企业的唯一目的是？",o:["A) 赚取利润","B) 创造顾客","C) 扩大规模","D) 降低成本"],a:1,m:"大师理论",tip:"德鲁克：企业的唯一目的是创造顾客，利润是结果而非目的。"},
+{q:"奥格·曼狄诺认为销售最重要的是？",o:["A) 技巧","B) 心态","C) 产品","D) 价格"],a:1,m:"大师理论",tip:"曼狄诺：销售最大的敌人是自己内心的恐惧，心态先于技巧。"},
+{q:"星趣控的延缓率约为？",o:["A) 50%","B) 59%","C) 67%","D) 76%"],a:2,m:"产品知识",tip:"星趣控延缓率约67%，控优点约59%，高境光约76%（目前最高）。"},
+{q:"高境光的核心技术是？",o:["A) 周边离焦","B) ON/OFF通路调控","C) 渐进多焦点","D) 防蓝光"],a:1,m:"产品知识",tip:"高境光采用ON/OFF通路调控技术，是主动调控而非被动离焦。"},
+{q:"成交后24小时内应该？",o:["A) 什么都不做","B) 发感谢信息+确认佩戴+告知复查","C) 催转介绍","D) 马上推销"],a:1,m:"售后维护",tip:"成交不是结束，是关系的开始。24小时内联系体现专业和重视。"},
+{q:"家长说'我回去考虑一下'，最好回应是？",o:["A) 好的慢慢考虑","B) 别考虑了今天必须定","C) 认同+合理紧迫感+低门槛选项","D) 考虑什么？"],a:2,m:"异议处理",tip:"'回去考虑一下'是常见购买信号，正确应对：认同+紧迫感+低门槛选项。"},
+{q:"高境光的适用年龄是？",o:["A) 3-12岁","B) 4-15岁","C) 6-18岁","D) 8-20岁"],a:2,m:"产品知识",tip:"高境光适用6-18岁，8-12岁是近视发展最快阶段，效果最佳。"},
+{q:"SPIN四步的正确顺序是？",o:["A) P-S-I-N","B) S-P-I-N","C) S-I-P-N","D) I-S-P-N"],a:1,m:"SPIN提问",tip:"SPIN：S现状→P问题→I影响→N价值，按顺序引导才能有效挖掘需求。"}
+];
+
+function getTodayKey(){
+var d=new Date();
+return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+function renderDailyQuestion(){
+var area=document.getElementById('daily-q-area');
+if(!area)return;
+var today=getTodayKey();
+var lastDate=localStorage.getItem('toc_daily_date')||'';
+if(lastDate&&lastDate!==today){
+var dayNum=(parseInt(localStorage.getItem('toc_daily_day')||'0')+1)%window.dailyQuestions.length;
+localStorage.setItem('toc_daily_day',String(dayNum));
+}
+var answered=JSON.parse(localStorage.getItem('toc_daily_answered')||'{}');
+var todayKey='daily_'+today;
+var last=localStorage.getItem('toc_daily_date')||'';
+if(last!==today||!answered[todayKey]){
+var dayNum=parseInt(localStorage.getItem('toc_daily_day')||'0');
+var q=window.dailyQuestions[dayNum%window.dailyQuestions.length];
+window._dq={q:q,todayKey:todayKey};
+var h='<div style="padding:16px 20px;background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:12px;border:2px solid #0ea5e9">';
+h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+h+='<span style="font-size:13px;font-weight:700;color:#0369a1">每日一题 · '+today+'</span>';
+h+='<span style="font-size:11px;padding:2px 10px;background:#0ea5e9;color:#fff;border-radius:20px">'+q.m+'</span></div>';
+h+='<p style="font-size:14px;font-weight:600;color:#0c4a6e;margin-bottom:12px;line-height:1.6">'+q.q+'</p>';
+q.o.forEach(function(opt,i){
+h+='<div class="dq-opt" data-idx="'+i+'" style="padding:8px 12px;background:#fff;border:1px solid #bae6fd;border-radius:8px;margin-bottom:6px;font-size:13px;cursor:pointer;color:#0c4a6e">'+opt+'</div>';
+});
+h+='<div id="dq-result" style="margin-top:10px;display:none"></div>';
+h+='</div>';
+area.innerHTML=h;
+area.querySelectorAll('.dq-opt').forEach(function(el){
+el.onclick=function(){
+var idx=parseInt(el.getAttribute('data-idx'));
+var dq=window._dq;
+answerDailyQ(idx,dq.q.a,dq.todayKey,dq.q.m,dq.q.tip);
+};
+});
+localStorage.setItem('toc_daily_date',today);
+}else{
+var dayNum=parseInt(localStorage.getItem('toc_daily_day')||'0');
+var q=window.dailyQuestions[dayNum%window.dailyQuestions.length];
+var userAns=answered[todayKey];
+var isCorrect=userAns===q.a;
+var h='<div style="padding:16px 20px;background:linear-gradient(135deg,#f0f9ff,#e0f2fe);border-radius:12px;border:2px solid #0ea5e9">';
+h+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">';
+h+='<span style="font-size:13px;font-weight:700;color:#0369a1">每日一题 · '+today+'</span>';
+h+='<span style="font-size:11px;padding:2px 10px;background:#16a34a;color:#fff;border-radius:20px">✅ 已完成</span></div>';
+h+='<p style="font-size:14px;font-weight:600;color:#0c4a6e;margin-bottom:12px;line-height:1.6">'+q.q+'</p>';
+q.o.forEach(function(opt,i){
+var cls='background:#f1f5f9;border-color:#cbd5e1;color:#64748b';
+if(i===q.a)cls='background:#dcfce7;border-color:#22c55e;color:#15803d;font-weight:600';
+else if(i===userAns&&i!==q.a)cls='background:#fee2e2;border-color:#ef4444;color:#dc2626';
+h+='<div style="padding:8px 12px;border-radius:8px;margin-bottom:6px;font-size:13px;'+cls+'">'+opt+'</div>';
+});
+h+='<div style="margin-top:10px;padding:10px;background:#fffbeb;border-radius:8px;font-size:12px;line-height:1.6;color:#92400e;border-left:3px solid #f59e0b"><b>💡 '+q.m+'解析：</b>'+q.tip+'</div>';
+h+='</div>';
+area.innerHTML=h;
+}
+}
+
+function answerDailyQ(selected,correct,todayKey,m,tip){
+var area=document.getElementById('daily-q-area');
+if(!area)return;
+if(area.querySelector('.dq-selected'))return;
+var opts=area.querySelectorAll('.dq-opt');
+opts.forEach(function(o,i){
+if(i===correct)o.style.background='#dcfce7',o.style.borderColor='#22c55e',o.style.fontWeight='600',o.style.color='#15803d';
+else if(i===selected&&selected!==correct)o.style.background='#fee2e2',o.style.borderColor='#ef4444',o.style.color='#dc2626';
+o.style.cursor='default';
+o.classList.add('dq-selected');
+});
+var result=document.getElementById('dq-result');
+if(!result)return;
+result.style.display='block';
+if(selected===correct){
+result.innerHTML='<span style="color:#16a34a;font-weight:700">✅ 正确！</span>';
+}else{
+result.innerHTML='<span style="color:#dc2626;font-weight:700">❌ 错误！正确答案：'+opts[correct].textContent+'</span>';
+}
+var answered=JSON.parse(localStorage.getItem('toc_daily_answered')||'{}');
+answered[todayKey]=selected;
+localStorage.setItem('toc_daily_answered',JSON.stringify(answered));
+var tipEl=document.createElement('div');
+tipEl.style='margin-top:8px;padding:10px;background:#fffbeb;border-radius:8px;font-size:12px;line-height:1.6;color:#92400e;border-left:3px solid #f59e0b';
+tipEl.innerHTML='<b>💡 '+m+'解析：</b>'+tip;
+result.appendChild(tipEl);
+}
+
+function initAllModuleQuizzes(){
+  try {
+    const quizIds = ['masters','products','reception','spin','value','objection','close','after'];
+    quizIds.forEach(function(id) {
+      try {
+        renderModuleQuiz(id);
+      } catch(e) {
+        console.error('Failed to init quiz: ' + id, e);
+        var area = document.getElementById('quiz-' + id);
+        if(area) area.innerHTML = '<p style="color:var(--text-muted);text-align:center;padding:12px">测试加载失败，请刷新页面</p>';
+      }
+    });
+  } catch(e) {
+    console.error('Failed to init all quizzes', e);
+  }
+}
+
+
+// 考核题库
+const l1Q=[
+{q:"中国青少年总体近视率约为多少？",o:["A) 30%","B) 42%","C) 52.7%","D) 65%"],a:2,m:"产品知识"},
+{q:"高境光属于第几代近视防控镜片？",o:["A) 第一代","B) 第二代","C) 第三代","D) 第四代"],a:2,m:"产品知识"},
+{q:"高境光的核心技术原理是什么？",o:["A) 周边近视离焦","B) ON/OFF通路调控","C) 角膜塑形","D) 药物干预"],a:1,m:"产品知识"},
+{q:"高境光的临床延缓率是多少？",o:["A) 30%","B) 59%","C) 67%","D) 76%"],a:3,m:"产品知识"},
+{q:"星趣控的延缓率约为多少？",o:["A) 50%","B) 59%","C) 67%","D) 76%"],a:2,m:"产品知识"},
+{q:"控优点（尼康）的延缓率约为多少？",o:["A) 30%","B) 59%","C) 67%","D) 76%"],a:1,m:"产品知识"},
+{q:"德鲁克说'企业的目的是什么'？",o:["A) 赚取利润","B) 扩大规模","C) 创造顾客","D) 降低成本"],a:2,m:"大师理论"},
+{q:"乔·吉拉德的250法则是？",o:["A) 顾客付250元","B) 每个顾客背后有250个潜在客户","C) 每天接待250个顾客","D) 每月寄250张贺卡"],a:1,m:"大师理论"},
+{q:"高境光适用年龄范围是？",o:["A) 3-12岁","B) 4-15岁","C) 6-18岁","D) 8-20岁"],a:2,m:"产品知识"},
+{q:"高境光镜片散射面积是？",o:["A) 5%","B) 14%","C) 25%","D) 50%"],a:1,m:"产品知识"},
+{q:"乔·吉拉德认为成交的唯一货币是？",o:["A) 价格","B) 品牌","C) 信任","D) 产品"],a:2,m:"大师理论"},
+{q:"奥格·曼狄诺认为销售最重要的是？",o:["A) 技巧","B) 心态","C) 产品","D) 价格"],a:1,m:"大师理论"},
+{q:"汤姆·霍普金斯假设成交法的核心是？",o:["A) 顾客决定再推销","B) 从第一个问题假设顾客会买","C) 价格低才能成交","D) 多打电话催促"],a:1,m:"大师理论"},
+{q:"SPIN中的S代表什么？",o:["A) Solution","B) Situation","C) Speed","D) Service"],a:1,m:"SPIN提问"},
+{q:"SPIN中的P代表什么？",o:["A) Price","B) Problem","C) Product","D) Plan"],a:1,m:"SPIN提问"},
+{q:"顾客进店3秒内应该？",o:["A) 等待顾客开口","B) 必须有回应","C) 介绍产品","D) 报价"],a:1,m:"进店接待"},
+{q:"家长带孩子进店第一句话应该？",o:["A) 高境光打折要不要看","B) 关心孩子建立信任","C) 您想配什么价位","D) 需要帮忙吗"],a:1,m:"进店接待"},
+{q:"成交后24小时内应该？",o:["A) 什么都不做","B) 发感谢信息确认佩戴","C) 催转介绍","D) 推销其他产品"],a:1,m:"售后维护"},
+{q:"杰弗里·吉特默的销售公式是？",o:["A) 销售=价格+产品","B) 销售=信任+价值+时机","C) 销售=品牌+渠道","D) 销售=关系+利益"],a:1,m:"大师理论"},
+{q:"高境光镜片建议多久复查一次？",o:["A) 1-3个月","B) 3-6个月","C) 1年","D) 不用复查"],a:1,m:"产品知识"},
+{q:"面对犹豫型顾客应该？",o:["A) 放弃","B) 给顾客空间，持续跟进","C) 不断催促","D) 降价"],a:1,m:"成交推进"}
+];
+const l2Q=[
+{q:"家长说'太贵了'，最好的回应是？",o:["A) 不贵的我们最便宜","B) 那您看看其他的","C) 我理解。算一笔账：每年涨100度到18岁可能600-800度，后续成本更高。高境光76%延缓率目前最优，一次到位更划算。","D) 可以打八折"],a:2,m:"异议处理"},
+{q:"家长说'星趣控不是更好吗'，最好的回应是？",o:["A) 星趣控不行效果差","B) 星趣控确实很好，延缓率约67%。高境光走不同技术路线，延缓率76%，目前数据最优。","C) 别听他们忽悠","D) 星趣控过时了"],a:1,m:"异议处理"},
+{q:"面对理性型爸爸，应该？",o:["A) 多讲故事","B) 用数据和论文说话","C) 报优惠","D) 讲感情"],a:1,m:"实战应用"},
+{q:"成交后24小时内应该？",o:["A) 什么都不做","B) 发感谢信息，确认佩戴，告知复查时间","C) 催转介绍","D) 推销其他产品"],a:1,m:"售后维护"},
+{q:"家长带8岁近视100度孩子进店，第一句话应该是？",o:["A) 高境光打折要不要看","B) 小朋友几岁啦？近视多长时间了？","C) 您想配什么价位？","D) 需要帮忙吗？"],a:1,m:"进店接待"},
+{q:"SPIN中的I（影响问题）目的是？",o:["A) 了解基本信息","B) 放大问题影响让顾客意识到后果","C) 直接推荐产品","D) 询问预算"],a:1,m:"SPIN提问"},
+{q:"以下哪个是购买信号？",o:["A) '我再看看'","B) '这个多少钱'","C) '这个有蓝色的吗'","D) '好的我先走了'"],a:2,m:"成交推进"},
+{q:"价值传递中'具象化'技巧是？",o:["A) 用专业术语","B) 把抽象数据变成直观感受","C) 降低价格","D) 增加功能"],a:1,m:"价值传递"},
+{q:"高境光的ON/OFF通路调控相比被动离焦的优势是？",o:["A) 更便宜","B) 主动调控延缓率更高","C) 镜片更薄","D) 更美观"],a:1,m:"产品知识"},
+{q:"乔·吉拉德每月给顾客做什么来维护关系？",o:["A) 打电话","B) 寄手写贺卡","C) 发短信","D) 发邮件"],a:1,m:"售后维护"},
+{q:"家长说'孩子说看不清效果'，应该？",o:["A) '那您退了'","B) '正常适应期1-2周，每天坚持戴，2周复查'","C) '别的家长都说好'","D) '那换别的'"],a:1,m:"异议处理"},
+{q:"OK镜和框架近视控制镜片的主要区别？",o:["A) 价格不同","B) OK镜夜间佩戴白天裸眼清晰，框架白天佩戴","C) 品牌不同","D) 没区别"],a:1,m:"产品知识"},
+{q:"选择成交法是？",o:["A) '买不买随便'","B) '您要A还是B'","C) '再考虑一下'","D) '今天不买就没优惠了'"],a:1,m:"成交推进"},
+{q:"奥格·曼狄诺十戒中最重要的是？",o:["A) 今天开始新生活","B) 坚持到底","C) 今天做的事今天完成","D) 控制情绪"],a:1,m:"大师理论"},
+{q:"面对价格敏感型家长，应该？",o:["A) 直接降价","B) 推荐最便宜的","C) 价格拆分+后果对比+价值强调","D) 不理会"],a:2,m:"异议处理"},
+{q:"高境光的离焦量是？",o:["A) +1.50D","B) +3.50D","C) +5.00D","D) +2.00D"],a:2,m:"产品知识"},
+{q:"以下哪个不是进店接待的常见错误？",o:["A) 3秒内无回应","B) 一上来就推产品","C) 先了解需求再推荐","D) 让顾客站着说话"],a:2,m:"进店接待"},
+{q:"SPIN中的N（价值问题）示例是？",o:["A) '孩子几岁了'","B) '现在眼镜怎么样'","C) '如果度数继续加深怎么办'","D) '如果有产品能控制度数加深，您有兴趣了解吗'"],a:3,m:"SPIN提问"},
+{q:"250法则告诉我们？",o:["A) 每天发250张名片","B) 每个顾客背后有250个潜在客户","C) 成交要达250分","D) 每月跟进250个顾客"],a:1,m:"大师理论"},
+{q:"弱视的黄金治疗期是？",o:["A) 1-3岁","B) 3-6岁","C) 6-12岁","D) 12-18岁"],a:1,m:"产品知识"}
+];
+const l3Q=[
+{q:"以下哪种做法违反了销售合规红线？",o:["A) 客观对比竞品数据","B) 承诺'一定能退轴'","C) 引用公开临床数据","D) 建议顾客先做检查"],a:1,m:"合规意识"},
+{q:"家长说'我朋友说戴了没用'，最好的回应是？",o:["A) 那您别买了","B) 每个人的情况不一样，但整体数据是76%延缓率。您朋友用的是什么产品？","C) 你朋友不懂","D) 我们产品肯定有用"],a:1,m:"异议处理"},
+{q:"弱视的黄金治疗期是？",o:["A) 1-3岁","B) 3-6岁","C) 6-12岁","D) 12-18岁"],a:1,m:"产品知识"},
+{q:"OK镜的主要风险是？",o:["A) 价格贵","B) 每天护理，有感染风险","C) 效果不好","D) 不方便购买"],a:1,m:"产品知识"},
+{q:"SPIN四步的正确顺序是？",o:["A) P-S-I-N","B) S-P-I-N","C) S-I-P-N","D) N-I-P-S"],a:1,m:"SPIN提问"},
+{q:"家长说'网上更便宜'，最好的应对是？",o:["A) '网上都是假货'","B) '网上确实便宜，但眼镜需要专业验光和调整，瞳距瞳高差一点影响效果，我们提供验光、试戴、调整、复查一条龙服务'","C) '那您去网上买'","D) '我们也能降价'"],a:1,m:"异议处理"},
+{q:"成交推进中'假设成交法'的核心是？",o:["A) 顾客已经买了","B) 从接待开始就假设顾客会买，用成交心态沟通","C) 强迫顾客购买","D) 先收钱"],a:1,m:"成交推进"},
+{q:"控优点（尼康）使用的近视控制技术是？",o:["A) DIMS多点离焦","B) DOT®点扩散近视控制","C) H.A.L.T.高非球微透镜","D) ON/OFF通路调控"],a:1,m:"产品知识"},
+{q:"面对焦虑型妈妈，SPIN提问应该？",o:["A) 直接给方案","B) 先了解孩子现状→挖掘问题→放大影响→引导方案","C) 只报价","D) 让她自己看"],a:1,m:"SPIN提问"},
+{q:"乔·吉拉德'绝不放弃顾客'在售后阶段体现为？",o:["A) 每月寄贺卡+定期复查提醒+转介绍机制","B) 只回访一次","C) 不再联系","D) 只发短信"],a:0,m:"售后维护"},
+{q:"以下哪个是'拥有感觉'销售技巧？",o:["A) '您看这个颜色多适合孩子，戴上眼睛亮亮的'","B) '这个2000块'","C) '你买不买随便'","D) '再看看呗'"],a:0,m:"价值传递"},
+{q:"线下配镜vs网上配镜的核心差异是？",o:["A) 价格","B) 专业验光+试戴+瞳距瞳高精准+售后一条龙","C) 品牌","D) 款式"],a:1,m:"产品知识"},
+{q:"家长说'孩子不想戴'，应该？",o:["A) '那算了'","B) '理解。让孩子试戴体验一下，很多孩子戴上后发现看东西清晰了就愿意戴了'","C) '别的孩子都戴'","D) '不戴会更严重'"],a:1,m:"异议处理"},
+{q:"销售中'翻译技巧'是指？",o:["A) 把外文翻译成中文","B) 把专业术语翻译成家长听得懂的语言","C) 翻译产品说明书","D) 翻译竞品资料"],a:1,m:"价值传递"},
+{q:"以下哪个不是汤姆·霍普金斯的成交技巧？",o:["A) 假设成交","B) 识别购买信号","C) 强迫成交","D) 及时推进"],a:2,m:"成交推进"},
+{q:"高境光适合什么度数的孩子？",o:["A) 仅100度以下","B) 6-18岁近视儿童青少年","C) 仅300度以上","D) 仅成人"],a:1,m:"产品知识"},
+{q:"奥格·曼狄诺认为'销售最大的敌人'是？",o:["A) 竞品","B) 价格","C) 自己内心的恐惧","D) 顾客"],a:2,m:"大师理论"},
+{q:"家长说'我需要回去商量一下'，应该？",o:["A) '好的再见'","B) '理解，我可以把对比资料发您参考。您看明天方便我再跟您联系一下吗？'","C) '今天不买就没优惠了'","D) '别家更贵'"],a:1,m:"成交推进"},
+{q:"近视控制镜片的'周边离焦'原理是？",o:["A) 让周边视野模糊","B) 通过周边视野的离焦设计减缓眼轴增长","C) 让中心视野更清晰","D) 增加周边视力"],a:1,m:"产品知识"},
+{q:"售后维护中'2-2-1回访节奏'是？",o:["A) 2天/2周/1月","B) 24小时/3天/2周/1月/3月/6月/12月","C) 2月/2月/1月","D) 2次电话/2次微信/1次到店"],a:1,m:"售后维护"},
+{q:"面对多品牌对比型顾客，最好的策略是？",o:["A) 只说自家好","B) 客观对比+突出优势+引导体验+尊重选择","C) 贬低竞品","D) 降价"],a:1,m:"实战应用"},
+{q:"品牌镜片vs杂牌的核心差异在？",o:["A) 包装","B) 光学精度+膜层耐用+售后保障","C) 广告","D) 颜色"],a:1,m:"产品知识"},
+{q:"以下哪个是SPIN中'暗示问题(Implication)'的例子？",o:["A) '孩子现在戴的眼镜怎么样'","B) '如果度数每年涨100度，到18岁可能600-800度，会影响以后升学和职业选择'","C) '孩子几岁了'","D) '您预算多少'"],a:1,m:"SPIN提问"},
+{q:"成交后跟进的第一条信息应该包含？",o:["A) 只说谢谢","B) 感谢+佩戴提醒+复查时间+联系方式","C) 催转介绍","D) 推销其他产品"],a:1,m:"售后维护"},
+{q:"杰弗里·吉特默认为建立信任最重要的是？",o:["A) 低价","B) 专业度+真诚态度","C) 品牌","D) 广告"],a:1,m:"大师理论"}
+];
+
+let quizQuestions=[],quizLevel='';
+let qCorrect=0,qTotal=0;
+let wrongByModule={};
+
+// ===== 考前冲刺模式 =====
+var sprintData=[
+{category:'产品知识',color:'#3b82f6',bg:'#dbeafe',icon:'📦'},
+{category:'大师理论',color:'#8b5cf6',bg:'#ede9fe',icon:'🧠'},
+{category:'进店接待',color:'#10b981',bg:'#d1fae5',icon:'👋'},
+{category:'SPIN提问',color:'#f59e0b',bg:'#fef3c7',icon:'🎯'},
+{category:'异议处理',color:'#ef4444',bg:'#fee2e2',icon:'💬'},
+{category:'成交推进',color:'#ec4899',bg:'#fce7f3',icon:'🤝'},
+{category:'售后维护',color:'#14b8a6',bg:'#ccfbf1',icon:'🔄'}
+];
+
+var sprintQuestions=[];
+var sprintCategory='';
+var sprintIdx=0;
+var sprintCorrect=0;
+var sprintTotal=0;
+var sprintUnlocked=0;
+
+function startSprint(){
+  sprintUnlocked=0;
+  var sprintArea=document.getElementById('sprint-area');
+  var statusEl=document.getElementById('sprint-status');
+  var btn=document.getElementById('sprint-start-btn');
+  // Collect all questions with module tags
+  sprintQuestions=[];
+  [l1Q,l2Q,l3Q].forEach(function(qArr){
+    qArr.forEach(function(q){
+      if(q.m)sprintQuestions.push(q);
+    });
+  });
+  // Show category list
+  var html='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">';
+  sprintData.forEach(function(cat,i){
+    var unlocked=i===0;
+    if(unlocked)sprintUnlocked++;
+    html+='<div onclick="startSprintCat('+i+')" style="padding:12px 8px;background:'+cat.bg+';border-radius:10px;text-align:center;cursor:'+(unlocked?'pointer':'not-allowed')+';opacity:'+(unlocked?'1':'0.5')+';border:2px solid '+(unlocked?cat.color:'#ccc')+'">';
+    html+='<div style="font-size:20px;margin-bottom:4px">'+cat.icon+'</div>';
+    html+='<div style="font-size:12px;font-weight:600;color:'+cat.color+'">'+cat.category+'</div>';
+    html+='</div>';
+  });
+  html+='</div>';
+  sprintArea.innerHTML=html;
+  btn.style.display='none';
+  if(statusEl)statusEl.innerHTML='<span style="font-size:13px;color:#7c3aed;font-weight:600">🎯 已解锁 0/'+sprintData.length+' 类 | 冲刺进度</span>';
+}
+
+function startSprintCat(catIdx){
+  if(catIdx>sprintUnlocked){alert('请先通过前面的类别！');return;}
+  sprintCategory=sprintData[catIdx];
+  var catQs=sprintQuestions.filter(function(q){return q.m===sprintCategory.category;});
+  if(!catQs.length){catQs=sprintQuestions.slice(0,5);} // fallback
+  sprintIdx=0;sprintCorrect=0;sprintTotal=catQs.length;
+  window._sprintCatQs=catQs;
+  renderSprintQ(catQs);
+}
+
+function renderSprintQ(catQs){
+  if(sprintIdx>=sprintTotal){
+    var pct=Math.round(sprintCorrect/sprintTotal*100);
+    var pass=pct>=75;
+    var sprintArea=document.getElementById('sprint-area');
+    var statusEl=document.getElementById('sprint-status');
+    if(pass){
+      sprintUnlocked=Math.min(sprintUnlocked+1,sprintData.length);
+      if(sprintUnlocked===sprintData.length){
+        sprintArea.innerHTML='<div style="text-align:center;padding:24px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:12px;border:2px solid #f59e0b"><div style="font-size:32px;margin-bottom:8px">🏆</div><div style="font-size:18px;font-weight:700;color:#92400e">冲刺完成！全部通关！</div><div style="font-size:14px;color:#78350f;margin-top:8px">恭喜获得【🏅 终极冲刺徽章】</div></div>';
+        markProgress('sprintAll');
+        if(statusEl)statusEl.innerHTML='<span style="font-size:13px;color:#92400e;font-weight:700">🏆 全部通关！</span>';
+        return;
+      }
+    }
+    sprintArea.innerHTML='<div style="text-align:center;padding:20px;background:'+(pass?'#d1fae5':'#fee2e2')+';border-radius:12px;border:2px solid '+(pass?'#10b981':'#ef4444')+'"><div style="font-size:28px;margin-bottom:8px">'+(pass?'✅':'❌')+'</div><div style="font-size:18px;font-weight:700;color:'+(pass?'#065f46':'#991b1b')+';margin-bottom:8px">'+(pass?'本类通关！':'再接再厉！')+' '+pct+'%</div><button onclick="startSprint()" style="padding:8px 20px;background:'+sprintCategory.color+';color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:13px">🔄 再冲一次</button></div>';
+    if(statusEl)statusEl.innerHTML='<span style="font-size:13px;color:#7c3aed;font-weight:600">🎯 已解锁 '+sprintUnlocked+'/'+sprintData.length+' 类</span>';
+    startSprint(); // refresh grid
+    return;
+  }
+  var q=catQs[sprintIdx];
+  var sprintArea=document.getElementById('sprint-area');
+  var html='<div style="padding:16px;background:'+sprintCategory.bg+';border-radius:12px;border:2px solid '+sprintCategory.color+'">';
+  html+='<div style="display:flex;justify-content:space-between;margin-bottom:10px;font-size:12px;color:'+sprintCategory.color+'">';
+  html+='<span>'+sprintCategory.icon+' '+sprintCategory.category+'</span>';
+  html+='<span>'+(sprintIdx+1)+'/'+sprintTotal+'</span></div>';
+  html+='<p style="font-size:15px;font-weight:600;color:#1e293b;margin-bottom:12px;line-height:1.5">'+q.q+'</p>';
+  q.o.forEach(function(opt,i){
+    html+='<div class="sprint-opt" onclick="answerSprintQ(this,'+i+','+q.a+')" style="padding:10px 14px;background:#fff;border:2px solid #e2e8f0;border-radius:8px;margin-bottom:6px;font-size:14px;cursor:pointer;color:#334155">'+opt+'</div>';
+  });
+  html+='<div id="sprint-result" style="margin-top:10px;display:none"></div>';
+  html+='</div>';
+  sprintArea.innerHTML=html;
+}
+
+function answerSprintQ(el,selected,correct){
+  var opts=el.parentElement.querySelectorAll('.sprint-opt');
+  if(el.classList.contains('sprint-answered'))return;
+  opts.forEach(function(o,i){
+    o.style.cursor='default';
+    o.classList.add('sprint-answered');
+    if(i===correct)o.style.background='#dcfce7',o.style.borderColor='#22c55e',o.style.color='#15803d',o.style.fontWeight='600';
+    else if(i===selected)o.style.background='#fee2e2',o.style.borderColor='#ef4444',o.style.color='#dc2626';
+  });
+  var isCorrect=selected===correct;
+  if(isCorrect)sprintCorrect++;
+  var result=document.getElementById('sprint-result');
+  result.style.display='block';
+  var hasNext=sprintIdx+1<sprintTotal;
+  result.innerHTML=(isCorrect?'<span style="color:#16a34a;font-weight:700">✅ 正确！</span>':'<span style="color:#dc2626;font-weight:700">❌ 错误！</span>')+' <span style="font-size:13px;color:#64748b">'+sprintCorrect+'/'+(sprintIdx+1)+' 正确</span>'+(hasNext?'<br><button onclick="nextSprint()" style="margin-top:10px;padding:8px 20px;background:'+sprintCategory.color+';color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600">下一题 →</button>':'<br><button onclick="nextSprint()" style="margin-top:10px;padding:8px 20px;background:'+sprintCategory.color+';color:#fff;border:none;border-radius:8px;cursor:pointer;font-size:14px;font-weight:600">查看结果 →</button>');
+}
+
+function nextSprint(){
+  sprintIdx++;
+  var catQsRef=window._sprintCatQs||[];
+  renderSprintQ(catQsRef);
+}
+
+function startQuiz(level){
+quizLevel=level;qCorrect=0;qTotal=0;
+wrongByModule={};
+if(level==='l1')quizQuestions=[...l1Q];
+else if(level==='l2')quizQuestions=[...l2Q];
+else quizQuestions=[...l3Q];
+for(let i=quizQuestions.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[quizQuestions[i],quizQuestions[j]]=[quizQuestions[j],quizQuestions[i]]}
+renderQuizQuestion(0);
+}
+
+function renderQuizQuestion(idx){
+if(idx>=quizQuestions.length){
+const pct=qTotal?Math.round(qCorrect/qTotal*100):0;
+const passMap={l1:80,l2:85,l3:90};
+const pass=pct>=passMap[quizLevel];
+const scores=JSON.parse(localStorage.getItem('toc_scores')||'[]');
+scores.push({level:quizLevel.toUpperCase(),score:pct,pass,date:new Date().toLocaleDateString('zh-CN')});
+localStorage.setItem('toc_scores',JSON.stringify(scores));
+if(pass)markProgress('exam');
+const nameMap={l1:'L1入门考',l2:'L2熟练考',l3:'L3进阶考'};
+var analysisHtml='';
+if(!pass&&Object.keys(wrongByModule).length>0){
+var weak=Object.keys(wrongByModule).sort(function(a,b){return wrongByModule[b]-wrongByModule[a]});
+var advice={'产品知识':'📦 建议复习【产品学习】，掌握核心技术参数和临床数据。','大师理论':'🧠 建议复习【销售大师话术】，理解各位大师的核心思想。','异议处理':'💬 建议复习【异议库】，熟练应对家长的价格、竞品等顾虑。','进店接待':'👋 建议复习【进店接待】，掌握30秒黄金法则和第一句话。','SPIN提问':'🎯 建议复习【SPIN提问】，熟练需求挖掘四步法。','售后维护':'🔄 建议复习【售后维护】，掌握250法则和关系维护四步法。','成交推进':'🤝 建议复习【成交推进】，掌握购买信号识别和选择成交法。','价值传递':'💎 建议复习【价值传递】，掌握具象化和翻译技巧。','实战应用':'🏋️ 建议多练【实战模拟】，积累真实场景应对经验。','合规意识':'⚠️ 务必注意销售合规，不做过度承诺！','其他':'📖 建议回顾本考核知识点。'};
+analysisHtml='<div style="margin-top:16px;padding:14px;background:linear-gradient(135deg,#fff7ed,#ffedd5);border-radius:10px;border:1px solid #fed7aa"><div style="font-size:13px;font-weight:700;color:#9a3412;margin-bottom:8px">📊 智能分析 — 薄弱环节</div>';
+weak.forEach(function(m){
+var tip=advice[m]||advice['其他'];
+analysisHtml+='<div style="margin-bottom:6px;font-size:12px;line-height:1.6"><b style="color:#ea580c">❌ '+m+'：'+wrongByModule[m]+'题</b><br><span style="color:#78350f">'+tip+'</span></div>';
+});
+analysisHtml+='</div>';
+}
+var bestKey='toc_best_'+quizLevel;
+var best=parseInt(localStorage.getItem(bestKey)||'0');
+if(pct>best){localStorage.setItem(bestKey,String(pct));best=pct;}
+document.getElementById('quiz-area').innerHTML=`<div class="card"><div class="result-box ${pass?'pass':'fail'}"><p style="font-size:20px;margin-bottom:8px">${pass?'🎉 恭喜通过！':'😥 未通过，继续加油！'}</p><div class="big">${pct}分</div><p style="margin-top:4px">${qCorrect}/${qTotal} 正确</p><p style="margin-top:8px;font-size:14px">${nameMap[quizLevel]} 通过线${passMap[quizLevel]}分</p>${pct>best&&pct!==best?'<p style="margin-top:4px;font-size:12px;color:var(--success)">🏆 新纪录！</p>':''}<p style="margin-top:4px;font-size:12px;color:var(--text-muted)">最高记录：${Math.max(pct,best)}分</p></div>${analysisHtml}<div style="text-align:center;margin-top:20px"><button class="btn btn-primary" onclick="startQuiz('${quizLevel}')">🔄 重考</button> <button class="btn btn-outline" onclick="showSection('records')" style="margin-left:8px">📊 查看成绩</button></div></div>`;
+return;
+}
+const q=quizQuestions[idx];
+let h=`<div class="card"><p style="color:var(--text-muted);font-size:13px">第 ${idx+1}/${quizQuestions.length} 题</p><p style="font-weight:600;margin:12px 0;font-size:16px">${q.q}</p>`;
+q.o.forEach((opt,i)=>{h+=`<button class="quiz-option" onclick="answerQuizQ(this,${i},${q.a})">${opt}</button>`});
+h+=`<div style="margin-top:16px"><button class="btn btn-primary" id="quiz-next" style="display:none" onclick="renderQuizQuestion(${idx+1})">下一题 →</button></div></div>`;
+document.getElementById('quiz-area').innerHTML=h;
+}
+
+function answerQuizQ(btn,selected,correct){
+const parent=btn.parentElement;
+if(parent.querySelector('.correct'))return;
+const opts=parent.querySelectorAll('.quiz-option');
+opts.forEach((o,i)=>{if(i===correct)o.classList.add('correct');if(i===selected&&selected!==correct)o.classList.add('wrong')});
+qTotal++;if(selected===correct)qCorrect++;
+else{var m=q.m||'其他';wrongByModule[m]=(wrongByModule[m]||0)+1;}
+document.getElementById('quiz-next').style.display='inline-block';
+}
+
+function renderScores(){
+const el=document.getElementById('score-area');
+const scores=JSON.parse(localStorage.getItem('toc_scores')||'[]');
+if(!scores.length){el.innerHTML='<p style="color:var(--text-muted);text-align:center;padding:20px">暂无考核记录。</p>';return}
+let h='';
+scores.forEach(s=>{
+h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;margin-bottom:8px">
+<div><b style="font-size:16px">${s.level}</b><br><span style="font-size:13px;color:var(--text-muted)">${s.date}</span></div>
+<div style="text-align:right"><span style="font-size:32px;font-weight:700;color:${s.pass?'var(--success)':'var(--danger)'}">${s.score}分</span><br><span style="font-size:13px">${s.pass?'✅ 通过':'❌ 未通过'}</span></div></div>`;
+});
+el.innerHTML=h;
+}
+
+function showRecordTab(tab){
+if(tab==='scores'){
+document.getElementById('score-area').style.display='block';
+document.getElementById('error-area').style.display='none';
+renderScores();
+}else{
+document.getElementById('score-area').style.display='none';
+document.getElementById('error-area').style.display='block';
+}
+}
+
+// 异议库数据 - 56条
+const objections = [
+// ===== 原有20条：防控镜片异议 =====
+{id:"TC-01",q:"太贵了",concern:"价格敏感",tags:["价格","防控","贵"],master:"吉特默×李奥贝纳",
+a:"<b>🧠 大师技巧：</b>价值对标（吉特默）+ 感受和结果（李奥贝纳）<br><b>理解：</b>我完全理解，给孩子配眼镜确实是一笔不小的开支。<br><b>回应：</b>不过我们算一笔账：如果每年涨100度，到18岁可能600-800度，后续配更高度数镜片反而更贵。高境光76%的延缓率是目前最好的，一次到位比反复尝试更划算。<br><b>推进：</b>我们也有分期/优惠活动，您看要不要了解一下具体方案？"},
+{id:"TC-02",q:"孩子太小，以后再说",concern:"拖延",tags:["拖延","年龄","防控","太小"],master:"乔·吉拉德×特劳特",
+a:"<b>🧠 大师技巧：</b>绝不放弃（乔·吉拉德）+ 紧迫感（特劳特）<br><b>理解：</b>您的想法我能理解，觉得孩子还小不着急。<br><b>回应：</b>其实恰恰相反，8-12岁是近视发展最快的阶段。等度数高了再控制，效果会打折扣。就像小树长歪了，越早矫正效果越好。<br><b>推进：</b>要不我们先给孩子做个详细的视光检查，看看目前的情况，您再决定要不要现在干预？"},
+{id:"TC-03",q:"现在戴普通眼镜挺好的",concern:"认知不足",tags:["认知","普通眼镜","防控"],master:"德鲁克",
+a:"<b>🧠 大师技巧：</b>解决真实问题（德鲁克）<br><b>理解：</b>普通眼镜确实能让孩子看清楚。<br><b>回应：</b>但普通眼镜只是矫正视力，不会控制度数增长。如果每年涨100度，一两年后度数就上去了。防控镜片在矫正的同时还能延缓加深。<br><b>推进：</b>您看这样，我先给您讲讲防控镜片和普通镜片的区别，您了解了再决定？"},
+{id:"TC-04",q:"星趣控/控优点不是更好吗",concern:"品牌偏好",tags:["竞品","星趣控","控优点","品牌"],master:"特劳特×吉特默",
+a:"<b>🧠 大师技巧：</b>客观对比（特劳特差异化）+ 数据信任（吉特默）<br><b>理解：</b>您做了功课，这几个品牌确实都不错。星趣控延缓率约67%，控优点约59%，高境光是76%。<br><b>回应：</b>三种技术路线不同：星趣控是H.A.L.T.高非球微透镜技术，控优点是DOT®点扩散近视控制技术（尼康4年CYPRESS临床数据，256名儿童随访），高境光是ON/OFF通路调控。数据上高境光目前是最优的。<br><b>推进：</b>要不我给您看看三家产品的对比资料，您看了自己判断？"},
+{id:"TC-05",q:"OK镜不是效果更好吗",concern:"信息偏差",tags:["OK镜","角塑","竞品","效果"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>倾听优先（吉特默）<br><b>理解：</b>OK镜确实是一种防控手段。<br><b>回应：</b>OK镜是夜间佩戴的隐形眼镜，需要每天护理，有感染风险。高境光是框架眼镜，安全方便，不需要特殊护理。两种方式各有适用场景。<br><b>推进：</b>我们先看看孩子的眼睛条件适合哪种方案，再做决定？"},
+{id:"TC-06",q:"戴了真的有用吗",concern:"效果怀疑",tags:["效果","怀疑","数据","防控"],master:"吉特默×霍普金斯",
+a:"<b>🧠 大师技巧：</b>数据信任（吉特默）+ 实战证据（霍普金斯）<br><b>理解：</b>您的担心很正常，毕竟关系到孩子的眼睛。<br><b>回应：</b>这是多中心临床研究的结果，不是某个厂家的自说自话。76%的延缓率是跟踪了两年以上的数据。<br><b>推进：</b>我们店也有用了高境光的顾客，可以分享实际体验，您想听听吗？"},
+{id:"TC-07",q:"我回去考虑一下",concern:"拖延/犹豫",tags:["拖延","犹豫","考虑"],master:"乔·吉拉德×霍普金斯",
+a:"<b>🧠 大师技巧：</b>绝不放弃（乔·吉拉德）+ 假设成交（霍普金斯）<br><b>理解：</b>当然，给孩子配眼镜确实要慎重考虑。<br><b>回应：</b>不过孩子度数每天都在变化，越早干预效果越好。<br><b>推进：</b>要不先做个检查，检查是免费的。了解清楚了再决定，也不耽误您考虑，您看呢？"},
+{id:"TC-08",q:"网上更便宜",concern:"比价",tags:["价格","网上","便宜","比价"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>价值>价格（吉特默）<br><b>理解：</b>网上价格确实可能便宜一些。<br><b>回应：</b>但防控镜片需要专业验配和定期调整，网上配了没人帮您调，戴着不舒服反而影响效果。而且我们店有售后保障。<br><b>推进：</b>我们今天的活动价其实跟网上差不多，而且包含售后，您算下来更划算。"},
+{id:"TC-09",q:"孩子不愿意戴",concern:"执行难度",tags:["孩子","不愿意","戴","执行"],master:"汤姆·霍普金斯",
+a:"<b>🧠 大师技巧：</b>拥有感觉（霍普金斯）<br><b>理解：</b>很多孩子刚开始都不愿意戴新的眼镜。<br><b>回应：</b>高境光在舒适度上做了很大改进，镜片轻薄、视觉干扰小。<br><b>推进：</b>要不让孩子来试戴一下？很多孩子试了之后觉得挺舒服的，就愿意戴了。"},
+{id:"TC-10",q:"副作用大吗",concern:"安全担忧",tags:["副作用","安全","担忧"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>信任第一（吉特默）<br><b>理解：</b>安全第一，您的担心完全正确。<br><b>回应：</b>高境光是框架眼镜，不是药物也不是手术，不存在药物副作用。物理原理，安全无创。<br><b>推进：</b>您可以看看这份安全性报告，是医院出具的。"},
+{id:"TC-11",q:"你们说的数据是真的吗",concern:"数据真实性",tags:["数据","真实","怀疑"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>信任是成交的唯一货币（吉特默）<br><b>理解：</b>谨慎是对的，毕竟关系到孩子。<br><b>回应：</b>这些数据全部来自公开发表的学术论文和医院临床报告。<br><b>推进：</b>要不我给您看看原始论文和顾客反馈？您自己判断。"},
+{id:"TC-12",q:"别家说你们的不好",concern:"竞品信息",tags:["竞品","不好","别家"],master:"特劳特",
+a:"<b>🧠 大师技巧：</b>不贬低竞品（特劳特定位）<br><b>理解：</b>您听到了一些不同的说法。<br><b>回应：</b>行业里有不同声音很正常，各家都有自己的立场。关键看数据。高境光的76%延缓率是医院做的临床研究。<br><b>推进：</b>这是数据源，您可以看看。数据不会骗人。"},
+{id:"TC-13",q:"孩子度数不高，不需要防控",concern:"认知不足",tags:["度数","不高","认知","防控"],master:"特劳特",
+a:"<b>🧠 大师技巧：</b>抢占心智（特劳特定位）<br><b>理解：</b>度数确实还不高。<br><b>回应：</b>但防控的关键在于'防'——在度数还低的时候开始控制，效果最好。<br><b>推进：</b>现在100度是最佳干预时机，等到300度就晚了。要不要先做个详细检查？"},
+{id:"TC-14",q:"我问问孩子爸爸/妈妈的意见",concern:"需要商量",tags:["商量","家人","意见"],master:"乔·吉拉德",
+a:"<b>🧠 大师技巧：</b>关系经营（乔·吉拉德）<br><b>理解：</b>当然要和家人商量。<br><b>回应：</b>这样，我把这些资料给您整理一份，您带回去给家人看。<br><b>推进：</b>要不约个时间，您和家人一起来？我可以当面给你们讲解。"},
+{id:"TC-15",q:"等下次活动/促销再说",concern:"等优惠",tags:["优惠","促销","等活动"],master:"特劳特",
+a:"<b>🧠 大师技巧：</b>合理紧迫感（特劳特）<br><b>理解：</b>想等优惠很正常。<br><b>回应：</b>不过孩子的度数不等人。如果为了等促销多涨了50度，后续控制难度更大。<br><b>推进：</b>要不今天先配了，早用早控制？省下的度数增长比优惠的钱更值。"},
+{id:"TC-16",q:"我朋友说戴了没用",concern:"口碑影响",tags:["朋友","没用","口碑"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>整体数据>个别案例（吉特默）<br><b>理解：</b>每个人的情况不一样，效果确实会有个体差异。<br><b>回应：</b>但我们要看整体数据——76%的延缓率是几百个孩子的统计结果。<br><b>推进：</b>要不我看看您朋友用的什么产品，帮您分析一下？"},
+{id:"TC-17",q:"孩子还在发育，度数自然会涨",concern:"认为无意义",tags:["发育","自然涨","无意义"],master:"李奥贝纳",
+a:"<b>🧠 大师技巧：</b>感受和结果（李奥贝纳）<br><b>理解：</b>您说得对，孩子发育期度数确实会增长。<br><b>回应：</b>但'自然增长'和'可控增长'是不同的。如果不加控制一年涨100度，用了防控镜片可能只涨24度。<br><b>推进：</b>到18岁，一个可能600度，一个可能150度。要不要先了解一下具体方案？"},
+{id:"TC-18",q:"之前用过防控镜片，效果不好",concern:"失败经历",tags:["失败","效果不好","之前"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>理解+差异化（吉特默）<br><b>理解：</b>理解您的失望。<br><b>回应：</b>之前用的是哪种防控镜片？高境光是第三代技术，和离焦镜片的原理不同。离焦是被动控制，高境光是主动调控。<br><b>推进：</b>临床数据显示高境光的延缓率更高。要不要让孩子试试？"},
+{id:"TC-19",q:"孩子还小，等度数高点再配",concern:"时机错误",tags:["时机","度数高","还小"],master:"特劳特",
+a:"<b>🧠 大师技巧：</b>抢占最佳时机（特劳特定位）<br><b>理解：</b>这是一个常见的误区。<br><b>回应：</b>防控的关键是'越早越好'。度数低的时候开始控制，效果更好。<br><b>推进：</b>现在100度是最佳时机。要不要先做个检查？"},
+{id:"TC-20",q:"我要对比一下再决定",concern:"信息收集",tags:["对比","考虑","信息"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>倾听+提供信息（吉特默）<br><b>理解：</b>对比是应该的，毕竟给孩子的事要慎重。<br><b>回应：</b>这样，我把高境光和主要竞品的对比资料给您一份，您带回去慢慢看。对比时重点看三点：延缓率数据、技术原理、对孩子视觉的影响。<br><b>推进：</b>有什么疑问随时问我。"},
+
+// ===== 角塑异议21条 =====
+{id:"JS-01",q:"什么是角膜塑形镜？",concern:"常识",tags:["角塑","定义","什么是","OK镜"],master:"德鲁克×李奥贝纳",
+a:"<b>🧠 大师技巧：</b>解决问题（德鲁克）+ 真实连接（李奥贝纳）<br><b>推荐话术：</b>\"角膜塑形镜是一种特殊设计的硬性透气隐形眼镜，只需<b>夜间佩戴</b>，白天不戴任何眼镜就能获得清晰视力，同时可以<b>有效控制近视发展</b>。已经有40多年历史，目前发展到第四代，透氧值达100以上。\""},
+{id:"JS-02",q:"能否彻底治愈近视？",concern:"治愈误解",tags:["治愈","消失","根治","误解"],master:"吉特默×特劳特",
+a:"<b>🧠 大师技巧：</b>信任+诚实（吉特默）+ 客观定位（特劳特）<br><b>推荐话术：</b>\"我理解您的期望。但目前<b>没有任何医疗手段可以彻底治疗近视</b>。角塑镜改变的是角膜曲率，从视力角度看确实'矫正'了，但眼球的整体结构没有改变。所以我们说<b>控制</b>而不是治愈，这也是对您负责。\""},
+{id:"JS-03",q:"角塑为什么这么贵？",concern:"价格",tags:["角塑","贵","价格","7000","12000"],master:"吉特默×李奥贝纳",
+a:"<b>🧠 大师技巧：</b>价值对标（吉特默）+ 投资思维（李奥贝纳）<br><b>推荐话术：</b>\"角塑镜能用1-1.5年，相比每年换框架眼镜的费用，长远看并不贵。更重要的是，它还能<b>有效控制度数增长</b>。北大医学部研究显示，角塑后平均年近视增长只有<b>8度</b>，框架眼镜为<b>67度</b>。这省下的度数增长，远比镜片本身的价值大。\""},
+{id:"JS-04",q:"和十年前的OK镜有什么区别？",concern:"产品对比",tags:["OK镜","十年前","区别","对比"],master:"特劳特×吉特默",
+a:"<b>🧠 大师技巧：</b>客观对比数据（特劳特）+ 数据信任（吉特默）<br><b>推荐话术：</b>\"OK镜就是角塑镜的旧称。现在已经发展到第四代：<b>透氧值从38提升到100+</b>，设计从机械压迫变成流体力学效应，验配从没有规范到现在完整体系。现在的角塑镜和十年前的OK镜，已经是完全不同的产品了。\""},
+{id:"JS-05",q:"戴角塑会不会留下后遗症？",concern:"安全担忧",tags:["角塑","后遗症","安全","担心"],master:"吉特默×德鲁克",
+a:"<b>🧠 大师技巧：</b>倾听+科学解释（吉特默）+ 解决问题（德鲁克）<br><b>推荐话术：</b>\"角塑镜是<b>物理性的治疗过程</b>，作用在角膜上皮层，仅使角膜上皮细胞重新排列。<b>停戴后最长30天，角膜就会恢复原样</b>，因此不会留下后遗症。这也是为什么角塑镜被称为'可逆'的近视控制方法。\""},
+{id:"JS-06",q:"到底能不能完全控制近视？",concern:"效果预期",tags:["角塑","完全控制","效果","预测"],master:"吉特默×霍普金斯",
+a:"<b>🧠 大师技巧：</b>权威数据（吉特默）+ 假设成交（霍普金斯）<br><b>推荐话术：</b>\"北大医学部研究表明，角塑后平均年近视增长<b>8度</b>，框架眼镜为<b>67度</b>。香港理工大学也证实，角塑二年后眼轴增长只有戴框架眼镜的<b>一半</b>。虽然无法预测每个孩子的具体效果，但<b>大部分患者近视加深明显减缓</b>。\""},
+{id:"JS-07",q:"能预测控制到什么程度吗？",concern:"效果预期",tags:["预测","控制程度","个体差异"],master:"吉特默×德鲁克",
+a:"<b>🧠 大师技巧：</b>诚实是最好的策略（吉特默）+ 引导行动（德鲁克）<br><b>推荐话术：</b>\"抱歉，我无法给您确切的预测。由于个体差异，我们无法预测某个特定孩子能控制到什么程度。但根据临床数据，<b>大部分患者明显减缓</b>。建议先做个全面检查，看看孩子的角膜条件是否适合。\""},
+{id:"JS-08",q:"小孩100多度需要戴角塑吗？",concern:"低度数",tags:["100度","低度数","需要"],master:"乔·吉拉德×特劳特",
+a:"<b>🧠 大师技巧：</b>绝不放弃（乔·吉拉德）+ 紧迫感（特劳特）<br><b>推荐话术：</b>\"100度刚刚处于近视早期。在我们周围，<b>很少能看到100度不再增长的</b>，更多的是后悔应用晚了。<b>越早干预，效果越好</b>，就像小树长歪了，越早矫正越容易。\""},
+{id:"JS-09",q:"超过600度还能戴吗？",concern:"高度数",tags:["600度","高度数","还能戴"],master:"吉特默×乔·吉拉德",
+a:"<b>🧠 大师技巧：</b>坦诚（吉特默）+ 不放弃（乔·吉拉德）<br><b>推荐话术：</b>\"可以，但效果不能确定。可能有残余度数需辅助低度数框架眼镜。不过，<b>即使有残余度数，对于控制近视增长仍有较好作用</b>。还可以验配日戴型RGP，也有控制作用。\""},
+{id:"JS-10",q:"为什么以前没人推荐？是不是新产品？",concern:"信任建立",tags:["以前","新产品","推荐","广告"],master:"吉特默×德鲁克",
+a:"<b>🧠 大师技巧：</b>历史数据建立信任（吉特默）<br><b>推荐话术：</b>\"角塑镜在美国已经有<b>40多年历史</b>，第四代了。国内上海五官科医院、温州眼视光医院等权威机构已经验配超过10年。<b>角塑镜属于医疗行为，不能做大面积广告，更不能发布夸大其辞的不实广告。</b>\""},
+{id:"JS-11",q:"别的医院为什么不介绍？",concern:"信任建立",tags:["别的医院","介绍","开展"],master:"吉特默×特劳特",
+a:"<b>🧠 大师技巧：</b>不贬低（吉特默）+ 差异化（特劳特）<br><b>推荐话术：</b>\"角塑镜验配检查流程复杂，不是所有医院都具备开展条件。<b>我们医院有完整的验配体系和售后体系，从检查到试戴到定制到复查，全程都有专业团队跟进。</b>\""},
+{id:"JS-12",q:"我戴眼镜几十年没问题，孩子近视就近视了",concern:"认知不足",tags:["戴眼镜","没问题","近视"],master:"乔·吉拉德×吉特默",
+a:"<b>🧠 大师技巧：</b>理解+价值（吉特默）+ 绝不放弃（乔·吉拉德）<br><b>推荐话术：</b>\"近视会影响孩子以后的生活、择业、报考学校。高度近视易引起眼底疾病：视网膜脱落、黄斑部病变等。<b>先给孩子做个全面检查，检查是免费的，不耽误您考虑。</b>\""},
+{id:"JS-13",q:"为什么你们自己还戴眼镜？",concern:"信任挑战",tags:["你们自己","戴眼镜","为什么"],master:"吉特默×霍普金斯",
+a:"<b>🧠 大师技巧：</b>认可问题（吉特默）+ 客观解释（霍普金斯）<br><b>推荐话术：</b>\"角塑镜主要还是用于<b>控制青少年近视</b>。我们成年后视力已稳定，选择的方法比较多。就像医院里，做激光手术的医生也大部分戴框架眼镜。<b>这不代表产品不好，只是选择不同。</b>\""},
+{id:"JS-14",q:"有这么神奇吗？",concern:"效果怀疑",tags:["神奇","立竿见影","试戴"],master:"霍普金斯×吉特默",
+a:"<b>🧠 大师技巧：</b>假设成交（霍普金斯）+ 体验验证（吉特默）<br><b>推荐话术：</b>\"让视力立竿见影地提高，<b>您是可以通过试戴立刻体验到的</b>。建议先试戴两个小时，一般近视度数平均能降低100度。效果好不好，您自己感受最清楚。\""},
+{id:"JS-15",q:"和眼保姆、针灸一样吗？",concern:"竞品对比",tags:["眼保姆","针灸","假性近视","真性近视"],master:"特劳特×吉特默",
+a:"<b>🧠 大师技巧：</b>客观区分（特劳特）+ 数据支撑（吉特默）<br><b>推荐话术：</b>\"完全不一样。眼保姆、针灸对于<b>假性近视</b>有一定效果，但对真性近视没有作用。角塑镜主要针对<b>真性近视</b>，通过佩戴减缓眼轴增长。这是有临床研究数据支持的。\""},
+{id:"JS-16",q:"等成年后做激光手术不就行了？",concern:"长远规划",tags:["激光手术","成年","切削角膜"],master:"吉特默×德鲁克",
+a:"<b>🧠 大师技巧：</b>长远眼光（德鲁克）+ 价值对比（吉特默）<br><b>推荐话术：</b>\"激光手术对近视度数有要求，度数越高切削角膜越多，风险也越大。<b>与其等到成年后冒更大风险做手术，不如现在就控制度数增长</b>。角塑镜停戴一个月后就可以做激光手术，两者并不冲突。\""},
+{id:"JS-17",q:"角塑镜需要天天戴吗？",concern:"使用频率",tags:["天天戴","每天","频率"],master:"霍普金斯",
+a:"<b>🧠 大师技巧：</b>假设成交（霍普金斯）<br><b>推荐话术：</b>\"第一个月是治疗期，需要天天戴。一个月后进入维持期，可以根据个人情况决定配戴方式。如果裸眼视力保持在0.8或以上，当晚可不戴。目前度数较低的顾客一周只需戴2-3天。\""},
+{id:"JS-18",q:"晚上戴会不会不舒服？",concern:"舒适度",tags:["晚上戴","不舒服","异物感"],master:"霍普金斯",
+a:"<b>🧠 大师技巧：</b>拥有感觉（霍普金斯）<br><b>推荐话术：</b>\"刚开始戴会有一定不适应，5~20分钟后就会慢慢适应。一般适应后，睡眠时佩戴没有明显不适感。我们会培训如何正确佩戴，熟练操作后包括清洗时间，一般2分钟即可完成。\""},
+{id:"JS-19",q:"镜片掉地上会不会碎？",concern:"耐用性",tags:["碎","掉地上","耐用"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>信任（吉特默）<br><b>推荐话术：</b>\"不会碎。镜片是氟硅材料，有一定韧性，只要不被踩到不会碎。但拾取时要小心用吸棒吸取，以免磨损。\""},
+{id:"JS-20",q:"感冒生病了还能戴吗？",concern:"特殊情况",tags:["感冒","生病","停戴"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>安全优先（吉特默）<br><b>推荐话术：</b>\"感冒生病了，建议<b>停戴</b>。因为身体抵抗力下降，易于造成角膜炎症。等身体恢复后再继续佩戴。\""},
+{id:"JS-21",q:"停戴后会不会加快近视发展？",concern:"停戴后果",tags:["停戴","加快","反弹","恢复"],master:"吉特默×德鲁克",
+a:"<b>🧠 大师技巧：</b>诚实（吉特默）+ 科学解释（德鲁克）<br><b>推荐话术：</b>\"目前还没有出现停戴后近视度数快速增长的例子。停用后，近视度数的加深会恢复到使用塑形镜之前的增长水平，<b>不会加速</b>。\""},
+
+// ===== 网络家长热议15条 =====
+{id:"NW-01",q:"近视了眼镜会越戴越深吗？",concern:"网络热议",tags:["越戴越深","眼镜","度数加深","涨度数"],master:"德鲁克×吉特默",
+a:"<b>🧠 大师技巧：</b>解决真实问题（德鲁克）+ 数据（吉特默）<br><b>推荐话术：</b>\"戴眼镜本身不会导致度数加深，度数加深是因为孩子还在发育期，眼轴在增长。普通眼镜只矫正不控制，所以度数会涨。防控镜片（如高境光、角塑镜）在矫正的同时还能延缓度数增长。\""},
+{id:"NW-02",q:"孩子近视不戴眼镜行不行？",concern:"网络热议",tags:["不戴眼镜","裸眼","看不清"],master:"德鲁克",
+a:"<b>🧠 大师技巧：</b>解决问题（德鲁克）<br><b>推荐话术：</b>\"如果不戴眼镜，孩子看不清会影响学习和生活，还可能加重眼睛疲劳，反而加速度数增长。建议至少配戴普通眼镜矫正视力，如果希望控制度数，可以考虑防控镜片。\""},
+{id:"NW-03",q:"防蓝光眼镜真的有用吗？",concern:"网络热议",tags:["防蓝光","电子屏幕","手机","iPad"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>客观建议（吉特默）<br><b>推荐话术：</b>\"防蓝光眼镜可以减少电子屏幕蓝光对眼睛的刺激，对于长时间看手机、iPad、电脑的孩子有一定保护作用。但防蓝光不等于防控近视，它只是辅助保护手段。\""},
+{id:"NW-04",q:"散光需要特殊处理吗？",concern:"网络热议",tags:["散光","特殊","处理"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>专业建议（吉特默）<br><b>推荐话术：</b>\"散光需要根据度数和类型来决定。顺规散光一般不影响防控效果；逆规散光大于200度可能不适合夜戴角塑镜。建议做个详细检查，根据孩子的具体情况推荐方案。\""},
+{id:"NW-05",q:"弱视和近视是一回事吗？",concern:"网络热议",tags:["弱视","近视","区别"],master:"德鲁克",
+a:"<b>🧠 大师技巧：</b>解决认知问题（德鲁克）<br><b>推荐话术：</b>\"不是一回事。近视是看远不清楚，弱视是即使戴了眼镜也看不清。弱视的黄金治疗期是3-6岁，越早越好。如果是中低度近视引起的弱视，可以用角塑镜矫正后配合弱视训练，效果更好。\""},
+{id:"NW-06",q:"孩子眼睛突出是近视导致的吗？",concern:"网络热议",tags:["眼睛突出","眼球","轴性近视"],master:"德鲁克×吉特默",
+a:"<b>🧠 大师技巧：</b>科学解释（德鲁克）+ 数据（吉特默）<br><b>推荐话术：</b>\"近视不一定会导致眼球突出。要看是真性近视还是假性近视，轴性近视还是曲率性近视。轴性近视是因为眼轴变长，眼轴每增长1mm近视增加300度。控制度数增长就能减缓眼轴变长。\""},
+{id:"NW-07",q:"近视会遗传吗？多少度会遗传？",concern:"网络热议",tags:["遗传","基因","度数遗传"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>数据信任（吉特默）<br><b>推荐话术：</b>\"高度近视（600度以上）有遗传倾向。父母双方都高度近视，子女发生率100%；一方高度近视，发生率50%；双方都无，发生率25%。所以父母近视的，更应重视孩子的近视防控。\""},
+{id:"NW-08",q:"孩子看东西眯眼睛是怎么回事？",concern:"网络热议",tags:["眯眼","揉眼","用眼习惯"],master:"德鲁克",
+a:"<b>🧠 大师技巧：</b>发现问题（德鲁克）<br><b>推荐话术：</b>\"眯眼睛是孩子在试图提高视力清晰度，说明可能已经有近视或散光了。建议尽快做个全面视力检查，早发现早干预。长期眯眼还可能加重散光。\""},
+{id:"NW-09",q:"每天看电子产品多久算多？",concern:"网络热议",tags:["电子产品","手机","时间","用眼"],master:"德鲁克",
+a:"<b>🧠 大师技巧：</b>科学建议（德鲁克）<br><b>推荐话术：</b>\"建议每天电子产品使用时间不超过2小时，每30-40分钟休息5-10分钟。同时注意距离：手机30cm以上，平板40cm以上，电脑50cm以上。更重要的是每天保证2小时户外活动，阳光对预防近视有帮助。\""},
+{id:"NW-10",q:"角膜塑形镜停戴后度数会反弹吗？",concern:"网络热议",tags:["角塑","停戴","反弹","恢复"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>诚实+数据（吉特默）<br><b>推荐话术：</b>\"停戴后角膜曲率会恢复原样，但近视度数不会'反弹加速'，只是恢复到使用前的增长水平。也就是说，如果以前每年涨100度，停戴后还是每年涨100度左右。\""},
+{id:"NW-11",q:"散瞳验光有必要吗？有副作用吗？",concern:"网络热议",tags:["散瞳","验光","副作用","阿托品"],master:"吉特默",
+a:"<b>🧠 大师技巧：</b>专业+信任（吉特默）<br><b>推荐话术：</b>\"散瞳验光非常必要，可以去除眼睛调节力，得到真实度数。散瞳没有副作用，只是散瞳期间近距离视力可能模糊，瞳孔恢复后自然消失。快散6-8小时恢复，慢散约3周。\""},
+{id:"NW-12",q:"孩子视力下降一定是近视吗？",concern:"网络热议",tags:["视力下降","近视","眼部疾病"],master:"德鲁克",
+a:"<b>🧠 大师技巧：</b>全面诊断（德鲁克）<br><b>推荐话术：</b>\"不一定。视力下降可能是近视、散光，也可能是结膜炎、青光眼、眼底病变等眼部疾病。建议先做系统的眼科检查，排除眼部疾病后再确定是否需要配镜。\""},
+{id:"NW-13",q:"戴普通近视镜一定会长度数吗？",concern:"网络热议",tags:["普通眼镜","长度数","调节"],master:"德鲁克×吉特默",
+a:"<b>🧠 大师技巧：</b>解释原理（德鲁克）+ 数据（吉特默）<br><b>推荐话术：</b>\"是的。学生大部分时间在看近，但看近时用的还是看远的近视镜，这时眼睛会多用调节，越疲劳度数越深。这是青少年戴眼镜后度数仍然加深的主要原因。防控镜片可以解决这个问题。\""},
+{id:"NW-14",q:"角膜塑形镜和激光手术哪个更好？",concern:"网络热议",tags:["角塑","激光手术","对比"],master:"吉特默×德鲁克",
+a:"<b>🧠 大师技巧：</b>客观对比（吉特默）+ 解决问题（德鲁克）<br><b>推荐话术：</b>\"两者不是替代关系。角塑镜用于青少年近视控制，激光手术用于成年后矫正。而且角塑镜停戴一个月后就可以做激光手术。如果度数控制得好，成年后做激光手术的风险也更低。\""},
+{id:"NW-15",q:"护眼产品（眼贴、按摩仪）有用吗？",concern:"网络热议",tags:["护眼","眼贴","按摩仪","治疗"],master:"特劳特×吉特默",
+a:"<b>🧠 大师技巧：</b>客观区分（特劳特）+ 信任（吉特默）<br><b>推荐话术：</b>\"眼贴、按摩仪主要作用是放松眼睛、促进血液循环，对于缓解疲劳和假性近视有一定效果。但对于<b>真性近视</b>，目前没有任何产品可以治愈。防控真性近视，建议选择有临床数据支持的方法。\""}
+];
+
+// 渲染异议库（带搜索+筛选）
+let currentTag = 'all';
+
+function filterObjections(){
+  const query = document.getElementById('obj-search').value.toLowerCase().trim();
+  const filtered = objections.filter(o => {
+    const matchTag = currentTag === 'all' || o.tags.includes(currentTag) || o.concern.includes(currentTag);
+    const matchQuery = !query || o.q.toLowerCase().includes(query) || o.concern.toLowerCase().includes(query) || o.tags.some(t => t.includes(query)) || (o.a && o.a.toLowerCase().includes(query));
+    return matchTag && matchQuery;
+  });
+  renderObjectionList(filtered);
+}
+
+function filterByTag(tag){
+  currentTag = tag;
+  // 重置所有标签按钮样式
+  const tags = ['all','防控','角塑','价格','效果','竞品','拖延'];
+  tags.forEach(t => {
+    const btn = document.getElementById('tag-' + t);
+    if(btn){ btn.style.background = 'transparent'; btn.style.color = ''; }
+  });
+  // 高亮当前标签
+  const activeBtn = document.getElementById('tag-' + tag);
+  if(activeBtn){ activeBtn.style.background = 'var(--primary)'; activeBtn.style.color = '#fff'; }
+  filterObjections();
+}
+
+function renderObjectionList(list){
+  document.getElementById('obj-count').textContent = list.length;
+  if(list.length === 0){
+    document.getElementById('objection-list').innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px">没有找到匹配的异议话术，试试其他关键词</p>';
+    return;
+  }
+  // 按分类分组
+  const groups = {};
+  list.forEach(o => {
+    const g = o.id.startsWith('JS') ? '角塑（OK镜）' : o.id.startsWith('NW') ? '网络热议' : '防控镜片';
+    if(!groups[g]) groups[g] = [];
+    groups[g].push(o);
+  });
+  let html = '';
+  for(const [gName, items] of Object.entries(groups)){
+    html += `<h4 style="margin:16px 0 8px;color:var(--primary);font-size:15px">📂 ${gName}（${items.length}条）</h4>`;
+    items.forEach(o => {
+      const masterHtml = o.master ? `<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">🧠 ${o.master}</div>` : '';
+      html += `<div class="objection-card" onclick="this.classList.toggle('open')">
+        <div class="q"><span class="tag tag-tc">${o.id}</span> "${o.q}" <span style="font-size:12px;color:var(--text-muted);font-weight:400;margin-left:8px">${o.concern}</span></div>
+        <div class="a">${masterHtml}${o.a}</div>
+      </div>`;
+    });
+  }
+  document.getElementById('objection-list').innerHTML = html;
+}
+
+// 初始化：页面加载时渲染全部
+function initObjections(){
+  currentTag = 'all';
+  document.getElementById('obj-search').value = '';
+  // 重置所有标签按钮样式
+  document.querySelectorAll('.btn-outline').forEach(b => {
+    b.style.background = 'transparent';
+    b.style.color = '';
+  });
+  const allBtn = document.getElementById('tag-all');
+  if(allBtn){ allBtn.style.background = 'var(--primary)'; allBtn.style.color = '#fff'; }
+  renderObjectionList(objections);
+}
+
+// 家长角色
+const parentRoles=[
+{name:"焦虑型妈妈（王姐）",emoji:"👩",stars:2,child:"小明，8岁，近视100度",concern:"效果、安全",opening:"医生，我家孩子才8岁就近视了，怎么办啊？我看网上说越戴眼镜度数越深，是真的吗？",
+tip:"先用同理心认同家长情绪，再纠正认知误区，用数据说话",
+responses:[
+{kw:["别急","不着急","放心","理解","担心","正常","每个家长"],r:"嗯，我就是太着急了……你说那个网上说的到底对不对啊？",skill:"情感连接",desc:"先认同家长情绪，建立信任"},
+{kw:["普通","只矫正","不控制","防控","延缓","度数","加深"],r:"那你说的那个防控镜片是什么？真的有用吗？会不会有副作用？",skill:"需求挖掘",desc:"从问题引出产品，建立需求"},
+{kw:["高境光","第三代","临床","数据","延缓","76%","安全","物理","北大"],r:"听着不错……那这个多少钱啊？",skill:"价值传递",desc:"用数据和原理建立信任"},
+{kw:["贵","价格","划算","账","后续","一次到位","分期","长期"],r:"嗯……你们现在有什么优惠吗？",skill:"异议处理",desc:"价格异议，转换视角算长期账"},
+{kw:["免费","检查","不耽误","了解","先看看","做个检查"],r:"那行吧，先检查一下看看。",skill:"成交推进",desc:"低门槛推进，引导下一步行动"}
+]},
+{name:"理性型爸爸（李工）",emoji:"👨‍💼",stars:3,child:"小李，10岁，近视200度",concern:"数据、原理",opening:"我看过一些资料，星趣控用的是H.A.L.T.高非球微透镜技术。我想问一下，高境光和星趣控的本质区别是什么？",
+tip:"理性型家长喜欢数据，用临床研究和多中心数据回应",
+responses:[
+{kw:["离焦","被动","调控","主动","户外","光线","信号","ON/OFF","通路"],r:"嗯，理解是对的。那临床数据呢？是哪几家医院做的？",skill:"专业价值",desc:"技术差异对比，建立专业形象"},
+{kw:["医院","临床","论文","数据","多中心","研究","北大","理工"],r:"数据倒是不错。那和星趣控的67%比，你们76%是怎么测的？",skill:"数据信任",desc:"引用权威研究数据"},
+{kw:["散射","视觉","干扰","清晰","小","影响","14%","对比"],r:"明白了。那和其他产品比呢？",skill:"竞品对比",desc:"客观对比，突出差异化优势"},
+{kw:["星趣控","控优点","对比","59%","67%","76%","客观","尊重","选择"],r:"你说得有道理。那我需要考虑一下价格和售后。",skill:"成交推进",desc:"尊重选择，适时推进"}
+]},
+{name:"价格敏感型（赵阿姨）",emoji:"👵",stars:3,child:"孙女，9岁，近视150度",concern:"价格、优惠",opening:"这个多少钱啊？我看网上好像更便宜。你们能打折吗？",
+tip:"价格敏感型要算长期账，强调安全性和服务价值",
+responses:[
+{kw:["理解","网上","便宜","专业","验配","售后","保障","服务"],r:"那你们店里能便宜多少？",skill:"情感连接",desc:"认同价格顾虑，拉近距离"},
+{kw:["价格","活动","优惠","划算","长期","涨","后续","成本","一次到位"],r:"嗯，你说的也有道理。那具体多少钱？",skill:"价值对标",desc:"价值对标，强调长期划算"},
+{kw:["具体","分期","方案","先定","检查"],r:"行，我考虑考虑。今天有什么活动吗？",skill:"成交推进",desc:"给选择而非给压力"}
+]},
+{name:"从众型家长（刘姐）",emoji:"👩‍👧",stars:1,child:"小刘，7岁，近视75度",concern:"别人用什么",opening:"我同事家孩子也在配防控镜片，配的是星趣控。你们这里有没有？哪种用的最多？",
+tip:"从众型用口碑和案例回应，强调真实顾客反馈",
+responses:[
+{kw:["我们店","最多","高境光","顾客","用的多","选择","口碑"],r:"哦？高境光用的人多吗？效果怎么样？",skill:"社会证明",desc:"用店里的真实案例回应"},
+{kw:["效果","反馈","好","控制","度数","顾客","评价","案例","故事"],r:"那价格呢？比星趣控贵吗？",skill:"价值传递",desc:"案例分享，增强可信度"},
+{kw:["价格","差不多","活动","性价比","优惠","划算"],r:"听起来不错，那给孩子配一副试试吧。",skill:"成交推进",desc:"正面回应，及时推进"}
+]},
+{name:"怀疑型家长（陈先生）",emoji:"🤨",stars:4,child:"小陈，11岁，近视300度",concern:"数据真实性",opening:"你们说的这些数据，我怎么知道是真的？每个品牌都说自己最好。",
+tip:"怀疑型要坦诚、用证据、不夸大，给顾客查证渠道",
+responses:[
+{kw:["理解","谨慎","论文","原始","扫码","查看","公开","学术","多中心"],r:"论文能给我看看吗？",skill:"信任建立",desc:"提供可查证的学术来源"},
+{kw:["论文","资料","给您","看看","临床","报告","医院","原件"],r:"那你们店有多少孩子用了这个？有效果吗？",skill:"案例信任",desc:"用真实顾客反馈增强信任"},
+{kw:["顾客","案例","反馈","分享","真实","体验","身边"],r:"行吧，我先了解一下。",skill:"不放弃",desc:"给顾客时间，不施压"}
+]},
+{name:"专业型家长（周医生）",emoji:"👨‍⚕️",stars:4,child:"小周，9岁，近视125度",concern:"理论、技术细节",opening:"我是眼科的，对ON/OFF通路有一定了解。我想从专业角度问一下，你们的微透镜团簇设计和星趣控的H.A.L.T.有什么区别？",
+tip:"专业型用更深度技术细节回应，展示专业度",
+responses:[
+{kw:["微透镜","参数","设计","光学","团簇","直径","间距","非球面"],r:"那ON通路的阈值是怎么设定的？",skill:"技术深度",desc:"展示专业参数知识"},
+{kw:["阈值","通路","机制","研究","文献","论文","调节"],r:"嗯，和我了解的差不多。那散射面积14%是怎么测的？",skill:"数据解读",desc:"深度技术沟通"},
+{kw:["散射","测量","方法","临床","验证","多中心","试验"],r:"好，了解了。你觉得适合我家孩子吗？",skill:"个性化推荐",desc:"给出专业建议"}
+]},
+{name:"沉默型家长（张姐）",emoji:"🙋",stars:1,child:"小张，10岁，近视200度",concern:"不愿表达",opening:"……（不说话，四处看看）",
+tip:"沉默型先从孩子入手破冰，用轻松话题打开话匣子",
+responses:[
+{kw:["小朋友","孩子","名字","几岁","多大","可爱","叫","上学"],r:"10岁了。",skill:"破冰",desc:"从孩子入手建立连接"},
+{kw:["近视","度数","多久","检查","戴镜","时间","发现"],r:"大概一年多了，现在200度。",skill:"SPIN-S",desc:"了解现状信息"},
+{kw:["现在","戴","什么","眼镜","普通","防控","效果","之前"],r:"就是普通眼镜。",skill:"SPIN-P",desc:"挖掘问题"},
+{kw:["防控","控制","延缓","度数","加深","普通","只矫正","不控制","长得快"],r:"防控镜片和普通的不一样吗？",skill:"需求引导",desc:"引导家长意识到需求"}
+]}
+];
+
+// ===== 技巧评分引擎 =====
+const skillKeywords={
+  '情感连接':["理解","担心","每个家长","放心","我懂","我明白","正常","太正常了","别急"],
+  '需求挖掘':["孩子","度数","加深","涨","控制","防控","问题","困扰","近视"],
+  '价值传递':["76%","76","延缓","数据","效果","临庌","临","临*","临#","临\n"],
+  '异议处理':["贵","便宜","太贵","划算","网上","别家","别人说","有用吗","真的吗","会不会","副作用","担心"],
+  '成交推进':["先","检查","试试","配","定","约","做个","免费","了解","看看"],
+  'SPIN-S':["几岁","多久","近视","发现","度数","验光","检查","以前","之前","现在"],
+  'SPIN-P':["加深","涨","效果","控制","困扰","问题","眼镜","戴"],
+  'SPIN-I':["高度近视","眼底","视网膜","青光眼","风险","并发症","影响","危害","以后"],
+  'SPIN-N':["有产品","减缓","控制","防控","解决","帮助","方法","要不要","有兴趣"],
+  '专业价值':["技术","原理","ON/OFF","离焦","通路","调控","微透镜","散射","研究"],
+  '社会证明':["顾客","孩子","案例","反馈","效果","用过的","我们店","很多","大家"],
+  '信任建立':["论文","数据","临床","研究","医院","北大","理工","多中心","可以查","公开"],
+  '不放弃':["没关系","不着急","慢慢来","了解","随时","可以先","先看看","随时找我"],
+  '破冰':["小朋友","孩子","可爱","几岁","叫什么","上学","几年级","名字"]
+};
+
+function evalSkill(text){
+  const found=[];
+  const lower=text.toLowerCase();
+  for(const [skill,kws] of Object.entries(skillKeywords)){
+    if(kws.some(k=>lower.includes(k))){found.push(skill);}
+  }
+  return found.length>0?found:["未识别技巧"];
+}
+
+let chatActive=false,currentParent=null,chatHistory=[],msgCount=0,skillRecord={};
+
+function renderParents(){
+document.getElementById('parent-list').innerHTML=parentRoles.map((p,i)=>`
+<div class="parent-card" onclick="startChat(${i})">
+<div class="emoji">${p.emoji}</div>
+<div class="info">
+<h4>${p.name}</h4>
+<p>孩子：${p.child} | 关注：${p.concern}</p>
+<p>难度：<span class="stars">${'⭐'.repeat(p.stars)}</span></p>
+</div>
+</div>`).join('');
+}
+
+function startChat(idx){
+currentParent=idx;chatActive=true;chatHistory=[];msgCount=0;skillRecord={};
+const p=parentRoles[idx];
+document.getElementById('parent-select').style.display='none';
+// 完整重建 chat-area，确保干净状态
+const chatArea=document.getElementById('chat-area');
+chatArea.style.display='block';
+chatArea.innerHTML=`
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+<h3 id="chat-title" style="margin:0">${p.emoji} ${p.name} — ${p.child}</h3>
+<button class="btn btn-warning" onclick="endChat()" style="padding:8px 16px;font-size:13px">🏁 结束对话</button>
+</div>
+<div id="skill-bar" style="margin-bottom:12px;padding:10px 14px;background:linear-gradient(135deg,#f8fafc,#f1f5f9);border-radius:10px;border:1px solid var(--border);min-height:44px;display:flex;align-items:center;flex-wrap:wrap">
+<span style="font-size:12px;color:var(--text-muted)">发送消息后，这里会显示你用到的销售技巧</span>
+</div>
+<div class="chat-box" id="chat-box" style="max-height:420px"></div>
+<div class="chat-input-wrap">
+<input type="text" id="chat-input" placeholder="输入你的回应..." onkeydown="if(event.key==='Enter')sendChat()" style="flex:1">
+<button class="btn btn-primary" onclick="sendChat()">发送</button>
+</div>`;
+// 提示卡
+const tipBox=document.createElement('div');
+tipBox.id='tip-box';
+tipBox.style.cssText='margin:12px 0;padding:12px 16px;background:linear-gradient(135deg,#fefce8,#fef3c7);border-radius:10px;border-left:3px solid #f59e0b;font-size:13px;color:#92400e;line-height:1.7';
+tipBox.innerHTML='<b>💡 提示：</b>'+p.tip;
+document.getElementById('chat-box').appendChild(tipBox);
+addMsg('parent',p.opening);
+updateSkillBar();
+document.getElementById('chat-input').focus();
+}
+
+function addMsg(type,text,skill){
+chatHistory.push({type,text,skill});
+const box=document.getElementById('chat-box');
+const d=document.createElement('div');
+d.className='chat-msg '+type;
+let skillHtml='';
+if(type==='student'&&skill&&skill.length>0){
+  skillRecord[skill[0]]=(skillRecord[skill[0]]||0)+1;
+  skillHtml=`<div style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px">`+skill.map(s=>`<span style="font-size:11px;padding:2px 8px;background:${getSkillColor(s)};color:#fff;border-radius:10px;font-weight:600">${s}</span>`).join('')+`</div>`;
+}
+d.innerHTML=`<div><div style="font-size:12px;font-weight:700;margin-bottom:4px;color:var(--text-muted)">${type==='parent'?'👩 家长':'👤 你'}</div><div class="chat-bubble">${text}</div>${skillHtml}</div>`;
+box.appendChild(d);box.scrollTop=box.scrollHeight;
+updateSkillBar();
+}
+
+function getSkillColor(skill){
+  const colors={'情感连接':'#ec4899','需求挖掘':'#8b5cf6','价值传递':'#f59e0b','异议处理':'#10b981','成交推进':'#3b82f6','SPIN-S':'#06b6d4','SPIN-P':'#6366f1','SPIN-I':'#f97316','SPIN-N':'#84cc16','专业价值':'#14b8a6','社会证明':'#f43f5e','信任建立':'#0ea5e9','不放弃':'#22c55e','破冰':'#a855f7','技术深度':'#0891b2','数据解读':'#64748b','个性化推荐':'#d946ef','未识别技巧':'#94a3b8'};
+  return colors[skill]||'#6366f1';
+}
+
+function updateSkillBar(){
+  const bar=document.getElementById('skill-bar');
+  if(!bar)return;
+  const skills=Object.keys(skillRecord);
+  if(skills.length===0){bar.innerHTML='<span style="font-size:12px;color:var(--text-muted)">发送消息后，这里会显示你用到的销售技巧</span>';return;}
+  bar.innerHTML='<div style="display:flex;flex-wrap:wrap;gap:6px">'+skills.map(s=>`<span style="font-size:12px;padding:4px 10px;background:${getSkillColor(s)};color:#fff;border-radius:20px;font-weight:600">${s} ×${skillRecord[s]}</span>`).join('')+'</div>';
+}
+
+function sendChat(){
+const input=document.getElementById('chat-input');
+const text=input.value.trim();if(!text)return;input.value='';
+msgCount++;
+const skills=evalSkill(text);
+addMsg('student',text,skills);
+const p=parentRoles[currentParent];if(!p)return;
+// 匹配家长回应
+for(const r of p.responses){
+  if(r.kw.some(k=>text.toLowerCase().includes(k.toLowerCase()))){
+    setTimeout(()=>{
+      addMsg('parent',r.r);
+      // 显示技巧提示
+      if(r.skill){
+        const fb=document.createElement('div');
+        fb.style.cssText='margin:8px 0;padding:10px 14px;background:linear-gradient(135deg,#ecfdf5,#d1fae5);border-radius:8px;font-size:12px;color:#065f46;border-left:3px solid #10b981';
+        fb.innerHTML='<b>✅ 技巧点评：</b>'+r.skill+' — '+r.desc;
+        document.getElementById('chat-box').appendChild(fb);
+        document.getElementById('chat-box').scrollTop=document.getElementById('chat-box').scrollHeight;
+      }
+    },600);
+    return;
+  }
+}
+// 无匹配 → 给通用提示
+const tipTexts=["嗯……你说的有点道理，但我还是想多了解一下。","你能再说具体一点吗？","那其他产品呢？","我再想想吧。","你能给我看看具体数据吗？"];
+setTimeout(()=>addMsg('parent',tipTexts[Math.floor(Math.random()*tipTexts.length)]),600);
+// 3轮无响应后给提示
+if(msgCount>=3&&msgCount%3===0){
+  setTimeout(()=>{
+    const tip=document.createElement('div');
+    tip.style.cssText='margin:8px 0;padding:10px 14px;background:#fef3c7;border-radius:8px;font-size:12px;color:#92400e;border-left:3px solid #f59e0b';
+    tip.innerHTML='<b>💡 小提示：</b>试试从关心孩子入手，或者用SPIN提问了解家长需求？比如"孩子现在度数情况怎么样？"';
+    document.getElementById('chat-box').appendChild(tip);
+    document.getElementById('chat-box').scrollTop=document.getElementById('chat-box').scrollHeight;
+  },1000);
+}
+}
+
+function endChat(){
+chatActive=false;
+const p=parentRoles[currentParent];
+if(!p)return;
+const skills=Object.keys(skillRecord);
+// 基于技巧使用情况评分
+const base={r:70,s:70,v:70,o:70,c:70,e:70};
+skills.forEach(sk=>{
+  if(['情感连接','破冰'].includes(sk))base.e=Math.min(100,base.e+10);
+  if(['SPIN-S','SPIN-P','需求挖掘'].includes(sk))base.s=Math.min(100,base.s+8);
+  if(['SPIN-I'].includes(sk))base.o=Math.min(100,base.o+8);
+  if(['SPIN-N','价值传递','专业价值','社会证明','数据解读'].includes(sk))base.v=Math.min(100,base.v+8);
+  if(['异议处理','信任建立'].includes(sk))base.o=Math.min(100,base.o+6);
+  if(['成交推进'].includes(sk))base.c=Math.min(100,base.c+10);
+  if(['不放弃'].includes(sk))base.c=Math.min(100,base.c+5);
+});
+// 惩罚未使用关键技巧
+if(!skills.some(s=>['SPIN-S','SPIN-P','需求挖掘'].includes(s)))base.s=Math.max(50,base.s-15);
+if(!skills.some(s=>['价值传递','专业价值','数据解读'].includes(s)))base.v=Math.max(50,base.v-15);
+if(!skills.some(s=>['异议处理','信任建立'].includes(s)))base.o=Math.max(50,base.o-15);
+if(!skills.some(s=>['成交推进'].includes(s)))base.c=Math.max(50,base.c-15);
+const total=Math.round(base.r*.1+base.s*.25+base.v*.25+base.o*.25+base.c*.15+base.e*.1);
+const scores=JSON.parse(localStorage.getItem('toc_scores')||'[]');
+scores.push({level:'实战-'+p.name,score:total,date:new Date().toLocaleDateString('zh-CN')});
+localStorage.setItem('toc_scores',JSON.stringify(scores));
+// 技巧总结
+const skillSummary=skills.length>0?'<div style="margin-top:12px;text-align:left"><b style="font-size:13px;color:var(--text-secondary)">📋 本次技巧使用：</b><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">'+skills.map(s=>`<span style="font-size:12px;padding:4px 10px;background:${getSkillColor(s)};color:#fff;border-radius:20px;font-weight:600">${s} ×${skillRecord[s]}</span>`).join('')+'</div></div>':'';
+let h=`<div class="result-box ${total>=80?'pass':'fail'}"><p style="font-size:18px;margin-bottom:4px">${total>=80?'🎉 太棒了！':'💪 继续加油！'}</p><div class="big">${total}分</div><p style="margin-top:4px">${msgCount}轮对话</p></div>`;
+h+=`<div class="score-bar">`;
+[['进店接待',base.r],['需求挖掘',base.s],['价值传递',base.v],['异议处理',base.o],['成交推进',base.c],['情感连接',base.e]].forEach(([l,v])=>{h+=`<div class="score-item"><div class="label">${l}</div><div class="value" style="color:${v>=80?'var(--success)':v>=60?'var(--warning)':'var(--danger)'}">${v}</div></div>`});
+h+=`</div>${skillSummary}<div style="text-align:center;margin-top:20px"><button class="btn btn-outline" onclick="showReportDetail()" style="margin-right:8px">📋 详细报告</button><button class="btn btn-primary" onclick="backToParents()">返回选择</button></div>`;
+document.getElementById('chat-area').innerHTML=h;
+}
+
+function showReportDetail(){
+  const p=parentRoles[currentParent];
+  const skills=Object.entries(skillRecord).sort((a,b)=>b[1]-a[1]);
+  const advices=[];
+  const skillCounts=Object.fromEntries(skills);
+  if(!skillCounts['情感连接']&&!skillCounts['破冰'])advices.push('🏆 建议：用同理心开场，比如"我理解您的担心"，能快速建立信任');
+  if(!skillCounts['SPIN-S']&&!skillCounts['需求挖掘'])advices.push('🎯 建议：用SPIN提问了解现状，先收集信息再推荐方案');
+  if(!skillCounts['价值传递'])advices.push('💎 建议：用具体数据说话，如"76%延缓率"，让家长感受价值');
+  if(!skillCounts['异议处理'])advices.push('💬 建议：面对"贵/有用吗"等异议，先认同再回应，不要回避');
+  if(!skillCounts['成交推进'])advices.push('🤝 建议：识别购买信号后及时推进，如"先做个检查？"');
+  const adviceHtml=advices.length>0?'<div style="margin-top:16px;text-align:left"><b style="font-size:13px">📝 改进建议：</b><div style="margin-top:8px;font-size:13px;line-height:1.8;color:var(--text-secondary)">'+advices.map(a=>'<div style="margin-bottom:4px">'+a+'</div>').join('')+'</div></div>':'';
+  alert('📋 实战报告 - '+p.name+'\n\n'+skills.map(([s,c])=>'• '+s+' ×'+c).join('\n')+'\n\n'+advices.map(a=>a).join('\n'));
+}
+
+function backToParents(){
+chatActive=false;
+currentParent=null;
+skillRecord={};msgCount=0;chatHistory=[];
+if(document.getElementById('parent-select'))document.getElementById('parent-select').style.display='block';
+if(document.getElementById('chat-area'))document.getElementById('chat-area').style.display='none';
+renderParents();
+}
+
+function copyText(text,btn){
+  navigator.clipboard.writeText(text).then(function(){
+    btn.textContent='已复制!';
+    btn.classList.add('copied');
+    setTimeout(function(){btn.textContent='复制';btn.classList.remove('copied');},1500);
+  }).catch(function(){
+    btn.textContent='失败';
+    setTimeout(function(){btn.textContent='复制';},1500);
+  });
+}
+function loadFavorites(){
+  try{return JSON.parse(localStorage.getItem('toc_favorites')||'[]');}catch(e){return [];}
+}
+function saveFavorites(list){localStorage.setItem('toc_favorites',JSON.stringify(list));}
+function toggleFavorite(btn,q,text){
+  var list=loadFavorites();
+  var key=btoa(unescape(encodeURIComponent(q))).substring(0,30);
+  var exists=list.find(function(x){return x.key===key;});
+  if(exists){
+    list=list.filter(function(x){return x.key!==key;});
+    btn.textContent='⭐ 收藏';
+    btn.classList.remove('favorited');
+  }else{
+    list.push({key:key,q:q,text:text,date:new Date().toLocaleDateString('zh-CN')});
+    btn.textContent='★ 已收藏';
+    btn.classList.add('favorited');
+  }
+  saveFavorites(list);
+  renderFavorites();
+}
+function renderFavorites(){
+  var area=document.getElementById('fav-list');
+  if(!area)return;
+  var list=loadFavorites();
+  if(!list.length){area.innerHTML='<div style="color:var(--text-muted);text-align:center;padding:32px;font-size:14px">⭐ 暂无收藏的话术<br><br><span style="font-size:13px">点击话术卡片的⭐按钮，收藏常用话术</span></div>';return;}
+  var html='<div style="display:grid;gap:12px">';
+  list.forEach(function(item,i){
+    html+='<div style="padding:14px 16px;background:linear-gradient(135deg,#fefce8,#fef9c3);border-radius:10px;border-left:3px solid #f59e0b;position:relative">';
+    html+='<div style="font-size:11px;color:#92400e;margin-bottom:6px;font-weight:600">'+item.date+'</div>';
+    html+='<div style="font-size:13px;font-weight:600;color:#78350f;margin-bottom:6px;line-height:1.5">'+item.q+'</div>';
+    html+='<div style="font-size:13px;color:#451a03;line-height:1.7">'+item.text+'</div>';
+    html+='<button class="fav-del-btn" data-key="'+item.key+'" onclick="removeFavorite(this)" style="position:absolute;top:10px;right:10px;font-size:11px;padding:3px 8px;background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:6px;cursor:pointer">删除</button>';
+    html+='</div>';
+  });
+  html+='</div>';
+  area.innerHTML=html;
+}
+function removeFavorite(btn){
+  var key=btn.getAttribute('data-key');
+  var list=loadFavorites();
+  list=list.filter(function(x){return x.key!==key;});
+  saveFavorites(list);
+  renderFavorites();
+  document.querySelectorAll('.fav-btn').forEach(function(b){
+    var k=b.getAttribute('data-key');
+    if(k&&k===key){b.textContent='⭐ 收藏';b.classList.remove('favorited');}
+  });
+}
+function clearFavorites(){
+  if(!confirm('确定清空所有收藏？'))return;
+  localStorage.removeItem('toc_favorites');
+  renderFavorites();
+  document.querySelectorAll('.fav-btn').forEach(function(b){b.textContent='⭐ 收藏';b.classList.remove('favorited');});
+}
+function initCopyButtons(){
+  var favList=loadFavorites();
+  document.querySelectorAll('.script-box').forEach(function(box){
+    var textEl=box.querySelector('.text');
+    if(!textEl)return;
+    if(!box.querySelector('.copy-btn')){
+      var btn=document.createElement('button');
+      btn.className='copy-btn';
+      btn.textContent='复制';
+      btn.onclick=function(){copyText(textEl.textContent.trim(),btn);};
+      box.appendChild(btn);
+    }
+    if(!box.querySelector('.fav-btn')){
+      var q=box.closest('.master-content')?box.closest('.master-content').querySelector('h3,h4,.master-name')?box.closest('.master-content').querySelector('h3,h4,.master-name').textContent.trim():box.textContent.trim().substring(0,30):box.textContent.trim().substring(0,30);
+      var text=textEl.textContent.trim();
+      var key=btoa(unescape(encodeURIComponent(q))).substring(0,30);
+      var isFav=favList.find(function(x){return x.key===key;});
+      var favBtn=document.createElement('button');
+      favBtn.className='fav-btn'+(isFav?' favorited':'');
+      favBtn.setAttribute('data-key',key);
+      favBtn.textContent=isFav?'★ 已收藏':'⭐ 收藏';
+      favBtn.onclick=function(){toggleFavorite(favBtn,q,text);};
+      box.appendChild(favBtn);
+    }
+  });
+}
+
+initAllModuleQuizzes();renderDailyQuestion();
+initWrongAnswers();
+initObjections();
+loadProgress();
+renderParents();
+</script>
+</body>
+</html>

@@ -76,7 +76,7 @@
             <el-switch
               :model-value="row.status === 1"
               :loading="row._statusLoading"
-              @change="(val: boolean) => handleToggleStatus(row, val)"
+              @change="(val) => handleToggleStatus(row as UserInfo, Boolean(val))"
             />
           </template>
         </el-table-column>
@@ -84,8 +84,8 @@
         <el-table-column label="操作" width="200" fixed="right">
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="$router.push(`/users/detail/${row.id}`)">详情</el-button>
-            <el-button text type="primary" size="small" @click="openEditDialog(row)">编辑</el-button>
-            <el-popconfirm title="确定删除此用户吗？" @confirm="handleDelete(row.id)">
+            <el-button text type="primary" size="small" @click="openEditDialog(row as UserInfo)">编辑</el-button>
+            <el-popconfirm teleported :persistent="false" popper-class="delete-popconfirm" title="确定删除此用户吗？" @confirm="handleDelete(row.id)">
               <template #reference>
                 <el-button text type="danger" size="small">删除</el-button>
               </template>
@@ -144,7 +144,7 @@
         </el-row>
         <el-row :gutter="16">
           <el-col :span="12">
-            <el-form-item label="手机号">
+            <el-form-item label="手机号" prop="phone">
               <el-input v-model="userForm.phone" />
             </el-form-item>
           </el-col>
@@ -235,6 +235,10 @@ const userRules: FormRules = {
   realName: [{ required: true, message: '请输入姓名', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }, { min: 6, message: '密码至少6位', trigger: 'blur' }],
   role: [{ required: true, message: '请选择角色', trigger: 'change' }],
+  phone: [
+    { required: true, message: '请输入手机号', trigger: 'blur' },
+    { pattern: /^1\d{10}$/, message: '请输入 11 位手机号', trigger: 'blur' },
+  ],
 }
 
 // Import state
@@ -265,6 +269,15 @@ async function getList() {
   } finally {
     loading.value = false
   }
+}
+
+
+function getApiErrorMessage(error: any, fallback: string) {
+  const detail = error?.response?.data?.detail
+  if (Array.isArray(detail)) {
+    return detail.map((item) => item?.msg).filter(Boolean).join('；') || fallback
+  }
+  return typeof detail === 'string' ? detail : fallback
 }
 
 function handleSearch() { currentPage.value = 1; getList() }
@@ -307,7 +320,7 @@ async function handleUserSubmit() {
         realName: userForm.realName,
         phone: userForm.phone,
         email: userForm.email,
-        storeId: userForm.storeId,
+        storeId: userForm.storeId ?? undefined,
       })
       ElMessage.success('更新成功')
     } else {
@@ -318,13 +331,15 @@ async function handleUserSubmit() {
         role: userForm.role as any,
         phone: userForm.phone,
         email: userForm.email,
-        storeId: userForm.storeId,
+        storeId: userForm.storeId ?? undefined,
       })
       ElMessage.success('创建成功')
     }
     dialogVisible.value = false
     getList()
-  } catch { /* handled */ } finally {
+  } catch (error: any) {
+    ElMessage.error(getApiErrorMessage(error, '保存失败'))
+  } finally {
     userSubmitting.value = false
   }
 }

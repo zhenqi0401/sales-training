@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ExamRecord } from '@/types'
 
-const props = defineProps<{
+defineProps<{
   record: ExamRecord
 }>()
 
@@ -12,6 +12,7 @@ function formatDuration(seconds: number): string {
 }
 
 function formatDate(dateStr: string): string {
+  if (!dateStr) return ''
   const d = new Date(dateStr)
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
 }
@@ -23,6 +24,7 @@ function formatDate(dateStr: string): string {
       <span v-if="record.passed" class="badge pass">通过</span>
       <span v-else class="badge fail">未通过</span>
     </div>
+    <div class="paper-title" v-if="record.paperTitle">{{ record.paperTitle }}</div>
     <div class="result-score">{{ record.score }}<small>/{{ record.totalScore }}</small></div>
     <div class="result-stats">
       <div class="stat-item">
@@ -62,7 +64,7 @@ function formatDate(dateStr: string): string {
 }
 
 .result-badge {
-  margin-bottom: 12px;
+  margin-bottom: 8px;
 }
 
 .badge {
@@ -83,6 +85,12 @@ function formatDate(dateStr: string): string {
   }
 }
 
+.paper-title {
+  color: var(--text-muted);
+  font-size: 13px;
+  margin-bottom: 10px;
+}
+
 .result-score {
   font-size: 48px;
   font-weight: 800;
@@ -101,7 +109,6 @@ function formatDate(dateStr: string): string {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 0;
 }
 
 .stat-item {
@@ -109,7 +116,8 @@ function formatDate(dateStr: string): string {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  padding: 0 16px;
+  padding: 0 12px;
+  min-width: 0;
 }
 
 .stat-label {
@@ -124,9 +132,11 @@ function formatDate(dateStr: string): string {
   &.correct {
     color: var(--success);
   }
+
   &.time {
     color: var(--primary);
   }
+
   &.date {
     color: var(--text-secondary);
     font-size: 12px;

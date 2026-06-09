@@ -25,7 +25,8 @@ export default defineConfig({
       scss: {
         additionalData: (source: string, filename: string) => {
           if (filename.includes('_variables.scss')) return source
-          return `@use "@/styles/variables" as *;\n` + source
+          return `@use "@/styles/variables" as *;
+` + source
         }
       }
     }
@@ -34,7 +35,11 @@ export default defineConfig({
     port: 3000,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://localhost:8080',
+        changeOrigin: true
+      },
+      '/uploads': {
+        target: 'http://localhost:8080',
         changeOrigin: true
       }
     }

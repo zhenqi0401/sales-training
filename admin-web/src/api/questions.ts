@@ -2,6 +2,7 @@ import { get, post, put, del } from './index'
 import type { Question, QuestionOption, AiGenerateParams, PageResult, Difficulty } from '@/types'
 
 type BackendPage<T> = PageResult<T> & { items?: T[] }
+type MessageResponse = { message: string; detail?: string }
 
 function toDifficultyLabel(value: unknown): Difficulty {
   if (value === 'easy' || value === 'medium' || value === 'hard') return value
@@ -21,6 +22,13 @@ function toDifficultyValue(value: unknown): number | undefined {
 
   const parsed = Number(value)
   return Number.isNaN(parsed) ? undefined : parsed
+}
+
+function toDifficultyLevelValue(value: unknown): number | undefined {
+  if (value === 'L1') return 1
+  if (value === 'L2') return 3
+  if (value === 'L3') return 5
+  return toDifficultyValue(value)
 }
 
 function toOptionList(options: unknown): QuestionOption[] {
@@ -44,14 +52,23 @@ function toOptionMap(options: unknown): Record<string, string> | undefined {
 }
 
 function normalizeQuestion(data: any): Question {
+  const type = data.type ?? 'single'
+  const rawAnswer = data.answer ?? ''
+
   return {
     ...data,
+    type,
     categoryId: data.categoryId ?? data.category_id,
+    videoId: data.videoId ?? data.video_id,
     categoryName: data.categoryName ?? data.category_name,
     difficulty: toDifficultyLabel(data.difficulty),
     options: toOptionList(data.options),
+    answer: type === 'multiple' && typeof rawAnswer === 'string'
+      ? rawAnswer.split(',').map((item) => item.trim()).filter(Boolean)
+      : rawAnswer,
     explanation: data.explanation ?? data.analysis ?? '',
     tags: Array.isArray(data.tags) ? data.tags : [],
+    source: data.source ?? '',
     status: data.status ?? (data.is_active === false ? 'disabled' : 'active'),
     createdAt: data.createdAt ?? data.created_at ?? '',
   }
@@ -77,8 +94,9 @@ function toQuestionPayload(params: Partial<Question>): Record<string, any> {
     options: toOptionMap(params.options),
     answer: Array.isArray(params.answer) ? params.answer.join(',') : params.answer,
     analysis: params.explanation,
-    difficulty: toDifficultyValue(params.difficulty),
+    difficulty: toDifficultyLevelValue((params as any).difficultyLevel ?? params.difficulty),
     category_id: params.categoryId,
+    video_id: params.videoId,
     tags: params.tags,
   }
 }
@@ -90,6 +108,7 @@ export function getQuestionList(params: {
   type?: string
   difficulty?: string
   keyword?: string
+  tag?: string
 }): Promise<PageResult<Question>> {
   return get<BackendPage<any>>('/questions/', normalizeQuestionParams(params)).then(normalizeQuestionPage)
 }
@@ -112,11 +131,24 @@ export function deleteQuestion(id: number): Promise<void> {
 
 export function aiGenerateQuestions(params: AiGenerateParams): Promise<Question[]> {
   return post<any[]>('/questions/ai-generate', {
-    topic: params.topic || 'sales training',
+    video_id: params.videoId,
+    topic: params.topic || '',
     count: params.count,
-    difficulty: toDifficultyValue(params.difficulty),
-    question_types: [params.type],
+    difficulty_level: params.difficultyLevel,
+    question_type_ratios: params.questionTypeRatios,
     category_id: params.categoryId,
+    product_category_id: params.productCategoryId,
+    knowledge_points: params.knowledgePoints ?? [],
+    transcript: params.transcript || '',
+  }).then((items) => items.map(normalizeQuestion))
+}
+
+export function saveReviewedAiQuestions(questions: Partial<Question>[]): Promise<Question[]> {
+  return post<any[]>('/questions/ai-review-save', {
+    questions: questions.map((question) => ({
+      ...toQuestionPayload(question),
+      source: 'ai',
+    })),
   }).then((items) => items.map(normalizeQuestion))
 }
 
@@ -124,6 +156,11 @@ export function batchDeleteQuestions(ids: number[]): Promise<void> {
   return post<void>('/questions/batch-delete', { ids })
 }
 
-export function importQuestions(questions: Partial<Question>[]): Promise<number> {
-  return post<number>('/questions/import', { questions })
+export function importQuestions(questions: Partial<Question>[]): Promise<MessageResponse> {
+  return post<MessageResponse>('/questions/import', {
+    questions: questions.map((question) => ({
+      ...toQuestionPayload(question),
+      source: 'import',
+    })),
+  })
 }

@@ -47,9 +47,9 @@
         </el-table-column>
         <el-table-column label="操作" width="240" fixed="right">
           <template #default="{ row }">
-            <el-button text type="primary" size="small" @click="openDialog(row)">编辑</el-button>
+            <el-button text type="primary" size="small" @click="openDialog(row as Category)">编辑</el-button>
             <el-button text type="primary" size="small" @click="openDialog(undefined, row.id)">添加子分类</el-button>
-            <el-popconfirm title="确定删除此分类吗？" @confirm="handleDelete(row.id)">
+            <el-popconfirm teleported :persistent="false" popper-class="delete-popconfirm" title="确定删除此分类吗？" @confirm="handleDelete(row.id)">
               <template #reference>
                 <el-button text type="danger" size="small">删除</el-button>
               </template>
@@ -73,7 +73,7 @@
           <el-tree-select
             v-model="form.parentId"
             :data="categoryTree"
-            :props="{ label: 'name', value: 'id', children: 'children' }"
+            :props="treeProps"
             placeholder="不选则为顶级分类"
             clearable
             check-strictly
@@ -106,6 +106,7 @@ const dialogVisible = ref(false)
 const isEditing = ref(false)
 const formRef = ref<FormInstance>()
 const editingId = ref<number | null>(null)
+const treeProps = { label: 'name', value: 'id', children: 'children' } as any
 
 const form = reactive({
   name: '',

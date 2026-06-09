@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 from typing import Any
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, or_
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
@@ -58,6 +58,71 @@ PRODUCT_CATEGORIES = {
     "竞品对比": ("competitor_compare", "竞品对比"),
 }
 
+SCRIPT_CATEGORY_LABELS = {
+    "drucker": "彼得·德鲁克",
+    "girard": "乔·吉拉德",
+    "hopkins": "汤姆·霍普金斯",
+    "gitomer": "杰弗里·吉特默",
+    "trout": "杰克·特劳特",
+    "burnett": "李奥·贝纳",
+    "masters": "大师通识",
+    "price": "价格敏感",
+    "delay": "拖延犹豫",
+    "awareness": "认知不足",
+    "brand": "品牌偏好",
+    "info_bias": "信息偏差",
+    "trust": "信任/效果疑虑",
+    "competitor": "竞品对比",
+    "execution": "执行难度",
+    "safety": "安全担忧",
+    "knowledge": "常识科普",
+    "online": "网络热议",
+    "fang_kong": "防控镜片异议",
+    "jiao_su": "角塑异议",
+    "service": "售后服务",
+    "product": "产品介绍",
+    "general": "通用话术",
+}
+
+CONCERN_CATEGORY_MAP = {
+    "价格敏感": "price",
+    "拖延": "delay",
+    "认知不足": "awareness",
+    "品牌偏好": "brand",
+    "信息偏差": "info_bias",
+    "效果怀疑": "trust",
+    "拖延/犹豫": "delay",
+    "比价": "price",
+    "执行难度": "execution",
+    "安全担忧": "safety",
+    "数据真实性": "trust",
+    "竞品信息": "competitor",
+    "需要商量": "delay",
+    "等优惠": "price",
+    "口碑影响": "trust",
+    "认为无意义": "awareness",
+    "失败经历": "trust",
+    "时机错误": "awareness",
+    "信息收集": "delay",
+    "常识": "knowledge",
+    "治愈误解": "awareness",
+    "价格": "price",
+    "产品对比": "competitor",
+    "效果预期": "trust",
+    "低度数": "delay",
+    "高度数": "execution",
+    "信任建立": "trust",
+    "信任挑战": "trust",
+    "竞品对比": "competitor",
+    "长远规划": "awareness",
+    "使用频率": "execution",
+    "舒适度": "safety",
+    "耐用性": "safety",
+    "特殊情况": "safety",
+    "停戴后果": "safety",
+    "网络热议": "online",
+}
+
 
 def clean_text(value: str) -> str:
     value = re.sub(r"<\s*br\s*/?\s*>", "\n", value, flags=re.I)
@@ -71,6 +136,15 @@ def clean_text(value: str) -> str:
     value = re.sub(r"\n{3,}", "\n\n", value)
     value = re.sub(r"[ \t]+", " ", value)
     return value.strip()
+
+
+def clean_tags(tags: list[str]) -> list[str]:
+    result: list[str] = []
+    for tag in tags:
+        item = (tag or "").strip()
+        if item and item not in result:
+            result.append(item)
+    return result
 
 
 def js_unescape(value: str) -> str:
@@ -294,7 +368,7 @@ def extract_div_blocks(text: str, class_name: str) -> list[str]:
             else:
                 depth -= 1
                 if depth == 0:
-                    blocks.append(text[match.start() : tag.end()])
+                    blocks.append((match.start(), text[match.start() : tag.end()]))
                     break
     return blocks
 
@@ -308,66 +382,235 @@ def inner_first(block: str, class_name: str) -> str:
     return clean_text(match.group(1)) if match else ""
 
 
+def master_for_card_start(text: str, card_start: int) -> str:
+    """Return the master category code for an objection-card at card_start.
+
+    Cards are siblings of master-content divs, sandwiched between them.
+    The closest master-content div BEFORE the card determines its master label.
+    Cards after the sec-learn-products boundary are tagged as 'products'.
+    """
+    # Section cutoffs — cards past these boundaries get different labels
+    products_start = text.find('id="sec-learn-products"')
+    exam_start = text.find('id="sec-exam"')
+    if products_start > 0 and card_start > products_start:
+        if exam_start > 0 and card_start > exam_start:
+            return "exam"
+        return "products"
+
+    # Master-content divs in order
+    master_div_ids = [
+        "content-drucker",
+        "content-girard",
+        "content-hopkins",
+        "content-gitomer",
+        "content-trout",
+        "content-burnett",
+    ]
+    before = text[:card_start]
+    best_code = "masters"
+    best_pos = -1
+    for div_id in master_div_ids:
+        matches = list(re.finditer(rf'<div[^>]*id="{div_id}"[^>]*>', before))
+        if matches and matches[-1].start() > best_pos:
+            best_pos = matches[-1].start()
+            best_code = div_id.replace("content-", "")
+    return best_code
+
+master_name_map = {
+    "drucker": "彼得·德鲁克",
+    "girard": "乔·吉拉德",
+    "hopkins": "汤姆·霍普金斯",
+    "gitomer": "杰弗里·吉特默",
+    "trout": "杰克·特劳特",
+    "burnett": "李奥·贝纳",
+    "masters": "大师通识",
+}
+
+
+def classify_script_box(title: str, content: str) -> str:
+    text = f"{title} {content}"
+    if any(word in text for word in ["太贵", "价格", "优惠", "便宜", "打折"]):
+        return "price"
+    if any(word in text for word in ["售后", "复查", "回访", "维护", "保养"]):
+        return "service"
+    if any(word in text for word in ["竞品", "对比", "区别", "选哪个", "框架眼镜"]):
+        return "competitor"
+    if any(word in text for word in ["成交", "下单", "今天先", "推进"]):
+        return "closing"
+    if any(word in text for word in ["产品", "镜片", "角塑", "高境光"]):
+        return "product"
+    return "general"
+
+
+def extract_table_rows(table: str) -> list[list[str]]:
+    rows: list[list[str]] = []
+    for row in re.findall(r"<tr\b[^>]*>(.*?)</tr>", table, flags=re.I | re.S):
+        cells = [
+            clean_text(cell)
+            for cell in re.findall(r"<t[dh]\b[^>]*>(.*?)</t[dh]>", row, flags=re.I | re.S)
+        ]
+        if cells and not all(cell in {"时间节点", "方式", "话术", "类型", "频率", "内容", "时机", "推荐数量", "奖励", "特征", "维护方式"} for cell in cells):
+            rows.append(cells)
+    return rows
+
+
+def extract_aftercare_scripts(text: str, start_sort: int = 1) -> list[dict[str, Any]]:
+    start = text.find('id="sec-after"')
+    if start < 0:
+        return []
+    end = text.find('id="sec-favorites"', start)
+    section = text[start:end] if end > start else text[start:]
+
+    scripts: list[dict[str, Any]] = []
+    chunks = re.split(r"(<h3\b[^>]*>.*?</h3>)", section, flags=re.I | re.S)
+    current_heading = "售后维护"
+    sort_order = start_sort
+    for chunk in chunks:
+        if re.match(r"<h3\b", chunk, flags=re.I):
+            current_heading = clean_text(chunk)
+            current_heading = re.sub(r"^[^\w\u4e00-\u9fff]+", "", current_heading).strip() or "售后维护"
+            continue
+
+        for table in re.findall(r"<table\b[^>]*>(.*?)</table>", chunk, flags=re.I | re.S):
+            for cells in extract_table_rows(table):
+                if len(cells) < 2:
+                    continue
+                title_subject = cells[0]
+                if len(cells) >= 3:
+                    content = f"方式：{cells[1]}\n话术：{cells[2]}"
+                else:
+                    content = f"话术：{cells[1]}"
+                scripts.append(
+                    {
+                        "title": f"售后维护 - {current_heading} - {title_subject}"[:256],
+                        "category": "service",
+                        "theory": "乔·吉拉德：成交不是结束，是关系的开始。",
+                        "content": content,
+                        "tags": ["prototype", "售后服务", current_heading, title_subject],
+                        "sort_order": sort_order,
+                    }
+                )
+                sort_order += 1
+    return scripts
+
+
 def extract_html_scripts(text: str) -> list[dict[str, Any]]:
     scripts: list[dict[str, Any]] = []
+    # Pre-scan master section boundaries
+    master_sections = {}
+    for div_id in ["content-drucker","content-girard","content-hopkins","content-gitomer","content-trout","content-burnett"]:
+        m = re.search(rf'<div[^>]*class="master-content[^"]*"[^>]*id="{div_id}"', text)
+        if m:
+            master_sections[div_id] = m.start()
+    sorted_sections = sorted(master_sections.items(), key=lambda x: x[1])
 
-    for idx, block in enumerate(extract_div_blocks(text, "objection-card"), start=1):
+    for idx, (card_pos, block) in enumerate(extract_div_blocks(text, "objection-card"), start=1):
         title = inner_first(block, "q")
         content = inner_first(block, "a")
         if title and content:
+            master_code = master_for_card_start(text, card_pos)
+            if master_code in {"products", "exam"}:
+                continue
+            master_name = master_name_map.get(master_code, "产品知识" if master_code == "products" else "大师通识")
             scripts.append(
                 {
                     "title": title[:256],
-                    "category": "prototype_card",
-                    "theory": "",
+                    "category": master_code,
+                    "theory": master_name,
                     "content": content,
-                    "tags": ["prototype", "html_card"],
+                    "tags": ["prototype", master_code, master_name],
                     "sort_order": idx,
                 }
             )
 
-    for idx, block in enumerate(extract_div_blocks(text, "script-box"), start=1):
+    for idx, (_, block) in enumerate(extract_div_blocks(text, "script-box"), start=1):
         title = inner_first(block, "label") or f"原型话术 {idx}"
         content = inner_first(block, "text")
         if content:
+            category = classify_script_box(title, content)
             scripts.append(
                 {
                     "title": title[:256],
-                    "category": "prototype_script",
-                    "theory": "",
+                    "category": category,
+                    "theory": SCRIPT_CATEGORY_LABELS.get(category, ""),
                     "content": content,
-                    "tags": ["prototype", "script_box"],
+                    "tags": ["prototype", "script_box", SCRIPT_CATEGORY_LABELS.get(category, category)],
                     "sort_order": idx,
                 }
             )
 
     objections = js_section(text, "const objections = [", "\n];\n\n// 渲染异议库")
-    for idx, block in enumerate(find_js_object_blocks(objections), start=1):
+
+    # Extract objection entries: use q+a (not q+o which is for quizzes)
+    obj_entries = []
+    _i = 0
+    while _i < len(objections):
+        if objections[_i] != "{":
+            _i += 1
+            continue
+        _start = _i
+        _depth = 0
+        _instr = False
+        _esc = False
+        while _i < len(objections):
+            _ch = objections[_i]
+            if _instr:
+                if _esc: _esc = False
+                elif _ch == chr(92): _esc = True
+                elif _ch == '"': _instr = False
+            else:
+                if _ch == '"': _instr = True
+                elif _ch == "{": _depth += 1
+                elif _ch == "}":
+                    _depth -= 1
+                    if _depth == 0:
+                        _blk = objections[_start:_i+1]
+                        # Must have q and a fields
+                        has_q = re.search(r"\bq\s*:", _blk) is not None
+                        has_a = re.search(r"\ba\s*:", _blk) is not None
+                        if has_q and has_a:
+                            obj_entries.append(_blk)
+                        break
+            _i += 1
+        _i += 1
+
+    for idx, block in enumerate(obj_entries, start=1):
         obj_id = extract_js_string(block, "id") or f"OBJ-{idx:03d}"
         question = extract_js_string(block, "q") or obj_id
         concern = extract_js_string(block, "concern") or ""
         answer = clean_text(extract_js_string(block, "a") or "")
         master = extract_js_string(block, "master") or ""
         tags = extract_js_string_array(block, "tags")
+        category = CONCERN_CATEGORY_MAP.get(concern, "")
+        if not category:
+            if obj_id.startswith("TC"):
+                category = "fang_kong"
+            elif obj_id.startswith("JS"):
+                category = "jiao_su"
+            elif obj_id.startswith("NW"):
+                category = "online"
+            else:
+                category = "general"
         if answer:
             scripts.append(
                 {
                     "title": f"{obj_id} {question}"[:256],
-                    "category": "objection",
+                    "category": category,
                     "theory": master,
                     "content": answer,
-                    "tags": ["prototype", concern, *tags],
-                    "sort_order": idx,
+                    "tags": clean_tags(["prototype", master, concern, *tags]),
+                    "sort_order": 10000 + idx,
                 }
             )
 
+    scripts.extend(extract_aftercare_scripts(text, start_sort=20000))
     return dedupe_dicts(scripts, ("title", "content"))
 
 
 def extract_products(text: str) -> list[dict[str, Any]]:
     section = text[text.find('<div id="sec-learn-products"') : text.find('<div id="sec-exam"')]
     products: list[dict[str, Any]] = []
-    for idx, block in enumerate(extract_div_blocks(section, "product-card"), start=1):
+    for idx, (_, block) in enumerate(extract_div_blocks(section, "product-card"), start=1):
         title_match = re.search(r"<h4[^>]*>(.*?)</h4>", block, flags=re.I | re.S)
         title = clean_text(title_match.group(1)) if title_match else f"原型产品 {idx}"
         title = re.sub(r"^[^\w\u4e00-\u9fff]+", "", title).strip()
@@ -433,6 +676,34 @@ async def import_content(dry_run: bool = False) -> None:
         await conn.run_sync(Base.metadata.create_all)
 
     async with async_session_factory() as session:
+        # --reset: delete all prototype-imported scripts/Questions/Products tagged with prototype source tag first
+        if _reset or _reset_scripts:
+            from sqlalchemy import delete as sa_delete
+            await session.execute(
+                sa_delete(Script).where(
+                    or_(
+                        Script.tags.contains("prototype"),
+                        Script.category.in_(["prototype_card", "prototype_script"]),
+                    )
+                )
+            )
+            print("Cleared old prototype scripts")
+
+        if _reset:
+            from sqlalchemy import delete as sa_delete
+            await session.execute(
+                sa_delete(Question).where(
+                    Question.source == "prototype"
+                )
+            )
+            await session.execute(
+                sa_delete(Product).where(
+                    Product.is_active == True
+                )
+            )
+            print("Cleared old prototype data: questions, products")
+            await session.flush()
+
         category_by_module: dict[str, Category] = {}
         for module, (code, name) in MODULE_CATEGORIES.items():
             category_by_module[module] = await get_or_create_category(session, code, name)
@@ -494,10 +765,18 @@ async def import_content(dry_run: bool = False) -> None:
     )
 
 
+_reset = False
+_reset_scripts = False
+
 def main() -> None:
+    global _reset, _reset_scripts
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true", help="Parse only; do not write to database")
+    parser.add_argument("--reset", action="store_true", help="Delete old prototype data before importing")
+    parser.add_argument("--reset-scripts", action="store_true", help="Delete old prototype scripts before importing")
     args = parser.parse_args()
+    _reset = args.reset
+    _reset_scripts = args.reset_scripts
     asyncio.run(import_content(dry_run=args.dry_run))
 
 

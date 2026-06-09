@@ -82,6 +82,24 @@ onMounted(async () => {
         </div>
         <van-icon name="arrow" size="16" color="var(--text-muted)" />
       </div>
+
+      <!-- Sales Scripts Entry - separate card outside v-for -->
+      <div
+        class="category-card scripts-entry"
+        @click="router.push('/courses/scripts')"
+      >
+        <div class="category-icon" style="background: linear-gradient(135deg, #7c3aed, #4f46e5)">
+          <van-icon name="chat-o" size="28" color="#fff" />
+        </div>
+        <div class="category-info">
+          <div class="category-name">销售话术</div>
+          <div class="category-desc">理论说明 + 实战话术 + 应用场景</div>
+          <div class="category-meta">
+            <span class="video-count">随时查阅 · 一键复制</span>
+          </div>
+        </div>
+        <van-icon name="arrow" size="16" color="var(--text-muted)" />
+      </div>
     </div>
   </div>
 </template>

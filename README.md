@@ -15,6 +15,23 @@
 
 ## 快速启动
 
+### 0. 系统依赖
+
+视频上传后会自动压缩为适配手机端播放的 H.264 MP4，需要 **ffmpeg**（含 ffprobe）：
+
+```bash
+# macOS
+brew install ffmpeg
+
+# Debian / Ubuntu
+sudo apt install ffmpeg
+
+# Windows
+winget install ffmpeg
+```
+
+验证：`ffmpeg -version`
+
 ### 1. 启动基础设施
 
 ```bash
@@ -68,7 +85,7 @@ npm run dev
 | 后端 | FastAPI + SQLAlchemy Async + Celery |
 | 数据库 | MySQL 8.0 + Redis 7 |
 | 认证 | JWT + bcrypt |
-| 异步任务 | Celery + Redis (AI出题、视频处理) |
+| 异步任务 | Celery + Redis (AI出题) |
 
 ## 产品分类编码
 

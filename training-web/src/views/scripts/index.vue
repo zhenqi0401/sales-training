@@ -14,13 +14,13 @@ const scripts = ref<SalesScript[]>([])
 const searchValue = ref('')
 
 // Master theory categories for the tabs
-const masterTheories = [
-  { id: 1, name: '接待问诊', masterTheory: '接待', description: '接待问诊话术' },
-  { id: 2, name: '产品介绍', masterTheory: '产品介绍', description: '产品介绍话术' },
-  { id: 3, name: '异议处理', masterTheory: '异议处理', description: '异议处理话术' },
-  { id: 4, name: '价格谈判', masterTheory: '价格谈判', description: '价格谈判话术' },
-  { id: 5, name: '促单成交', masterTheory: '促单成交', description: '促单成交话术' },
-  { id: 6, name: '售后服务', masterTheory: '售后服务', description: '售后回访话术' }
+const masterTheories: ScriptCategory[] = [
+  { id: 1, name: '接待问诊', masterTheory: '接待', description: '接待问诊话术', scriptCount: 0 },
+  { id: 2, name: '产品介绍', masterTheory: '产品介绍', description: '产品介绍话术', scriptCount: 0 },
+  { id: 3, name: '异议处理', masterTheory: '异议处理', description: '异议处理话术', scriptCount: 0 },
+  { id: 4, name: '价格谈判', masterTheory: '价格谈判', description: '价格谈判话术', scriptCount: 0 },
+  { id: 5, name: '促单成交', masterTheory: '促单成交', description: '促单成交话术', scriptCount: 0 },
+  { id: 6, name: '售后服务', masterTheory: '售后服务', description: '售后回访话术', scriptCount: 0 }
 ]
 
 onMounted(async () => {

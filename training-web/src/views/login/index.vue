@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onBeforeUnmount, ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { showToast, showLoadingToast, closeToast } from 'vant'
 import { useAuthStore } from '@/stores/auth'
@@ -17,6 +17,10 @@ const agree = ref(true)
 const loading = ref(false)
 let timer: ReturnType<typeof setInterval> | null = null
 
+function isPhoneValid() {
+  return /^1[3-9]\d{9}$/.test(phone.value)
+}
+
 function startCountdown() {
   countdown.value = 60
   sending.value = true
@@ -30,7 +34,7 @@ function startCountdown() {
 }
 
 async function sendCode() {
-  if (!/^1[3-9]\d{9}$/.test(phone.value)) {
+  if (!isPhoneValid()) {
     showToast('请输入正确的手机号')
     return
   }
@@ -38,13 +42,13 @@ async function sendCode() {
     await authApi.sendCode(phone.value)
     showToast('验证码已发送')
     startCountdown()
-  } catch {
-    showToast('发送失败，请重试')
+  } catch (e: any) {
+    showToast(e?.response?.data?.detail || e?.message || '发送失败，请重试')
   }
 }
 
 function isValid() {
-  if (!/^1[3-9]\d{9}$/.test(phone.value)) {
+  if (!isPhoneValid()) {
     showToast('请输入正确的手机号')
     return false
   }
@@ -68,18 +72,22 @@ async function handleLogin() {
     duration: 0
   })
   try {
-    await authStore.login(phone.value, code.value)
+    const user = await authStore.login(phone.value, code.value)
     closeToast()
     showToast('登录成功')
     const redirect = (route.query.redirect as string) || '/home'
-    router.replace(redirect)
+    router.replace(user.mustChangePassword ? '/init-password' : redirect)
   } catch (e: any) {
     closeToast()
-    showToast(e?.message || '登录失败')
+    showToast(e?.response?.data?.detail || e?.message || '登录失败')
   } finally {
     loading.value = false
   }
 }
+
+onBeforeUnmount(() => {
+  if (timer) clearInterval(timer)
+})
 </script>
 
 <template>

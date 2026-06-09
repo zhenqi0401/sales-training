@@ -10,6 +10,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: false }
   },
   {
+    path: '/init-password',
+    name: 'InitPassword',
+    component: () => import('@/views/login/init-password.vue'),
+    meta: { requiresAuth: true, allowChangePassword: true }
+  },
+  {
     path: '/',
     redirect: '/home'
   },
@@ -38,6 +44,18 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, keepAlive: false, showTabBar: false }
   },
   {
+    path: '/courses/scripts',
+    name: 'CourseScripts',
+    component: () => import('@/views/courses/scripts.vue'),
+    meta: { requiresAuth: true, keepAlive: false, showTabBar: false }
+  },
+  {
+    path: '/courses/script/:scriptId',
+    name: 'CourseScriptDetail',
+    component: () => import('@/views/courses/script-detail.vue'),
+    meta: { requiresAuth: true, keepAlive: false, showTabBar: false }
+  },
+  {
     path: '/practice',
     name: 'Practice',
     component: () => import('@/views/practice/index.vue'),
@@ -53,7 +71,7 @@ const routes: RouteRecordRaw[] = [
     path: '/scripts',
     name: 'Scripts',
     component: () => import('@/views/scripts/index.vue'),
-    meta: { requiresAuth: true, keepAlive: true, showTabBar: true }
+    meta: { requiresAuth: true, keepAlive: false, showTabBar: false }
   },
   {
     path: '/scripts/:id',
@@ -65,7 +83,7 @@ const routes: RouteRecordRaw[] = [
     path: '/products',
     name: 'Products',
     component: () => import('@/views/products/index.vue'),
-    meta: { requiresAuth: true, keepAlive: true, showTabBar: true }
+    meta: { requiresAuth: true, keepAlive: false, showTabBar: false }
   },
   {
     path: '/products/:id',
@@ -117,11 +135,19 @@ const router = createRouter({
 })
 
 // Auth guard
-router.beforeEach((to, _from, next) => {
+router.beforeEach(async (to, _from, next) => {
   const authStore = useAuthStore()
+
+  if (to.meta.requiresAuth !== false && authStore.token && !authStore.user) {
+    await authStore.fetchUserInfo()
+  }
 
   if (to.meta.requiresAuth !== false && !authStore.isLoggedIn) {
     next({ path: '/login', query: { redirect: to.fullPath } })
+  } else if (authStore.mustChangePassword && !to.meta.allowChangePassword) {
+    next({ path: '/init-password' })
+  } else if (to.path === '/init-password' && authStore.isLoggedIn && !authStore.mustChangePassword) {
+    next({ path: '/home' })
   } else if (to.path === '/login' && authStore.isLoggedIn) {
     next({ path: '/home' })
   } else {

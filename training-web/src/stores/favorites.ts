@@ -14,6 +14,19 @@ export const useFavoritesStore = defineStore(
     const favoriteCount = computed(() => favoriteScriptIds.value.length)
 
     // Actions
+    function addFavorite(script: SalesScript) {
+      if (!favoriteScriptIds.value.includes(script.id)) {
+        favoriteScriptIds.value.push(script.id)
+      }
+      const existing = favoriteScripts.value.findIndex((s) => s.id === script.id)
+      const favoriteScript = { ...script, isFavorite: true }
+      if (existing === -1) {
+        favoriteScripts.value.push(favoriteScript)
+      } else {
+        favoriteScripts.value.splice(existing, 1, favoriteScript)
+      }
+    }
+
     function toggleFavorite(script: SalesScript) {
       const index = favoriteScriptIds.value.indexOf(script.id)
       if (index !== -1) {
@@ -51,6 +64,7 @@ export const useFavoritesStore = defineStore(
       favoriteScripts,
       isFavorite,
       favoriteCount,
+      addFavorite,
       toggleFavorite,
       setFavorites,
       removeFavorite,

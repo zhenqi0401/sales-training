@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { showToast, showConfirmDialog } from 'vant'
+import { showConfirmDialog, showToast } from 'vant'
 import { examsApi } from '@/api/exams'
 import QuestionCard from '@/components/exam/QuestionCard.vue'
-import type { Question } from '@/types'
+import type { ExamConfig, Question } from '@/types'
 
 const route = useRoute()
 const router = useRouter()
@@ -12,67 +12,84 @@ const router = useRouter()
 const level = computed(() => (route.params.level as string).toUpperCase())
 const loading = ref(true)
 const submitting = ref(false)
+const autoSubmitting = ref(false)
 
+const config = ref<ExamConfig | null>(null)
 const questions = ref<Question[]>([])
 const answers = ref<Record<number, string | string[]>>({})
 const markedQuestions = ref<number[]>([])
 const currentIndex = ref(0)
-const timeLeft = ref(0) // seconds
+const timeLeft = ref(0)
 const totalTime = ref(0)
 
 let timer: ReturnType<typeof setInterval> | null = null
 
 const currentQuestion = computed(() => questions.value[currentIndex.value] || null)
-
+const answeredCount = computed(() => Object.keys(answers.value).filter((id) => hasAnswer(answers.value[Number(id)])).length)
 const progress = computed(() => {
   if (questions.value.length === 0) return 0
-  return Math.round((Object.keys(answers.value).length / questions.value.length) * 100)
+  return Math.round((answeredCount.value / questions.value.length) * 100)
 })
 
-const answeredCount = computed(() => Object.keys(answers.value).length)
+onMounted(loadExam)
+onUnmounted(stopTimer)
+
+async function loadExam() {
+  loading.value = true
+  try {
+    const configRes = await examsApi.getExamConfig(level.value)
+    config.value = configRes.data
+    totalTime.value = Math.max((config.value?.duration || 30) * 60, 60)
+
+    const questionRes = level.value === 'SPRINT'
+      ? await examsApi.getSprintQuestions()
+      : await examsApi.getQuestions(level.value)
+
+    questions.value = questionRes.data || []
+    if (questions.value.length === 0) {
+      showToast(level.value === 'WRONG' ? '暂无错题可练习' : '暂无可用题目')
+      router.replace('/exam')
+      return
+    }
+
+    timeLeft.value = totalTime.value
+    startTimer()
+  } catch {
+    showToast('加载考试失败')
+    router.replace('/exam')
+  } finally {
+    loading.value = false
+  }
+}
+
+function startTimer() {
+  stopTimer()
+  timer = setInterval(() => {
+    timeLeft.value = Math.max(timeLeft.value - 1, 0)
+    if (timeLeft.value === 0) {
+      autoSubmitting.value = true
+      handleSubmit(true)
+    }
+  }, 1000)
+}
+
+function stopTimer() {
+  if (timer) {
+    clearInterval(timer)
+    timer = null
+  }
+}
+
+function hasAnswer(value: string | string[] | undefined) {
+  if (Array.isArray(value)) return value.length > 0
+  return !!value
+}
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60)
   const s = seconds % 60
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
-
-onMounted(async () => {
-  try {
-    let data: Question[]
-    if (level.value === 'SPRINT') {
-      const res = await examsApi.getSprintQuestions()
-      data = res.data || []
-      totalTime.value = 600 // 10 min
-    } else {
-      const res = await examsApi.getQuestions(level.value)
-      data = res.data || []
-      totalTime.value = level.value === 'L1' ? 1800 : level.value === 'L2' ? 2700 : 3600
-    }
-    questions.value = data
-    timeLeft.value = totalTime.value
-
-    // Start countdown
-    timer = setInterval(() => {
-      timeLeft.value--
-      if (timeLeft.value <= 0) {
-        handleSubmit()
-      }
-    }, 1000)
-  } catch {
-    showToast('加载失败')
-    router.back()
-  } finally {
-    loading.value = false
-  }
-})
-
-onUnmounted(() => {
-  if (timer) {
-    clearInterval(timer)
-    timer = null
-  }
-})
 
 function onSelect(value: string | string[]) {
   if (currentQuestion.value) {
@@ -81,14 +98,13 @@ function onSelect(value: string | string[]) {
 }
 
 function toggleMark() {
-  if (currentQuestion.value) {
-    const id = currentQuestion.value.id
-    const idx = markedQuestions.value.indexOf(id)
-    if (idx !== -1) {
-      markedQuestions.value.splice(idx, 1)
-    } else {
-      markedQuestions.value.push(id)
-    }
+  if (!currentQuestion.value) return
+  const id = currentQuestion.value.id
+  const index = markedQuestions.value.indexOf(id)
+  if (index >= 0) {
+    markedQuestions.value.splice(index, 1)
+  } else {
+    markedQuestions.value.push(id)
   }
 }
 
@@ -104,63 +120,62 @@ function nextQuestion() {
   if (currentIndex.value < questions.value.length - 1) currentIndex.value++
 }
 
-async function handleSubmit() {
+async function confirmSubmit(unanswered: number) {
+  if (autoSubmitting.value) return
+  await showConfirmDialog({
+    title: '提交确认',
+    message: unanswered > 0
+      ? `还有 ${unanswered} 题未作答，确定提交吗？`
+      : '确定提交试卷吗？',
+    confirmButtonText: '确定提交',
+    cancelButtonText: unanswered > 0 ? '继续答题' : '再检查'
+  })
+}
+
+async function handleSubmit(force = false) {
+  if (submitting.value || questions.value.length === 0) return
+
   const unanswered = questions.value.length - answeredCount.value
-  if (unanswered > 0) {
+  if (!force) {
     try {
-      await showConfirmDialog({
-        title: '提交确认',
-        message: `还有 ${unanswered} 题未作答，确定提交吗？`,
-        confirmButtonText: '确定提交',
-        cancelButtonText: '继续答题'
-      })
-    } catch {
-      return // User cancelled
-    }
-  } else {
-    try {
-      await showConfirmDialog({
-        title: '提交确认',
-        message: '确定要提交试卷吗？',
-        confirmButtonText: '确定提交'
-      })
+      await confirmSubmit(unanswered)
     } catch {
       return
     }
   }
 
   submitting.value = true
-  if (timer) {
-    clearInterval(timer)
-    timer = null
-  }
+  stopTimer()
 
   try {
-    const duration = totalTime.value - timeLeft.value
+    const paperId = Number(route.query.paperId || config.value?.paperId || 0) || undefined
+    const duration = Math.max(totalTime.value - timeLeft.value, 0)
     const res = await examsApi.submitExam({
       level: level.value,
-      answers: Object.entries(answers.value).map(([questionId, selected]) => ({
-        questionId: Number(questionId),
-        selected
+      paperId,
+      answers: questions.value.map((question) => ({
+        questionId: question.id,
+        selected: answers.value[question.id] || (question.type === 'multi' ? [] : '')
       })),
       duration
     })
-    showToast('提交成功')
+    showToast(force ? '时间到，已自动交卷' : '提交成功')
     router.replace(`/exam/result/${res.data.id}`)
   } catch {
     showToast('提交失败，请重试')
     submitting.value = false
+    autoSubmitting.value = false
+    startTimer()
   }
 }
 </script>
 
 <template>
   <div class="exam-taking-page page-no-tabbar">
-    <!-- Header with timer -->
     <div class="exam-header">
-      <div class="header-left" @click="handleSubmit">
+      <div class="header-left" @click="handleSubmit(false)">
         <van-icon name="cross" size="20" />
-        <span class="exit-text">退出</span>
+        <span class="exit-text">交卷</span>
       </div>
       <div class="header-center">
         <van-progress
@@ -177,9 +192,9 @@ async function handleSubmit() {
       </div>
     </div>
 
-    <!-- Question progress info -->
     <div class="exam-progress-info">
       <span class="answered">{{ answeredCount }}/{{ questions.length }} 已答</span>
+      <span class="paper-title">{{ config?.title || '考试' }}</span>
       <span class="marked-count" v-if="markedQuestions.length > 0">
         <van-icon name="flag-o" size="12" color="var(--warning)" />
         {{ markedQuestions.length }} 标记
@@ -188,7 +203,6 @@ async function handleSubmit() {
 
     <van-loading v-if="loading" size="24" class="page-loading" />
 
-    <!-- Question Card -->
     <template v-else-if="currentQuestion">
       <div class="question-area">
         <QuestionCard
@@ -200,30 +214,29 @@ async function handleSubmit() {
         />
       </div>
 
-      <!-- Bottom actions -->
+      <div class="question-navigator">
+        <div
+          v-for="(question, idx) in questions"
+          :key="question.id"
+          class="nav-dot"
+          :class="{
+            answered: hasAnswer(answers[question.id]),
+            current: idx === currentIndex,
+            marked: markedQuestions.includes(question.id)
+          }"
+          @click="goQuestion(idx)"
+        >
+          {{ idx + 1 }}
+        </div>
+      </div>
+
       <div class="bottom-actions">
         <div class="action-left">
-          <van-button
-            round
-            plain
-            type="default"
-            size="small"
-            icon="arrow-left"
-            :disabled="currentIndex === 0"
-            @click="prevQuestion"
-          >
+          <van-button round plain type="default" size="small" icon="arrow-left" :disabled="currentIndex === 0" @click="prevQuestion">
             上一题
           </van-button>
-          <van-button
-            round
-            plain
-            type="default"
-            size="small"
-            :icon="currentIndex === questions.length - 1 ? '' : 'arrow'"
-            :class="{ 'is-last': currentIndex === questions.length - 1 }"
-            @click="nextQuestion"
-          >
-            {{ currentIndex === questions.length - 1 ? '最后一题' : '下一题' }}
+          <van-button round plain type="default" size="small" :disabled="currentIndex === questions.length - 1" icon="arrow" @click="nextQuestion">
+            下一题
           </van-button>
         </div>
         <div class="action-right">
@@ -242,28 +255,11 @@ async function handleSubmit() {
             type="primary"
             size="small"
             color="linear-gradient(135deg, var(--primary), var(--primary-dark))"
-            @click="handleSubmit"
             :loading="submitting"
+            @click="handleSubmit(false)"
           >
-            交卷
+            提交
           </van-button>
-        </div>
-      </div>
-
-      <!-- Question Navigator -->
-      <div class="question-navigator" v-if="questions.length > 0">
-        <div
-          v-for="(q, idx) in questions"
-          :key="q.id"
-          class="nav-dot"
-          :class="{
-            answered: answers[q.id],
-            current: idx === currentIndex,
-            marked: markedQuestions.includes(q.id)
-          }"
-          @click="goQuestion(idx)"
-        >
-          {{ idx + 1 }}
         </div>
       </div>
     </template>
@@ -292,14 +288,20 @@ async function handleSubmit() {
   z-index: 10;
 }
 
+.header-left,
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
 .header-center {
   flex: 1;
 }
 
 .header-right {
-  display: flex;
-  align-items: center;
-  gap: 4px;
   font-size: 16px;
   font-weight: 700;
   color: var(--text);
@@ -310,23 +312,24 @@ async function handleSubmit() {
   }
 }
 
-.header-left {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
 .exam-progress-info {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 8px;
   padding: 8px 20px;
   font-size: 12px;
   color: var(--text-muted);
   background: $card;
   border-bottom: 1px solid var(--border-light);
+}
+
+.paper-title {
+  flex: 1;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .marked-count {
@@ -339,33 +342,12 @@ async function handleSubmit() {
   padding: 12px 0;
 }
 
-.bottom-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
-  background: $card;
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  z-index: 10;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
-}
-
-.action-left,
-.action-right {
-  display: flex;
-  gap: 8px;
-}
-
 .question-navigator {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
   padding: 12px 16px;
-  margin: 12px 16px;
+  margin: 0 16px 12px;
   background: $card;
   border-radius: $radius;
 }
@@ -399,9 +381,26 @@ async function handleSubmit() {
     border: 2px solid var(--warning);
     color: var(--warning);
   }
+}
 
-  &:active {
-    transform: scale(0.9);
-  }
+.bottom-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  background: $card;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.action-left,
+.action-right {
+  display: flex;
+  gap: 8px;
 }
 </style>

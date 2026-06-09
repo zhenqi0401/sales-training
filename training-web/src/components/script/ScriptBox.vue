@@ -53,7 +53,7 @@ function handleCopy(text: string) {
         v-for="(tag, idx) in script.tags.slice(0, 3)"
         :key="idx"
         plain
-        size="small"
+        size="medium"
         color="var(--primary)"
         style="margin-right: 6px; margin-bottom: 4px;"
       >

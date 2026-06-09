@@ -52,13 +52,13 @@ services:
       redis:
         condition: service_healthy
     environment:
-      DATABASE_URL: mysql+asyncmy://training:training123@mysql:3306/sales_training
-      REDIS_URL: redis://redis:6379/0
-      JWT_SECRET_KEY: change-this-to-a-secure-random-key-in-production
-      JWT_ALGORITHM: HS256
-      ACCESS_TOKEN_EXPIRE_MINUTES: 120
-      REFRESH_TOKEN_EXPIRE_DAYS: 7
-      UPLOAD_DIR: /app/uploads
+      SALES_TRAINING_DATABASE_URL: mysql+asyncmy://training:training123@mysql:3306/sales_training
+      SALES_TRAINING_CELERY_BROKER_URL: redis://redis:6379/0
+      SALES_TRAINING_CELERY_RESULT_BACKEND: redis://redis:6379/0
+      SALES_TRAINING_JWT_SECRET_KEY: change-this-to-a-secure-random-key-in-production
+      SALES_TRAINING_JWT_ALGORITHM: HS256
+      SALES_TRAINING_JWT_EXPIRE_MINUTES: 120
+      SALES_TRAINING_UPLOAD_DIR: /app/uploads
       TZ: Asia/Shanghai
     ports:
       - "8080:8080"

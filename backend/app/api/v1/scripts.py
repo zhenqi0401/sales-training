@@ -117,14 +117,34 @@ async def list_script_categories(
     )
 
     labels = {
+        "drucker": "彼得·德鲁克",
+        "girard": "乔·吉拉德",
+        "hopkins": "汤姆·霍普金斯",
+        "gitomer": "杰弗里·吉特默",
+        "trout": "杰克·特劳特",
+        "burnett": "李奥·贝纳",
+        "masters": "大师通识",
+        "price": "价格敏感",
+        "delay": "拖延犹豫",
+        "awareness": "认知不足",
+        "brand": "品牌偏好",
+        "info_bias": "信息偏差",
+        "trust": "信任/效果疑虑",
+        "competitor": "竞品对比",
+        "execution": "执行难度",
+        "safety": "安全担忧",
+        "knowledge": "常识科普",
+        "online": "网络热议",
+        "fang_kong": "防控镜片异议",
+        "jiao_su": "角塑异议",
         "opening": "开场白",
         "product": "产品介绍",
         "objection": "异议处理",
         "closing": "促单成交",
         "service": "售后服务",
         "general": "通用话术",
-        "prototype_card": "原型卡片",
-        "prototype_script": "原型话术",
+        "prototype_card": "大师通识",
+        "prototype_script": "通用话术",
     }
     return [
         ScriptCategoryResponse(value=category, label=labels.get(category, category), count=count)

@@ -19,6 +19,9 @@ env/
 # IDE
 .vscode/
 .idea/
+.codex/
+.codegraph/
+.reasonix/
 *.swp
 *.swo
 *~
@@ -35,6 +38,8 @@ Thumbs.db
 # Uploads
 uploads/*
 !uploads/.gitkeep
+backend/uploads/*
+!backend/uploads/.gitkeep
 
 # Database
 *.db
@@ -53,3 +58,8 @@ coverage/
 mysql_data/
 redis_data/
 uploads_data/
+
+# Local tool/cache files
+.uv-cache/
+nul
+reasonix.toml

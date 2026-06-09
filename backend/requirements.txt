@@ -1,3 +1,8 @@
+# ── Python dependencies ───────────────────────────────────────────────
+# ── System dependencies (not pip-installable) ────────────────────────
+#   ffmpeg (含 ffprobe) — 视频上传后自动压缩为手机端 H.264 MP4
+#   安装: brew install ffmpeg / apt install ffmpeg / winget install ffmpeg
+
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
 pydantic==2.9.2

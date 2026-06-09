@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
-import { ref, computed, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 
-const active = ref(0)
+const pendingActive = ref<number | null>(null)
 
 const tabs = [
   { name: 'Home', label: '首页', icon: 'home-o', path: '/home' },
@@ -17,21 +17,50 @@ const tabs = [
   { name: 'Profile', label: '我的', icon: 'contact-o', path: '/profile' }
 ]
 
-const currentIndex = computed(() => {
+const routeActive = computed(() => {
   const idx = tabs.findIndex((t) => route.path.startsWith(t.path))
   return idx !== -1 ? idx : 0
 })
 
-watch(currentIndex, (val) => {
-  active.value = val
-}, { immediate: true })
+const active = computed({
+  get: () => pendingActive.value ?? routeActive.value,
+  set: (value) => {
+    pendingActive.value = Number(value)
+  }
+})
 
-function onTabChange(index: number) {
-  if (!authStore.isLoggedIn) {
-    router.push('/login')
+watch(
+  () => route.fullPath,
+  () => {
+    pendingActive.value = null
+  }
+)
+
+async function onTabChange(index: number | string) {
+  const nextIndex = Number(index)
+  const tab = tabs[nextIndex]
+  if (!tab) {
+    pendingActive.value = null
     return
   }
-  router.push(tabs[index].path)
+
+  pendingActive.value = nextIndex
+
+  if (!authStore.isLoggedIn) {
+    await router.push('/login')
+    return
+  }
+
+  if (route.path === tab.path) {
+    pendingActive.value = null
+    return
+  }
+
+  try {
+    await router.push(tab.path)
+  } catch {
+    pendingActive.value = null
+  }
 }
 </script>
 

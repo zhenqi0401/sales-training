@@ -55,7 +55,7 @@ function goModule(moduleId: number) {
           <div class="module-title">{{ mod.title }}</div>
           <div class="module-desc">{{ mod.description }}</div>
         </div>
-        <van-tag round :color="categoryColors[mod.category]" size="small">{{ mod.category }}</van-tag>
+        <van-tag round :color="categoryColors[mod.category]" size="medium">{{ mod.category }}</van-tag>
       </div>
     </div>
   </div>

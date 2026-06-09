@@ -18,6 +18,6 @@ celery_app.conf.update(
     timezone="Asia/Shanghai",
     enable_utc=True,
     task_track_started=True,
-    task_time_limit=30 * 60,
-    task_soft_time_limit=25 * 60,
+    task_time_limit=60 * 60,
+    task_soft_time_limit=55 * 60,
 )

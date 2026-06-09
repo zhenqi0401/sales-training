@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useLearningStore } from '@/stores/learning'
@@ -18,7 +18,7 @@ function goRecords() {
 }
 
 function goFavoriteScripts() {
-  router.push('/scripts?favorites=1')
+  router.push('/courses/scripts?favorites=1')
 }
 
 function goWrongBook() {
@@ -44,6 +44,20 @@ async function handleLogout() {
     // User cancelled
   }
 }
+
+onMounted(async () => {
+  try {
+    const res = await import('@/api/learning').then((m) => m.learningApi.getScripts(undefined, 1, 200, true))
+    const scripts = (res.data?.items || []).map((script: any) => ({
+      ...script,
+      summary: script.theory || '',
+      isFavorite: true,
+    }))
+    favoritesStore.setFavorites(scripts as any)
+  } catch {
+    // Keep the persisted count if the network is temporarily unavailable.
+  }
+})
 </script>
 
 <template>

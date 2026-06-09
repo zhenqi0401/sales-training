@@ -41,7 +41,7 @@
         <el-table-column prop="title" label="试卷名称" min-width="200" show-overflow-tooltip />
         <el-table-column prop="type" label="组卷方式" width="120" align="center">
           <template #default="{ row }">
-            <el-tag :type="row.type === 'manual' ? '' : row.type === 'random' ? 'success' : 'warning'" size="small">
+            <el-tag :type="row.type === 'manual' ? 'primary' : row.type === 'random' ? 'success' : 'warning'" size="small">
               {{ row.type === 'manual' ? '手动组卷' : row.type === 'random' ? '随机组卷' : 'AI组卷' }}
             </el-tag>
           </template>
@@ -75,7 +75,7 @@
               size="small"
               @click="handleClose(row.id)"
             >关闭</el-button>
-            <el-popconfirm title="确定删除此试卷吗？" @confirm="handleDelete(row.id)">
+            <el-popconfirm teleported :persistent="false" popper-class="delete-popconfirm" title="确定删除此试卷吗？" @confirm="handleDelete(row.id)">
               <template #reference>
                 <el-button text type="danger" size="small">删除</el-button>
               </template>

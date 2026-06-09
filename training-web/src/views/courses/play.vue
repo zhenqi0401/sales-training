@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { learningApi } from '@/api/learning'
 import { useLearningStore } from '@/stores/learning'
 import type { Video } from '@/types'
-import { showToast, showLoadingToast, closeToast } from 'vant'
+import { showToast } from 'vant'
 
 const route = useRoute()
 const router = useRouter()
@@ -12,26 +12,37 @@ const learningStore = useLearningStore()
 const videoId = computed(() => Number(route.params.videoId))
 
 const video = ref<Video | null>(null)
+const videoRef = ref<HTMLVideoElement | null>(null)
 const loading = ref(true)
 const playing = ref(false)
 const currentTime = ref(0)
+const duration = ref(0)
 const progress = ref(0)
-const fullDuration = ref(0)
+const videoOrientation = ref<'landscape' | 'portrait' | 'square'>('landscape')
 
-// Auto progress tracking
 let progressTimer: ReturnType<typeof setInterval> | null = null
+let progressSaving = false
+let pendingProgressSave = false
+let lastSyncedProgress: {
+  videoId: number
+  watchDuration: number
+  progress: number
+  completed: boolean
+} | null = null
 
 onMounted(async () => {
   try {
     const res = await learningApi.getVideoDetail(videoId.value)
     video.value = res.data
-    fullDuration.value = video.value.duration
+    duration.value = video.value.duration
+    updateVideoOrientationFromResolution(video.value.resolution)
 
-    // Restore progress
     const saved = learningStore.videoProgress[videoId.value]
     if (saved) {
       progress.value = saved.progress
-      currentTime.value = saved.watchDuration
+      if (videoRef.value && saved.watchDuration > 0) {
+        videoRef.value.currentTime = saved.watchDuration
+      }
     }
   } catch {
     showToast('加载失败')
@@ -41,68 +52,155 @@ onMounted(async () => {
 })
 
 onUnmounted(() => {
-  if (progressTimer) {
-    clearInterval(progressTimer)
+  stopProgressTimer()
+  void saveProgress({ force: true })
+  if (videoRef.value) {
+    videoRef.value.pause()
   }
 })
 
-function togglePlay() {
-  playing.value = !playing.value
-  if (playing.value) {
-    // Simulate playback progress
-    progressTimer = setInterval(() => {
-      currentTime.value += 1
-      if (fullDuration.value > 0) {
-        progress.value = Math.min(100, Math.round((currentTime.value / fullDuration.value) * 100))
-      }
-      // Track progress every 5 seconds
-      if (currentTime.value % 5 === 0 && video.value) {
-        saveProgress()
-      }
-      // Auto-complete at 90%+
-      if (progress.value >= 90 && video.value) {
-        completeVideo()
-      }
-    }, 1000)
-  } else {
-    if (progressTimer) {
-      clearInterval(progressTimer)
-      progressTimer = null
+function startProgressTimer() {
+  stopProgressTimer()
+  progressTimer = setInterval(() => {
+    if (!video.value) return
+    const ct = videoRef.value?.currentTime ?? currentTime.value
+    currentTime.value = Math.floor(ct)
+    if (duration.value > 0) {
+      progress.value = Math.min(100, Math.round((currentTime.value / duration.value) * 100))
     }
-    if (currentTime.value > 0) {
-      saveProgress()
-    }
-  }
+    void saveProgress()
+  }, 1000)
 }
 
-async function saveProgress() {
-  if (!video.value) return
-  learningStore.updateVideoProgress(video.value.id, {
-    progress: progress.value,
-    completed: progress.value >= 90,
-    watchDuration: currentTime.value
-  })
-}
-
-async function completeVideo() {
-  if (!video.value) return
+function stopProgressTimer() {
   if (progressTimer) {
     clearInterval(progressTimer)
     progressTimer = null
   }
+}
+
+function onVideoPlay() {
+  playing.value = true
+  startProgressTimer()
+}
+
+function onVideoPause() {
+  playing.value = false
+  stopProgressTimer()
+  void saveProgress({ force: true })
+}
+
+function onVideoEnded() {
+  playing.value = false
+  stopProgressTimer()
+  completeVideo()
+}
+
+function onVideoTimeUpdate() {
+  if (!videoRef.value) return
+  currentTime.value = Math.floor(videoRef.value.currentTime)
+}
+
+function onVideoLoadedMetadata() {
+  if (!videoRef.value) return
+  duration.value = Math.floor(videoRef.value.duration)
+  updateVideoOrientation(videoRef.value.videoWidth, videoRef.value.videoHeight)
+  const saved = learningStore.videoProgress[videoId.value]
+  if (saved?.watchDuration) {
+    videoRef.value.currentTime = saved.watchDuration
+  }
+}
+
+function updateVideoOrientationFromResolution(resolution?: string) {
+  const match = /^(\d+)x(\d+)$/i.exec(resolution || '')
+  if (!match) return
+  updateVideoOrientation(Number(match[1]), Number(match[2]))
+}
+
+function updateVideoOrientation(width: number, height: number) {
+  if (!width || !height) return
+  if (Math.abs(width - height) <= 2) {
+    videoOrientation.value = 'square'
+  } else {
+    videoOrientation.value = width > height ? 'landscape' : 'portrait'
+  }
+}
+
+function shouldSyncProgress(completed: boolean) {
+  if (!video.value) return false
+  if (!lastSyncedProgress) return true
+  if (lastSyncedProgress.videoId !== video.value.id) return true
+  if (completed && !lastSyncedProgress.completed) return true
+  return currentTime.value - lastSyncedProgress.watchDuration >= 5
+}
+
+async function saveProgress(options: { force?: boolean } = {}) {
+  if (!video.value) return
+  const completed = progress.value >= 90
+  learningStore.updateVideoProgress(video.value.id, {
+    progress: progress.value,
+    completed,
+    watchDuration: currentTime.value,
+  })
+  if (!options.force && !shouldSyncProgress(completed)) return
+  if (progressSaving) {
+    pendingProgressSave = true
+    return
+  }
+
+  const payload = {
+    videoId: video.value.id,
+    watchDuration: currentTime.value,
+    progress: progress.value,
+    completed,
+  }
+
+  progressSaving = true
+  try {
+    await learningApi.updateProgress(payload)
+    lastSyncedProgress = payload
+  } catch {
+    // Local progress is available and will be overwritten after the next successful sync.
+  } finally {
+    progressSaving = false
+    if (pendingProgressSave) {
+      pendingProgressSave = false
+      void saveProgress({ force: true })
+    }
+  }
+}
+
+async function completeVideo() {
+  if (!video.value) return
   playing.value = false
   progress.value = 100
   learningStore.updateVideoProgress(video.value.id, {
     progress: 100,
     completed: true,
-    watchDuration: currentTime.value
+    watchDuration: duration.value,
   })
+  try {
+    await learningApi.updateProgress({
+      videoId: video.value.id,
+      progress: 100,
+      completed: true,
+      watchDuration: duration.value,
+    })
+    lastSyncedProgress = {
+      videoId: video.value.id,
+      progress: 100,
+      completed: true,
+      watchDuration: duration.value,
+    }
+  } catch {
+    // Keep the completion state locally if the network is temporarily unavailable.
+  }
   showToast('学习完成！')
 }
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60)
-  const s = seconds % 60
+  const s = Math.floor(seconds % 60)
   return `${m}:${String(s).padStart(2, '0')}`
 }
 </script>
@@ -120,26 +218,21 @@ function formatTime(seconds: number): string {
     <van-loading v-if="loading" size="24" class="page-loading" />
 
     <template v-else-if="video">
-      <!-- Video Player Area -->
-      <div class="player-area" @click="togglePlay">
-        <div class="player-cover" v-if="!playing">
-          <van-image :src="video.cover" fit="cover" width="100%" height="100%" />
-          <div class="play-overlay">
-            <van-icon name="play-circle" size="60" color="#fff" />
-          </div>
-          <div class="player-info">
-            <span class="duration">{{ formatTime(video.duration) }}</span>
-          </div>
-        </div>
-        <div v-else class="player-simulating">
-          <div class="simulate-bar">
-            <van-icon name="music" size="40" color="var(--primary)" />
-            <p>视频播放中...</p>
-            <div class="simulate-progress">
-              <div class="progress-fill" :style="{ width: progress + '%' }" />
-            </div>
-          </div>
-        </div>
+      <!-- Video Player -->
+      <div class="player-area" :class="`is-${videoOrientation}`">
+        <video
+          ref="videoRef"
+          class="video-element"
+          :src="video.url"
+          :poster="video.cover"
+          playsinline
+          controls
+          @play="onVideoPlay"
+          @pause="onVideoPause"
+          @ended="onVideoEnded"
+          @timeupdate="onVideoTimeUpdate"
+          @loadedmetadata="onVideoLoadedMetadata"
+        />
       </div>
 
       <!-- Progress Bar -->
@@ -153,7 +246,7 @@ function formatTime(seconds: number): string {
             track-color="#e2e8f0"
             :show-pivot="false"
           />
-          <span class="time-label">{{ formatTime(video.duration) }}</span>
+          <span class="time-label">{{ formatTime(duration) }}</span>
         </div>
       </div>
 
@@ -190,71 +283,29 @@ function formatTime(seconds: number): string {
 .player-area {
   position: relative;
   width: 100%;
-  aspect-ratio: 16 / 9;
   background: #000;
-  overflow: hidden;
-}
-
-.player-cover {
-  position: relative;
-  width: 100%;
-  height: 100%;
-}
-
-.play-overlay {
-  position: absolute;
-  inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.3);
+  overflow: hidden;
+  aspect-ratio: 16 / 9;
 }
 
-.player-info {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
+.player-area.is-portrait {
+  aspect-ratio: 9 / 16;
+  max-height: calc(100vh - 46px);
 }
 
-.duration {
-  background: rgba(0, 0, 0, 0.6);
-  color: #fff;
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 12px;
+.player-area.is-square {
+  aspect-ratio: 1 / 1;
 }
 
-.player-simulating {
+.video-element {
   width: 100%;
   height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
-}
-
-.simulate-bar {
-  text-align: center;
-  color: var(--text-secondary);
-  width: 80%;
-}
-
-.simulate-bar p {
-  margin: 8px 0;
-  font-size: 14px;
-}
-
-.simulate-progress {
-  height: 4px;
-  background: #e2e8f0;
-  border-radius: 2px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--primary), var(--success));
-  transition: width 0.3s;
+  display: block;
+  background: #000;
+  object-fit: contain;
 }
 
 .progress-section {

@@ -51,15 +51,29 @@ class ExamPaperResponse(BaseModel):
 class ExamSubmit(BaseModel):
     """Submit an exam."""
 
-    paper_id: int
+    paper_id: Optional[int] = Field(default=None, alias="paperId")
+    level: Optional[str] = None
+    duration: int = 0
     answers: list["AnswerItem"]
+
+    model_config = {"populate_by_name": True}
 
 
 class AnswerItem(BaseModel):
     """Single answer item within an exam submission."""
 
-    question_id: int
-    user_answer: str
+    question_id: int = Field(alias="questionId")
+    user_answer: Optional[str] = Field(default=None, alias="userAnswer")
+    selected: Optional[str | list[str]] = None
+
+    model_config = {"populate_by_name": True}
+
+    @property
+    def answer_value(self) -> str:
+        value = self.user_answer if self.user_answer is not None else self.selected
+        if isinstance(value, list):
+            return ",".join(str(item) for item in value)
+        return "" if value is None else str(value)
 
 
 class ExamResult(BaseModel):

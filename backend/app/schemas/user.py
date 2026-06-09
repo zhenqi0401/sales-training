@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import AliasChoices, BaseModel, Field
 
 
 class LoginRequest(BaseModel):
@@ -21,17 +21,65 @@ class TokenResponse(BaseModel):
     user: "UserResponse"
 
 
+class SmsCodeRequest(BaseModel):
+    """Send SMS code payload."""
+
+    phone: str = Field(..., min_length=11, max_length=20)
+
+
+class PhoneLoginRequest(BaseModel):
+    """Phone + SMS code login payload."""
+
+    phone: str = Field(..., min_length=11, max_length=20)
+    code: str = Field(..., min_length=4, max_length=8)
+
+
+class RefreshTokenRequest(BaseModel):
+    """Refresh token payload used by the training web app."""
+
+    refresh_token: str = Field(..., alias="refreshToken", min_length=1)
+
+    model_config = {"populate_by_name": True}
+
+
+class TrainingTokenPayload(BaseModel):
+    """Token payload used by the training web response envelope."""
+
+    token: str
+    refreshToken: str
+    user: "TrainingUserResponse"
+
+
+class ApiResponse(BaseModel):
+    """Frontend-compatible response envelope."""
+
+    code: int = 200
+    message: str = "success"
+    data: object | None = None
+
+
 class UserCreate(BaseModel):
     """Create a new user."""
 
     username: str = Field(..., min_length=2, max_length=64)
     phone: str = Field(..., min_length=11, max_length=20)
     password: str = Field(..., min_length=6, max_length=128)
-    real_name: Optional[str] = ""
+    real_name: Optional[str] = Field(
+        default="",
+        validation_alias=AliasChoices("real_name", "realName"),
+    )
     role: str = "student"
-    store_id: Optional[int] = None
-    is_active: bool = True
+    store_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("store_id", "storeId"),
+    )
+    is_active: bool = Field(
+        default=True,
+        validation_alias=AliasChoices("is_active", "isActive"),
+    )
     remark: Optional[str] = ""
+
+    model_config = {"populate_by_name": True}
 
 
 class UserUpdate(BaseModel):
@@ -39,11 +87,22 @@ class UserUpdate(BaseModel):
 
     username: Optional[str] = None
     phone: Optional[str] = None
-    real_name: Optional[str] = None
+    real_name: Optional[str] = Field(
+        default=None,
+        validation_alias=AliasChoices("real_name", "realName"),
+    )
     role: Optional[str] = None
-    store_id: Optional[int] = None
-    is_active: Optional[bool] = None
+    store_id: Optional[int] = Field(
+        default=None,
+        validation_alias=AliasChoices("store_id", "storeId"),
+    )
+    is_active: Optional[bool] = Field(
+        default=None,
+        validation_alias=AliasChoices("is_active", "isActive"),
+    )
     remark: Optional[str] = None
+
+    model_config = {"populate_by_name": True}
 
 
 class UserResponse(BaseModel):
@@ -65,6 +124,20 @@ class UserResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
+class TrainingUserResponse(BaseModel):
+    """User shape consumed by the training web app."""
+
+    id: int
+    name: str
+    phone: str
+    avatar: str = ""
+    storeName: str = ""
+    joinDate: str = ""
+    level: int = 1
+    point: int = 0
+    mustChangePassword: bool = False
+
+
 class UserBatchImport(BaseModel):
     """Batch import users payload."""
 
@@ -75,4 +148,10 @@ class ChangePasswordRequest(BaseModel):
     """Change password payload."""
 
     old_password: str = Field(..., min_length=6)
+    new_password: str = Field(..., min_length=6, max_length=128)
+
+
+class InitPasswordRequest(BaseModel):
+    """Set initial password after SMS login."""
+
     new_password: str = Field(..., min_length=6, max_length=128)

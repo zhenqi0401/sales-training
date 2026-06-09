@@ -1,6 +1,6 @@
 """Alembic migration template."""
 revision: str = "510b2da09aa8"
-down_revision: str | None = "None"
+down_revision: str | None = None
 branch_labels: str | None = None
 depends_on: str | None = None
 

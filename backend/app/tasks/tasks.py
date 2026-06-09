@@ -1,4 +1,4 @@
-"""Celery task definitions (placeholder)."""
+"""Celery task definitions."""
 
 from app.tasks.celery_app import celery_app
 

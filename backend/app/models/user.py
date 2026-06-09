@@ -46,6 +46,9 @@ class User(Base, TimestampMixin):
         String(512), default="", comment="头像URL"
     )
     is_active: Mapped[bool] = mapped_column(default=True, comment="是否启用")
+    must_change_password: Mapped[bool] = mapped_column(
+        default=True, comment="首次登录是否必须修改密码"
+    )
     last_login: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True, comment="最后登录时间"
     )

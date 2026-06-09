@@ -8,7 +8,8 @@ from typing import Optional
 
 from app.core.dependencies import CurrentUserDep, SessionDep
 from app.models.favorite import Favorite
-from app.schemas.common import MessageResponse, PaginatedResponse
+from app.schemas.common import PaginatedResponse
+from app.schemas.user import ApiResponse
 
 
 class FavoriteCreate(BaseModel):
@@ -59,7 +60,7 @@ async def list_favorites(
     )
 
 
-@router.post("/", response_model=FavoriteResponse, status_code=201, summary="添加收藏")
+@router.post("/", response_model=ApiResponse, status_code=201, summary="添加收藏")
 async def add_favorite(
     body: FavoriteCreate,
     session: SessionDep,
@@ -74,7 +75,7 @@ async def add_favorite(
     )
     existing = (await session.execute(stmt)).scalar_one_or_none()
     if existing:
-        return FavoriteResponse.model_validate(existing)
+        return ApiResponse(message="已收藏", data=FavoriteResponse.model_validate(existing).model_dump())
 
     fav = Favorite(
         user_id=user.id,
@@ -83,10 +84,10 @@ async def add_favorite(
     )
     session.add(fav)
     await session.flush()
-    return FavoriteResponse.model_validate(fav)
+    return ApiResponse(message="已收藏", data=FavoriteResponse.model_validate(fav).model_dump())
 
 
-@router.delete("/", response_model=MessageResponse, summary="取消收藏")
+@router.delete("/", response_model=ApiResponse, summary="取消收藏")
 async def remove_favorite(
     session: SessionDep,
     user: CurrentUserDep,
@@ -101,8 +102,8 @@ async def remove_favorite(
     )
     fav = (await session.execute(stmt)).scalar_one_or_none()
     if not fav:
-        raise HTTPException(status_code=404, detail="收藏记录不存在")
+        return ApiResponse(message="已取消收藏")
 
     await session.delete(fav)
     await session.flush()
-    return MessageResponse(message="已取消收藏")
+    return ApiResponse(message="已取消收藏")

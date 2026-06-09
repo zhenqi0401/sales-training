@@ -7,7 +7,7 @@ const baseURL = import.meta.env.VITE_API_BASE_URL || '/api/v1'
 
 const request: AxiosInstance = axios.create({
   baseURL,
-  timeout: 30000,
+  timeout: 10 * 60 * 1000,
 })
 
 function normalizeParams(params?: Record<string, any>): Record<string, any> | undefined {

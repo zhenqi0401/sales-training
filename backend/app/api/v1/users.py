@@ -26,6 +26,7 @@ async def list_users(
     role: str | None = None,
     keyword: str | None = None,
     store_id: int | None = None,
+    status: int | None = None,
 ):
     """Paginated user list with optional filters."""
     query = select(User)
@@ -40,6 +41,8 @@ async def list_users(
         )
     if store_id is not None:
         query = query.where(User.store_id == store_id)
+    if status is not None:
+        query = query.where(User.is_active == (status == 1))
 
     # Count total
     count_query = select(func.count()).select_from(query.subquery())

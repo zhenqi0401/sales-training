@@ -12,7 +12,7 @@
       background-color="#304156"
       text-color="#bfcbd9"
       active-text-color="#409eff"
-      router
+      @select="handleSelect"
     >
       <template v-for="item in appStore.menuItems" :key="item.path">
         <el-sub-menu v-if="item.children && item.children.length" :index="item.path || item.title">
@@ -48,10 +48,30 @@ import router from '@/router'
 const route = useRoute()
 const appStore = useAppStore()
 
-const activeMenu = computed(() => {
-  const { path } = route
-  return path
+const menuPaths = computed(() => {
+  return appStore.menuItems.flatMap((item) => {
+    if (item.children?.length) {
+      return item.children.map((child) => child.path)
+    }
+
+    return item.path ? [item.path] : []
+  })
 })
+
+const activeMenu = computed(() => {
+  if (menuPaths.value.includes(route.fullPath)) {
+    return route.fullPath
+  }
+
+  const parentPath = menuPaths.value.find((path) => path && route.path.startsWith(path.split('?')[0]))
+  return parentPath ?? route.path
+})
+
+function handleSelect(index: string) {
+  if (index && index !== route.fullPath) {
+    router.push(index)
+  }
+}
 </script>
 
 <style scoped lang="scss">

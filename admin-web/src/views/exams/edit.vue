@@ -97,7 +97,7 @@
               <el-tree-select
                 v-model="randomCategories"
                 :data="categoryTree"
-                :props="{ label: 'name', value: 'id', children: 'children' }"
+                :props="treeProps"
                 multiple
                 check-strictly
                 placeholder="选择题目分类（可多选）"
@@ -194,6 +194,7 @@ const formRef = ref<FormInstance>()
 const submitting = ref(false)
 const isEditing = computed(() => !!route.params.id)
 const categoryTree = ref<Category[]>([])
+const treeProps = { label: 'name', value: 'id', children: 'children' } as any
 
 // Form state
 const form = reactive({
@@ -270,12 +271,13 @@ async function openQuestionPicker() {
 function onPickerSelect(val: any[]) { pickerSelected.value = val }
 
 function addSelectedQuestions() {
+  const addedCount = pickerSelected.value.length
   pickerSelected.value.forEach((q: any) => {
     questions.value.push({ ...q, score: 5 })
   })
   showQuestionPicker.value = false
   pickerSelected.value = []
-  ElMessage.success(`已添加 ${pickerSelected.value.length} 道题目`)
+  ElMessage.success(`已添加 ${addedCount} 道题目`)
 }
 
 function removeQuestion(q: any) {

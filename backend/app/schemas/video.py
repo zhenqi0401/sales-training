@@ -14,6 +14,8 @@ class VideoCreate(BaseModel):
     category_id: Optional[int] = None
     file_url: str = Field(..., max_length=512)
     cover_url: Optional[str] = ""
+    tags: list[str] = Field(default_factory=list)
+    product_ids: list[int] = Field(default_factory=list)
     duration: Optional[int] = 0
     resolution: Optional[str] = ""
     file_size: Optional[int] = 0
@@ -31,6 +33,8 @@ class VideoUpdate(BaseModel):
     category_id: Optional[int] = None
     file_url: Optional[str] = None
     cover_url: Optional[str] = None
+    tags: Optional[list[str]] = None
+    product_ids: Optional[list[int]] = None
     duration: Optional[int] = None
     resolution: Optional[str] = None
     file_size: Optional[int] = None
@@ -47,8 +51,12 @@ class VideoResponse(BaseModel):
     title: str
     description: Optional[str] = ""
     category_id: Optional[int] = None
+    category_name: Optional[str] = None
     file_url: str
     cover_url: Optional[str] = ""
+    tags: list[str] = Field(default_factory=list)
+    product_ids: list[int] = Field(default_factory=list)
+    product_names: list[str] = Field(default_factory=list)
     duration: Optional[int] = 0
     resolution: Optional[str] = ""
     file_size: Optional[int] = 0
@@ -68,3 +76,16 @@ class VideoList(BaseModel):
 
     total: int
     items: list[VideoResponse]
+
+
+class VideoStatusUpdate(BaseModel):
+    """Update a single video's shelf status."""
+
+    status: str
+
+
+class VideoBatchStatusUpdate(BaseModel):
+    """Batch shelf status update."""
+
+    ids: list[int]
+    status: str

@@ -73,7 +73,7 @@
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="openDialog(row)">编辑</el-button>
             <el-button text type="primary" size="small" @click="previewScript(row)">预览</el-button>
-            <el-popconfirm title="确定删除吗？" @confirm="handleDelete(row.id)">
+            <el-popconfirm teleported :persistent="false" popper-class="delete-popconfirm" title="确定删除吗？" @confirm="handleDelete(row.id)">
               <template #reference>
                 <el-button text type="danger" size="small">删除</el-button>
               </template>

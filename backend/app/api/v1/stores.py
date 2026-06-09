@@ -1,18 +1,15 @@
 """Store management endpoints."""
 
+from datetime import datetime
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select, func
+from pydantic import BaseModel
+from sqlalchemy import func, select
 
 from app.core.dependencies import CurrentUserDep, SessionDep, require_role
 from app.models.store import Store
 from app.schemas.common import MessageResponse, PaginatedResponse
-from app.schemas.category import CategoryCreate, CategoryUpdate
-
-# Re-use CategoryResponse and CategoryCreate which have the same shape
-# Let's define simple inline schemas for store
-from pydantic import BaseModel
-from datetime import datetime
-from typing import Optional
 
 
 class StoreCreate(BaseModel):
@@ -91,9 +88,24 @@ async def get_store_tree(
     session: SessionDep,
     user: CurrentUserDep,
 ):
-    """Return flat list of stores sorted by hierarchy (parent, sort_order)."""
+    """Return flat list of stores sorted by hierarchy."""
     result = await session.execute(
-        select(Store).order_by(Store.parent_id.asc().nullsfirst(), Store.sort_order)
+        select(Store).order_by(Store.parent_id.is_not(None), Store.parent_id, Store.sort_order, Store.id)
+    )
+    stores = result.scalars().all()
+    return [StoreResponse.model_validate(s) for s in stores]
+
+
+@router.get("/all", response_model=list[StoreResponse], summary="全部启用门店")
+async def get_all_stores(
+    session: SessionDep,
+    user: CurrentUserDep,
+):
+    """Return all active stores for select controls."""
+    result = await session.execute(
+        select(Store)
+        .where(Store.is_active == True)
+        .order_by(Store.parent_id.is_not(None), Store.parent_id, Store.sort_order, Store.id)
     )
     stores = result.scalars().all()
     return [StoreResponse.model_validate(s) for s in stores]
