@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import type { UserInfo } from '@/types'
 import { authApi } from '@/api/auth'
+import { normalizeTrainingUser, shouldRefreshCachedUser } from './auth-user'
 
 const AUTH_TOKEN_REFRESHED_EVENT = 'auth-token-refreshed'
 
@@ -10,6 +11,7 @@ export const useAuthStore = defineStore('auth', () => {
   const token = ref<string>('')
   const refreshToken = ref<string>('')
   const user = ref<UserInfo | null>(null)
+  const hasFetchedUserInfo = ref(false)
 
   // Getters
   const isLoggedIn = computed(() => !!token.value)
@@ -28,8 +30,9 @@ export const useAuthStore = defineStore('auth', () => {
   }
 
   function setUser(userInfo: UserInfo) {
-    user.value = userInfo
-    localStorage.setItem('auth-user', JSON.stringify(userInfo))
+    const normalizedUser = normalizeTrainingUser(userInfo)
+    user.value = normalizedUser
+    localStorage.setItem('auth-user', JSON.stringify(normalizedUser))
   }
 
   async function login(phone: string, code: string) {
@@ -37,14 +40,16 @@ export const useAuthStore = defineStore('auth', () => {
     const data = res.data
     setToken(data.token, data.refreshToken)
     setUser(data.user)
-    return data.user
+    hasFetchedUserInfo.value = true
+    return user.value as UserInfo
   }
 
   async function fetchUserInfo() {
     try {
       const res = await authApi.getUserInfo()
       setUser(res.data)
-      return res.data
+      hasFetchedUserInfo.value = true
+      return user.value
     } catch {
       // If token is invalid, clear auth state
       logout()
@@ -55,7 +60,8 @@ export const useAuthStore = defineStore('auth', () => {
   async function initPassword(newPassword: string) {
     const res = await authApi.initPassword(newPassword)
     setUser(res.data)
-    return res.data
+    hasFetchedUserInfo.value = true
+    return user.value as UserInfo
   }
 
   function logout() {
@@ -65,6 +71,7 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('auth-token')
     localStorage.removeItem('auth-refresh-token')
     localStorage.removeItem('auth-user')
+    hasFetchedUserInfo.value = false
   }
 
   function syncRefreshedToken(event: Event) {
@@ -89,11 +96,15 @@ export const useAuthStore = defineStore('auth', () => {
     const savedUser = localStorage.getItem('auth-user')
     if (savedUser) {
       try {
-        user.value = JSON.parse(savedUser)
+        user.value = normalizeTrainingUser(JSON.parse(savedUser))
       } catch {
         localStorage.removeItem('auth-user')
       }
     }
+  }
+
+  function needsUserInfoRefresh() {
+    return shouldRefreshCachedUser(token.value, user.value, hasFetchedUserInfo.value)
   }
 
   init()
@@ -118,6 +129,7 @@ export const useAuthStore = defineStore('auth', () => {
     initPassword,
     fetchUserInfo,
     logout,
-    init
+    init,
+    needsUserInfoRefresh
   }
 })

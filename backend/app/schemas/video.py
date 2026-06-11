@@ -11,7 +11,7 @@ class VideoCreate(BaseModel):
 
     title: str = Field(..., min_length=1, max_length=256)
     description: Optional[str] = ""
-    category_id: Optional[int] = None
+    category_id: int
     file_url: str = Field(..., max_length=512)
     cover_url: Optional[str] = ""
     tags: list[str] = Field(default_factory=list)

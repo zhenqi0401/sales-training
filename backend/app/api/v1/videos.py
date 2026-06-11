@@ -1,5 +1,6 @@
 """Video management endpoints."""
 
+import asyncio
 import hashlib
 import json
 import shutil
@@ -43,6 +44,30 @@ VALID_STATUSES = {"draft", "published", "archived"}
 _VIDEO_SCHEMA_READY = False
 
 
+async def _transcode_and_publish(video_id: int, file_url: str) -> None:
+    """后台压缩视频，完成后将状态更新为已上架。"""
+    from app.core.database import async_session_factory
+
+    final_path = UPLOAD_DIR / file_url.removeprefix("/uploads/")
+    result = None
+    try:
+        result = await asyncio.to_thread(compress_mobile_mp4_in_place, final_path, UPLOAD_DIR)
+    except Exception:
+        pass
+
+    async with async_session_factory() as session:
+        async with session.begin():
+            video = await session.get(Video, video_id)
+            if video and video.status == "transcoding":
+                video.status = "published"
+                video.published_at = datetime.now(timezone.utc)
+                if result:
+                    video.file_size = result.file_size
+                    video.resolution = result.resolution
+                    if result.cover_url:
+                        video.cover_url = result.cover_url
+
+
 def ensure_upload_dirs() -> None:
     """Create upload folders if they do not exist."""
     VIDEO_DIR.mkdir(parents=True, exist_ok=True)
@@ -60,6 +85,15 @@ def ensure_video_compression_ready() -> None:
 def validate_status(status: str) -> None:
     if status not in VALID_STATUSES:
         raise HTTPException(status_code=400, detail="Invalid video status")
+
+
+async def require_active_category(session: SessionDep, category_id: int | None) -> Category:
+    if category_id is None:
+        raise HTTPException(status_code=400, detail="请选择所属分类")
+    category = await session.get(Category, category_id)
+    if not category or not category.is_active:
+        raise HTTPException(status_code=400, detail="所属分类不存在或已停用")
+    return category
 
 
 async def ensure_video_schema(session: SessionDep) -> None:
@@ -202,7 +236,7 @@ async def list_videos(
     count_query = select(func.count()).select_from(query.subquery())
     total = (await session.execute(count_query)).scalar() or 0
 
-    query = query.order_by(Video.sort_order, Video.id.desc()).offset((page - 1) * page_size).limit(page_size)
+    query = query.order_by(Video.id.desc()).offset((page - 1) * page_size).limit(page_size)
     videos = (await session.execute(query)).scalars().all()
     categories, products = await load_lookup_data(session, list(videos))
 
@@ -230,16 +264,16 @@ async def get_video(video_id: int, session: SessionDep, user: CurrentUserDep):
 
 
 @router.post("/", response_model=VideoResponse, status_code=201, summary="Create video")
-async def create_video(body: VideoCreate, session: SessionDep, user: CurrentUserDep):
+async def create_video(body: VideoCreate, session: SessionDep, user: CurrentUserDep, background_tasks: BackgroundTasks):
     await ensure_video_schema(session)
     data = normalize_video_payload(body.model_dump())
-    validate_status(data.get("status", "draft"))
-    if data["status"] == "published":
-        data["published_at"] = datetime.now(timezone.utc)
+    category = await require_active_category(session, data.get("category_id"))
+    data["status"] = "transcoding"
+    data.pop("published_at", None)
     video = Video(**data)
     session.add(video)
     await session.flush()
-    category = await session.get(Category, video.category_id) if video.category_id else None
+    background_tasks.add_task(_transcode_and_publish, video.id, video.file_url)
     _, products = await load_lookup_data(session, [video])
     return await build_video_response(video, category, products)
 
@@ -252,6 +286,9 @@ async def update_video(video_id: int, body: VideoUpdate, session: SessionDep, us
         raise HTTPException(status_code=404, detail="Video not found")
 
     data = normalize_video_payload(body.model_dump(exclude_unset=True))
+    category: Category | None = None
+    if "category_id" in data:
+        category = await require_active_category(session, data["category_id"])
     if "status" in data:
         validate_status(data["status"])
         if data["status"] == "published" and video.status != "published":
@@ -262,7 +299,8 @@ async def update_video(video_id: int, body: VideoUpdate, session: SessionDep, us
         setattr(video, field, value)
 
     await session.flush()
-    category = await session.get(Category, video.category_id) if video.category_id else None
+    if category is None:
+        category = await session.get(Category, video.category_id) if video.category_id else None
     _, products = await load_lookup_data(session, [video])
     return await build_video_response(video, category, products)
 
@@ -307,16 +345,15 @@ async def batch_update_video_status(
     return MessageResponse(message=f"Updated {len(videos)} video(s)")
 
 
-@router.delete("/{video_id:int}", response_model=MessageResponse, summary="Archive video")
+@router.delete("/{video_id:int}", response_model=MessageResponse, summary="Delete video")
 async def delete_video(video_id: int, session: SessionDep, user: CurrentUserDep):
     await ensure_video_schema(session)
     video = await session.get(Video, video_id)
     if not video:
         raise HTTPException(status_code=404, detail="Video not found")
-    video.status = "archived"
-    video.published_at = None
+    await session.delete(video)
     await session.flush()
-    return MessageResponse(message="Video archived")
+    return MessageResponse(message="Video deleted")
 
 
 @router.post("/upload/cover", summary="Upload generated video cover")
@@ -378,9 +415,7 @@ async def upload_chunk(
 @router.post("/upload/merge", summary="Merge chunks and compress for mobile")
 async def merge_chunks(
     upload_id: str = Form(...),
-    session: SessionDep = None,
     user: CurrentUserDep = None,
-    background_tasks: BackgroundTasks = None,
 ):
     ensure_upload_dirs()
     chunk_path = CHUNK_DIR / upload_id
@@ -423,10 +458,6 @@ async def merge_chunks(
             status_code=500,
             detail=str(exc) or "视频快速处理失败，请重新上传或更换格式",
         ) from exc
-
-    final_path = UPLOAD_DIR / playable.file_url.removeprefix("/uploads/")
-    if background_tasks is not None:
-        background_tasks.add_task(compress_mobile_mp4_in_place, final_path, UPLOAD_DIR)
 
     return {
         "filename": Path(playable.file_url).name,

@@ -143,3 +143,112 @@
 - 修复培训端播放页进度上报过于频繁的问题：本地播放进度仍每秒更新，但后端 `POST /learning/progress` 只在观看时长较上次同步增加至少 5 秒、暂停、离开或播放完成时触发。
 - 增加进度上报单飞控制，同一时间最多保留一个进行中的进度请求；请求未结束时不会继续堆积新的 `progress` 请求，避免网络面板大量超时。
 - 保留本地学习进度缓存，网络失败时不影响视频播放，下一次满足同步条件后继续尝试上报。
+
+## 2026-06-10 AI 出题接入硅基流动大模型
+- 后端 `app/services/ai_service.py` 接入硅基流动 OpenAI 兼容 Chat Completions API，默认模型为 `Qwen/Qwen3.5-4B`，通过 `SALES_TRAINING_AI_*` 环境变量配置 API Key、Base URL、模型和超时时间。
+- `/questions/ai-generate` 保持返回待审核草稿的既有流程，但生成来源改为真实大模型；大模型未配置、超时、空响应或 JSON 格式异常时返回明确 502 错误，不再静默返回占位题。
+- 请求体按硅基流动文档使用 `enable_thinking=false` 与 `response_format=json_schema`，约束返回 `questions` JSON 数组，保留管理员审核后再调用 `/questions/ai-review-save` 入库的流程。
+- `docker-compose.yml` 增加 AI 环境变量透传，`README.md` 补充硅基流动配置说明，避免将真实 API Key 写入仓库。
+- 新增 `backend/tests/test_ai_service.py` 覆盖硅基流动请求体、JSON 解析、空响应报错和不再回退占位题；已通过后端 unittest 发现集验证。
+
+## 2026-06-10 AI 出题 502 配置加载修复
+- 定位管理端点击 AI 生成题目返回 502 的根因：后端运行时未读取到 `SALES_TRAINING_AI_API_KEY`，服务层因此返回“AI_API_KEY 未配置”错误。
+- 调整后端配置加载路径，`Settings` 同时读取项目根目录 `.env` 和 `backend/.env`，兼容从仓库根目录或 `backend/` 目录启动后端服务。
+- 配置解析增加 `extra="ignore"`，避免本地 `.env` 中存在其他环境变量时导致后端启动失败。
+- 本地补充未提交的 `backend/.env` 运行配置后，已通过真实硅基流动接口生成 1 道题目草稿，验证 `/questions/ai-generate` 依赖的服务层链路可用。
+- 新增 `backend/tests/test_config.py` 覆盖 `.env` 候选路径配置，避免后续启动目录变化再次导致 AI Key 读取失败。
+
+## 2026-06-10 AI 出题严格依据视频内容
+- 管理端 AI 出题页删除“字幕/转写”输入，只保留“补充要求”可选项，作为用户出题角度建议传给后端。
+- 后端 `/questions/ai-generate` 请求结构删除 `transcript` 字段，新增 `user_requirements` 字段，并禁止额外字段，避免旧字幕/转写参数继续混入生成链路。
+- AI 服务改为使用视频 `description` 作为唯一视频内容文本来源传给大模型；视频内容为空时直接返回明确错误，避免模型只凭标题、知识点或用户建议发挥。
+- 大模型提示词强化为“题干、答案和解析必须能从 video_content 直接得到支撑”，并明确用户补充要求只能作为建议，不能替代或扩展视频事实。
+- 补充后端测试覆盖视频内容必填、用户建议透传、移除字幕/转写字段和严格提示词结构；管理端构建已通过。
+
+## 2026-06-10 AI 出题接入硅基流动多模态视频输入
+- 按硅基流动多模态视觉文档调整 AI 出题请求，`/questions/ai-generate` 现在通过 Chat Completions 的 `video_url` content part 传入视频画面，由多模态模型直接读取视频内容生成题目。
+- 当时默认模型改为 `Qwen/Qwen3.5-397B-A17B`，并新增 `SALES_TRAINING_AI_VIDEO_DETAIL`、`SALES_TRAINING_AI_VIDEO_MAX_FRAMES`、`SALES_TRAINING_AI_VIDEO_FPS`、`SALES_TRAINING_AI_VIDEO_MAX_INLINE_MB` 配置控制视频抽帧和本地视频内联大小。
+- 对 `http(s)` 视频地址直接传 URL；对 `/uploads` 本地视频，在不超过内联大小上限时转为 `data:video/...;base64,...` 发送给硅基流动；文件缺失或过大时返回明确错误。
+- 管理端 AI 出题页文案改为“根据视频画面内容生成题目”，补充要求继续作为建议传给模型，不能替代视频事实。
+- 后端新增多模态请求体、本地视频 data URL、远程视频 URL 和缺失文件错误测试；后端 unittest 与管理端构建均已通过。
+
+## 2026-06-10 AI 出题多模态模型与错误日志修复
+- 根据硅基流动视频输入文档，将默认多模态模型从图片视觉模型 `Qwen/Qwen2.5-VL-72B-Instruct` 调整为视频示例模型 `Qwen/Qwen3.5-397B-A17B`，避免供应商返回 `Model disabled`。
+- 后端 `/questions/ai-generate` 捕获 AI 生成异常时新增 warning 日志，后续 502 会在后端日志中明确输出视频 ID 与供应商返回原因。
+- 本地同视频复测确认模型禁用问题已消除；当前硅基流动返回 `account balance is insufficient`，需要在供应商账户充值或更换可用 API Key/模型后才能继续生成。
+
+## 2026-06-10 AI 模型配置切回 Qwen3.5-4B
+- 按要求将后端默认 AI 模型、Docker Compose 环境变量默认值、README 示例和本地 `backend/.env` 统一改为 `Qwen/Qwen3.5-4B`。
+- 保留现有多模态视频输入请求结构与视频帧参数配置；若供应商侧该模型不支持 `video_url` 视频输入，需更换为支持视频能力的模型或调整供应商模型权限。
+
+## 2026-06-10 AI 出题切换阿里云百炼平台
+- 后端 AI 出题默认供应商从硅基流动切换为阿里云百炼 OpenAI 兼容接口，默认 `SALES_TRAINING_AI_BASE_URL` 改为 `https://dashscope.aliyuncs.com/compatible-mode/v1`，默认模型改为 `qwen3.6-flash`。
+- 按百炼视频理解文档调整多模态请求体，`video_url` 仅保留视频 `url`，抽帧频率通过同级 `fps` 字段传入，不再发送旧供应商相关的 `detail`、`max_frames`、`enable_thinking` 和 `response_format` 字段。
+- 本地未提交的 `backend/.env` 已写入百炼 API Key、模型、Base URL、超时时间和视频内联大小配置；真实 API Key 仍不写入 README、Docker Compose 或其他受版本控制文件。
+- `docker-compose.yml` 与 `README.md` 同步百炼环境变量示例，并将本地视频 data URL 内联上限默认调整为 100MB，降低已上传视频因默认上限过小导致生成失败的概率。
+- 后端测试已更新为校验百炼视频请求结构、data URL 编码和异常处理，管理端 AI 出题页面继续通过“补充要求”向大模型传递用户建议。
+
+## 2026-06-10 AI 出题切换 Qwen-Omni 全模态模型
+- 根据 PPT 讲解类视频需要同时理解画面和讲解音频的需求，AI 出题模型从 `qwen3.6-flash` 调整为百炼 `qwen3.5-omni-flash`，题目依据扩展为视频画面和音频讲解，用户补充要求仍仅作为出题角度建议。
+- 按 Qwen-Omni 文档要求将 Chat Completions 请求改为 `stream=true`，并新增流式 SSE 响应解析，继续从模型输出中提取 `questions` JSON。
+- 按文档中 Base64 文件小于 10MB 的限制，将 `SALES_TRAINING_AI_VIDEO_MAX_DATA_URL_CHARS` 默认改为 `10000000`，避免再次触发百炼请求体字符串过长错误。
+- 本地 `/uploads` 视频超过 Base64 限制时，会自动生成 `uploads/ai-cache/*.ai.mp4` AI 识别压缩版；压缩版降低分辨率和码率但保留音频，确保 PPT + 人声讲解视频仍能被全模态模型理解。
+- `backend/.env`、`docker-compose.yml`、`README.md` 和后端测试同步新增 `SALES_TRAINING_AI_VIDEO_COMPRESS_AUDIO_BITRATE` 等配置，覆盖 Omni 模型、流式载荷和保留音频压缩行为。
+
+## 2026-06-10 AI 出题答案与解析校验修复
+- 后端 AI 出题提示词补强题型约束：单选答案只能为 A/B/C/D 中一个，多选答案只能使用 A/B/C/D 并以英文逗号分隔，判断题 `true_false` 只能使用 A/B，且固定 A=正确、B=错误，禁止返回 C/D。
+- 后端要求每道题 `analysis` 必须与题目和答案严格对应，明确引用视频画面或音频讲解中的时间段证据，并逐项说明每个选项正确或错误的原因；判断题也必须说明该陈述为何正确或错误。
+- 后端规范化 AI 题目时新增答案范围校验，若判断题返回 C/D 或任意题型答案不在实际选项内，会直接返回 AI 生成错误，避免无效题目进入管理端审核和题库。
+- 管理端 AI 审核保存前补充答案范围校验，防止异常草稿或人工编辑后的非法答案继续入库。
+- 补充后端单元测试覆盖判断题非法答案拦截，以及提示词中 A/B 判断题规则、时间段证据和逐项解析规则。
+
+## 2026-06-10 管理端删除确认弹窗居中修复
+- 新增管理端统一危险操作确认工具，所有删除/归档确认统一使用居中的 Element Plus MessageBox，不再使用贴着表格行展示的 Popconfirm。
+- 题目管理、用户管理、门店管理、分类管理、试卷管理、产品知识、话术管理和视频管理的单条删除/归档按钮改为普通文本按钮，点击后弹出居中确认框。
+- 题目管理的批量删除按钮同步改为统一居中确认框，保证单条删除和批量删除的确认体验一致。
+- 管理端构建已通过，保留现有 Sass legacy API、Rollup 注释和 chunk size 警告。
+
+## 2026-06-10 管理端删除确认弹窗样式优化
+- 管理端保留现有 `confirmDanger()` 和 Element Plus MessageBox 交互链路，仅调整 `.confirm-dialog` 危险确认弹窗样式。
+- 删除确认弹窗改为标准居中危险操作视觉：标题区分隔更清晰，关闭按钮固定在右上角，内容区留白正常，底部按钮右对齐。
+- 确认按钮在 `.confirm-dialog` 内统一显示为红色危险按钮，取消按钮保持 Element Plus 默认次级按钮样式，避免影响普通 MessageBox 弹窗。
+
+## 2026-06-10 培训端用户姓名刷新修复
+- 确认培训端用户已通过后端 `/auth/phone-login` 和 `/auth/user-info` 与数据库 `users.real_name` 关联，页面显示姓名来源为 `authStore.userName`。
+- 新增培训端用户信息规范化逻辑，兼容后端返回的 `name`、`real_name`、`realName` 和 `username` 字段，避免字段形状不一致时姓名显示异常。
+- 调整培训端路由鉴权逻辑：有 token 时每次应用启动至少刷新一次 `/auth/user-info`，用数据库最新姓名覆盖浏览器 `localStorage` 中旧的 `auth-user` 缓存。
+- 补充用户信息规范化测试，并通过培训端 `npm run build` 验证。
+
+## 2026-06-11 AI 开发文档维护规则固化
+- 在 `AGENTS.md` 中明确 `AGENTS.md`、`README.md`、`update.md` 三类文档的职责边界：AI 协作规则入口、使用者/开发者手册、持续追加变更日志。
+- 固化文档触发更新规则：长期协作规则和开发约定变化更新 `AGENTS.md`，环境依赖、启动配置和使用方式变化更新 `README.md`，重要功能、接口、配置、数据库或业务流程变化追加 `update.md`。
+- 明确 `update.md` 记录格式需包含日期、变更主题、影响范围和要点，并规定文档规范本身变更也需要追加变更日志。
+
+## 2026-06-11 产品分类与 AI 出题表单修复
+- 管理端 AI 出题页将“关联视频”默认值从 `0` 调整为空选择状态，默认展示“请选择视频”，并优化生成配置表单在窄宽度下的标签、滑块和数字输入布局，避免用户横向滑动才能看完整表单。
+- 管理端分类页面文案统一为产品分类语义，分类列表的视频数量改为读取后端返回的真实 `video_count`，用于展示每个产品分类下已关联视频数量。
+- 后端分类接口新增按 `videos.category_id` 统计的视频数量返回，并在删除分类时拦截已有视频关联的产品分类，避免视频挂到已停用分类。
+- 视频上传/编辑流程将所属分类改为必填：管理端增加表单校验，后端 `VideoCreate.category_id` 改为必填，并在创建和更新时校验分类存在且启用。
+- 补充后端 `unittest` 覆盖分类响应视频数量和视频创建分类必填；已通过后端相关测试和管理端 `npm run build` 验证。
+
+## 2026-06-11 产品分类上级分类选择框修复
+- 修复管理端产品分类新增弹窗中“上级分类”选择框点击选择后消失的问题。
+- 根因是选择框显示条件直接绑定 `form.parentId`，选择父分类后组件被 `v-if` 卸载；现改为使用独立的 `parentSelectorVisible` 控制显示，选择值变化不会影响控件存在。
+- 已通过最小回归检查确认不再存在 `v-if="!form.parentId"` 绑定，并通过管理端 `npm run build` 验证。
+
+## 2026-07-01 生产环境部署配置
+
+### 影响范围
+- **基础设施**：`docker-compose.yml`、`backend/Dockerfile`、新增 `nginx/default.conf`、`.env.example`、`admin-web/vite.config.ts`、`admin-web/.env.production`
+- **管理端**：vite.config.ts 增加 `base` 环境变量支持，新增 `.env.production` 设置 VITE_BASE=/admin/
+- **培训端**：无变动（Hash 路由 + 根路径部署）
+- **后端**：Dockerfile 增加 ffmpeg 系统依赖
+
+### 变更要点
+- `docker-compose.yml` 重写为生产版：新增 `celery-worker`（AI 出题异步任务）与 `nginx`（统一入口）服务；各服务端口不再对外暴露（仅 Nginx 80 端口对外）；backend 去掉 `--reload` 热重载标志；MySQL/Redis 端口注释掉不再暴露到宿主机。
+- `backend/Dockerfile` 增加 `ffmpeg` 系统包，确保容器内视频转码可用。
+- 新建 `nginx/default.conf`：统一入口配置，培训端 `/`（默认），管理端 `/admin`，`/api` 反向代理到 backend，`/uploads` 由 Nginx 直接返回静态文件提高性能，限制上传 500MB。
+- 新建 `.env.example` 生产环境变量模板，覆盖数据库、JWT、AI 出题、分页等全部可配项。
+- `admin-web/vite.config.ts` 增加 `base` 从环境变量 `VITE_BASE` 读取，新建 `admin-web/.env.production` 设置 `VITE_BASE=/admin/`，使管理端构建产物正确匹配 Nginx `/admin` 子路径部署。
+- 新建 `deploy.sh` 一键部署脚本，自动检查依赖、构建前端、启动服务、运行迁移。
+- 保留现有 `backend/deploy/nginx-videos.conf` 作为参考，生产使用 `nginx/default.conf`。

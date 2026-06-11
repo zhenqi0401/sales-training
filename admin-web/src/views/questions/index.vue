@@ -128,11 +128,7 @@
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="openPreview(row)">预览</el-button>
             <el-button text type="primary" size="small" @click="$router.push(`/questions/edit/${row.id}`)">编辑</el-button>
-            <el-popconfirm teleported :persistent="false" popper-class="delete-popconfirm" title="确定删除此题目吗？" @confirm="handleDelete(row.id)">
-              <template #reference>
-                <el-button text type="danger" size="small">删除</el-button>
-              </template>
-            </el-popconfirm>
+            <el-button text type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -220,7 +216,8 @@
 
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref } from 'vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ElMessage } from 'element-plus'
+import { confirmDanger } from '@/utils/confirm'
 import { Delete, Download, MagicStick, Plus, Upload } from '@element-plus/icons-vue'
 import * as XLSX from 'xlsx'
 import { getQuestionList, deleteQuestion, batchDeleteQuestions, importQuestions } from '@/api/questions'
@@ -320,6 +317,7 @@ function handleSelectionChange(rows: Question[]) {
 
 async function handleDelete(id: number) {
   try {
+    await confirmDanger('确定删除此题目吗？')
     await deleteQuestion(id)
     ElMessage.success('删除成功')
     await getList()
@@ -332,19 +330,7 @@ async function batchDelete() {
   if (selectedIds.value.length === 0) return
 
   try {
-    await ElMessageBox.confirm(
-      `确定删除选中的 ${selectedIds.value.length} 道题目吗？`,
-      '确认删除',
-      {
-        appendTo: document.body,
-        customClass: 'confirm-dialog',
-        confirmButtonText: '删除',
-        cancelButtonText: '取消',
-        type: 'warning',
-        center: true,
-        draggable: false,
-      },
-    )
+    await confirmDanger(`确定删除选中的 ${selectedIds.value.length} 道题目吗？`)
     await batchDeleteQuestions(selectedIds.value)
     ElMessage.success('批量删除成功')
     selectedIds.value = []

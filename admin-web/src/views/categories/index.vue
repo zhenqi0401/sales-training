@@ -1,15 +1,15 @@
 <template>
   <div class="page-container">
     <div class="page-header">
-      <h2>分类管理</h2>
-      <p>管理课程分类，支持多级分类结构</p>
+      <h2>产品分类管理</h2>
+      <p>管理产品分类，视频上传时必须归入一个产品分类</p>
     </div>
 
     <el-card shadow="hover">
       <div class="table-toolbar">
         <div class="toolbar-left">
           <el-button type="primary" @click="openDialog()">
-            <el-icon><Plus /></el-icon>新增分类
+            <el-icon><Plus /></el-icon>新增产品分类
           </el-button>
           <el-button @click="refreshTree">
             <el-icon><Refresh /></el-icon>刷新
@@ -25,7 +25,7 @@
         stripe
         v-loading="loading"
       >
-        <el-table-column prop="name" label="分类名称" min-width="200">
+        <el-table-column prop="name" label="产品分类名称" min-width="200">
           <template #default="{ row }">
             <div class="category-name">
               <el-icon v-if="row.children && row.children.length" color="#409eff"><Folder /></el-icon>
@@ -39,7 +39,6 @@
             <el-tag size="small">{{ row.videoCount || 0 }}</el-tag>
           </template>
         </el-table-column>
-        <el-table-column prop="sort" label="排序" width="100" align="center" />
         <el-table-column prop="createdAt" label="创建时间" width="180">
           <template #default="{ row }">
             {{ row.createdAt || '--' }}
@@ -49,11 +48,7 @@
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="openDialog(row as Category)">编辑</el-button>
             <el-button text type="primary" size="small" @click="openDialog(undefined, row.id)">添加子分类</el-button>
-            <el-popconfirm teleported :persistent="false" popper-class="delete-popconfirm" title="确定删除此分类吗？" @confirm="handleDelete(row.id)">
-              <template #reference>
-                <el-button text type="danger" size="small">删除</el-button>
-              </template>
-            </el-popconfirm>
+            <el-button text type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -62,14 +57,14 @@
     <!-- Dialog -->
     <el-dialog
       v-model="dialogVisible"
-      :title="isEditing ? '编辑分类' : '新增分类'"
+      :title="isEditing ? '编辑产品分类' : '新增产品分类'"
       width="500px"
     >
       <el-form ref="formRef" :model="form" :rules="rules" label-width="80px">
         <el-form-item label="分类名称" prop="name">
-          <el-input v-model="form.name" placeholder="请输入分类名称" maxlength="20" />
+          <el-input v-model="form.name" placeholder="请输入产品分类名称" maxlength="20" />
         </el-form-item>
-        <el-form-item label="上级分类" v-if="!form.parentId">
+        <el-form-item label="上级分类" v-if="parentSelectorVisible">
           <el-tree-select
             v-model="form.parentId"
             :data="categoryTree"
@@ -79,9 +74,6 @@
             check-strictly
             style="width: 100%"
           />
-        </el-form-item>
-        <el-form-item label="排序">
-          <el-input-number v-model="form.sort" :min="0" :max="999" />
         </el-form-item>
       </el-form>
       <template #footer>
@@ -95,6 +87,7 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
+import { confirmDanger } from '@/utils/confirm'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getCategoryTree, createCategory, updateCategory, deleteCategory } from '@/api/categories'
 import type { Category } from '@/types'
@@ -104,6 +97,7 @@ const submitting = ref(false)
 const categoryTree = ref<Category[]>([])
 const dialogVisible = ref(false)
 const isEditing = ref(false)
+const parentSelectorVisible = ref(true)
 const formRef = ref<FormInstance>()
 const editingId = ref<number | null>(null)
 const treeProps = { label: 'name', value: 'id', children: 'children' } as any
@@ -111,7 +105,6 @@ const treeProps = { label: 'name', value: 'id', children: 'children' } as any
 const form = reactive({
   name: '',
   parentId: null as number | null,
-  sort: 0,
 })
 
 const rules: FormRules = {
@@ -139,16 +132,16 @@ async function refreshTree() {
 function openDialog(row?: Category, parentId?: number) {
   if (row) {
     isEditing.value = true
+    parentSelectorVisible.value = true
     editingId.value = row.id
     form.name = row.name
     form.parentId = row.parentId
-    form.sort = row.sort
   } else {
     isEditing.value = false
+    parentSelectorVisible.value = !parentId
     editingId.value = null
     form.name = ''
     form.parentId = parentId || null
-    form.sort = 0
   }
   dialogVisible.value = true
 }
@@ -177,6 +170,7 @@ async function handleSubmit() {
 
 async function handleDelete(id: number) {
   try {
+    await confirmDanger('确定删除此分类吗？')
     await deleteCategory(id)
     ElMessage.success('删除成功')
     refreshTree()

@@ -75,11 +75,7 @@
               size="small"
               @click="handleClose(row.id)"
             >关闭</el-button>
-            <el-popconfirm teleported :persistent="false" popper-class="delete-popconfirm" title="确定删除此试卷吗？" @confirm="handleDelete(row.id)">
-              <template #reference>
-                <el-button text type="danger" size="small">删除</el-button>
-              </template>
-            </el-popconfirm>
+            <el-button text type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -102,6 +98,7 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
+import { confirmDanger } from '@/utils/confirm'
 import { getExamList, deleteExam, publishExam, closeExam } from '@/api/exams'
 import type { Exam } from '@/types'
 
@@ -156,6 +153,7 @@ async function handleClose(id: number) {
 
 async function handleDelete(id: number) {
   try {
+    await confirmDanger('确定删除此试卷吗？')
     await deleteExam(id)
     ElMessage.success('删除成功')
     getList()

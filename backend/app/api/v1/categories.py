@@ -5,6 +5,7 @@ from sqlalchemy import func, select
 
 from app.core.dependencies import CurrentUserDep, SessionDep
 from app.models.category import Category
+from app.models.video import Video
 from app.schemas.category import CategoryCreate, CategoryResponse, CategoryUpdate
 from app.schemas.common import MessageResponse, PaginatedResponse
 
@@ -14,6 +15,7 @@ router = APIRouter()
 def to_category_response(
     category: Category,
     children: list[CategoryResponse] | None = None,
+    video_count: int = 0,
 ) -> CategoryResponse:
     """Build a category response without triggering lazy relationship loading."""
     return CategoryResponse(
@@ -25,10 +27,25 @@ def to_category_response(
         sort_order=category.sort_order,
         parent_id=category.parent_id,
         is_active=category.is_active,
+        video_count=video_count,
         created_at=category.created_at,
         updated_at=category.updated_at,
         children=children,
     )
+
+
+async def get_category_video_counts(
+    session: SessionDep,
+    category_ids: list[int],
+) -> dict[int, int]:
+    if not category_ids:
+        return {}
+    rows = await session.execute(
+        select(Video.category_id, func.count(Video.id))
+        .where(Video.category_id.in_(category_ids))
+        .group_by(Video.category_id)
+    )
+    return {int(category_id): int(count) for category_id, count in rows.all() if category_id is not None}
 
 
 @router.get("/", response_model=PaginatedResponse[CategoryResponse], summary="分类列表")
@@ -58,13 +75,14 @@ async def list_categories(
     ).offset((page - 1) * page_size).limit(page_size)
     result = await session.execute(query)
     categories = result.scalars().all()
+    video_counts = await get_category_video_counts(session, [category.id for category in categories])
 
     return PaginatedResponse(
         total=total,
         page=page,
         page_size=page_size,
         total_pages=(total + page_size - 1) // page_size,
-        items=[to_category_response(c) for c in categories],
+        items=[to_category_response(c, video_count=video_counts.get(c.id, 0)) for c in categories],
     )
 
 
@@ -85,10 +103,11 @@ async def get_category_tree(
         )
     )
     all_cats = result.scalars().all()
+    video_counts = await get_category_video_counts(session, [category.id for category in all_cats])
 
     cat_map: dict[int, CategoryResponse] = {}
     for category in all_cats:
-        cat_map[category.id] = to_category_response(category, [])
+        cat_map[category.id] = to_category_response(category, [], video_counts.get(category.id, 0))
 
     roots: list[CategoryResponse] = []
     for category in cat_map.values():
@@ -109,7 +128,8 @@ async def get_category(
     category = await session.get(Category, category_id)
     if not category or not category.is_active:
         raise HTTPException(status_code=404, detail="分类不存在")
-    return to_category_response(category)
+    video_counts = await get_category_video_counts(session, [category.id])
+    return to_category_response(category, video_count=video_counts.get(category.id, 0))
 
 
 @router.post("/", response_model=CategoryResponse, status_code=201, summary="创建分类")
@@ -146,7 +166,8 @@ async def update_category(
         setattr(category, field, value)
 
     await session.flush()
-    return to_category_response(category)
+    video_counts = await get_category_video_counts(session, [category.id])
+    return to_category_response(category, video_count=video_counts.get(category.id, 0))
 
 
 @router.delete("/{category_id}", response_model=MessageResponse, summary="删除分类")
@@ -164,6 +185,12 @@ async def delete_category(
     ).scalars().all()
     if children:
         raise HTTPException(status_code=400, detail="该分类下有子分类，无法删除")
+
+    video_count = (
+        await session.execute(select(func.count()).select_from(Video).where(Video.category_id == category_id))
+    ).scalar() or 0
+    if video_count:
+        raise HTTPException(status_code=400, detail="该产品分类下已有视频，无法删除")
 
     category.is_active = False
     await session.flush()

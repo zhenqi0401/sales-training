@@ -73,11 +73,7 @@
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="openDialog(row)">编辑</el-button>
             <el-button text type="primary" size="small" @click="previewScript(row)">预览</el-button>
-            <el-popconfirm teleported :persistent="false" popper-class="delete-popconfirm" title="确定删除吗？" @confirm="handleDelete(row.id)">
-              <template #reference>
-                <el-button text type="danger" size="small">删除</el-button>
-              </template>
-            </el-popconfirm>
+            <el-button text type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -163,6 +159,7 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
+import { confirmDanger } from '@/utils/confirm'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getScriptList, createScript, updateScript, deleteScript, getScriptCategoryOptions } from '@/api/scripts'
 import type { SalesScript } from '@/types'
@@ -274,7 +271,8 @@ async function handleSubmit() {
 }
 
 async function handleDelete(id: number) {
-  try { await deleteScript(id); ElMessage.success('删除成功'); getList() } catch { /* handled */ }
+  try { await confirmDanger('确定删除此话术吗？')
+    await deleteScript(id); ElMessage.success('删除成功'); getList() } catch { /* handled */ }
 }
 
 function categoryLabel(cat: string): string {

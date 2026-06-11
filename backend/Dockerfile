@@ -2,9 +2,11 @@ FROM python:3.12-slim
 
 WORKDIR /app
 
+# 系统依赖：gcc/mysql-dev 用于 asyncmy，ffmpeg 用于视频转码
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     default-libmysqlclient-dev \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

@@ -64,7 +64,7 @@ export interface Video {
 export interface VideoUploadParams {
   title: string
   description?: string
-  categoryId?: number | null
+  categoryId: number
   url: string
   coverUrl?: string
   tags?: string[]
@@ -105,7 +105,7 @@ export interface QuestionOption {
 }
 
 export interface AiGenerateParams {
-  videoId: number
+  videoId: number | null
   categoryId?: number | null
   productCategoryId?: number | null
   count: number
@@ -116,8 +116,7 @@ export interface AiGenerateParams {
     true_false: number
   }
   knowledgePoints?: string[]
-  transcript?: string
-  topic?: string
+  userRequirements?: string
 }
 
 // ==================== Exam Types ====================

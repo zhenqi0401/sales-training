@@ -41,6 +41,7 @@ class CategoryResponse(BaseModel):
     sort_order: int
     parent_id: Optional[int] = None
     is_active: bool
+    video_count: int = 0
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
     children: Optional[list["CategoryResponse"]] = None

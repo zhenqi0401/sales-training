@@ -6,6 +6,7 @@ import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 import { resolve } from 'path'
 
 export default defineConfig({
+  base: process.env.VITE_BASE || '/',
   plugins: [
     vue(),
     AutoImport({
@@ -29,6 +30,7 @@ export default defineConfig({
   },
   server: {
     port: 3000,
+    allowedHosts: ['.ngrok-free.dev', '.ngrok-free.app', '.ngrok.app'],
     proxy: {
       '/api': {
         target: 'http://localhost:8080',

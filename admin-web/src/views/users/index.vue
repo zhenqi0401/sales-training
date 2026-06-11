@@ -85,11 +85,7 @@
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="$router.push(`/users/detail/${row.id}`)">详情</el-button>
             <el-button text type="primary" size="small" @click="openEditDialog(row as UserInfo)">编辑</el-button>
-            <el-popconfirm teleported :persistent="false" popper-class="delete-popconfirm" title="确定删除此用户吗？" @confirm="handleDelete(row.id)">
-              <template #reference>
-                <el-button text type="danger" size="small">删除</el-button>
-              </template>
-            </el-popconfirm>
+            <el-button text type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -195,6 +191,7 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
+import { confirmDanger } from '@/utils/confirm'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getUserList, createUser, updateUser, deleteUser, toggleUserStatus } from '@/api/users'
 import { getAllStores } from '@/api/stores'
@@ -359,6 +356,7 @@ async function handleToggleStatus(row: UserInfo, enabled: boolean) {
 
 async function handleDelete(id: number) {
   try {
+    await confirmDanger('确定删除此用户吗？')
     await deleteUser(id)
     ElMessage.success('删除成功')
     getList()

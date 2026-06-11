@@ -9,15 +9,19 @@ from typing import Literal
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+BACKEND_DIR = Path(__file__).resolve().parents[2]
+PROJECT_ROOT = BACKEND_DIR.parent
+
 
 class Settings(BaseSettings):
     """Global application settings loaded from environment / .env file."""
 
     model_config = SettingsConfigDict(
         env_prefix="SALES_TRAINING_",
-        env_file=".env",
+        env_file=(PROJECT_ROOT / ".env", BACKEND_DIR / ".env"),
         env_file_encoding="utf-8",
         case_sensitive=False,
+        extra="ignore",
     )
 
     # ---------- App ----------
@@ -45,6 +49,18 @@ class Settings(BaseSettings):
     # ---------- Celery / Redis ----------
     celery_broker_url: str = "redis://localhost:6379/0"
     celery_result_backend: str = "redis://localhost:6379/0"
+
+    # ---------- AI Question Generation ----------
+    ai_api_key: str = ""
+    ai_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+    ai_model: str = "qwen3.5-omni-flash"
+    ai_request_timeout_seconds: int = 120
+    ai_video_fps: int = 1
+    ai_video_max_inline_mb: int = 100
+    ai_video_max_data_url_chars: int = 10_000_000
+    ai_video_compress_max_width: int = 480
+    ai_video_compress_crf: int = 38
+    ai_video_compress_audio_bitrate: str = "32k"
 
     # ---------- Pagination ----------
     default_page_size: int = 20

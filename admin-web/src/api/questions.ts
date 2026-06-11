@@ -130,16 +130,18 @@ export function deleteQuestion(id: number): Promise<void> {
 }
 
 export function aiGenerateQuestions(params: AiGenerateParams): Promise<Question[]> {
+  if (!params.videoId) {
+    return Promise.reject(new Error('请选择视频'))
+  }
   return post<any[]>('/questions/ai-generate', {
     video_id: params.videoId,
-    topic: params.topic || '',
+    user_requirements: params.userRequirements || '',
     count: params.count,
     difficulty_level: params.difficultyLevel,
     question_type_ratios: params.questionTypeRatios,
     category_id: params.categoryId,
     product_category_id: params.productCategoryId,
     knowledge_points: params.knowledgePoints ?? [],
-    transcript: params.transcript || '',
   }).then((items) => items.map(normalizeQuestion))
 }
 

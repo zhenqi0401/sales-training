@@ -79,11 +79,6 @@
                   </el-radio-group>
                 </el-form-item>
               </el-col>
-              <el-col :xs="24" :sm="12">
-                <el-form-item label="排序权重">
-                  <el-input-number v-model="form.sortOrder" :min="0" :max="999999" controls-position="right" />
-                </el-form-item>
-              </el-col>
             </el-row>
 
             <el-row :gutter="16">
@@ -200,12 +195,12 @@ const form = reactive({
   resolution: '',
   fileSize: 0,
   status: 'draft' as 'draft' | 'published' | 'archived',
-  sortOrder: 0,
   required: false,
 })
 
 const rules: FormRules = {
   title: [{ required: true, message: '请输入视频标题', trigger: 'blur' }],
+  categoryId: [{ required: true, message: '请选择所属分类', trigger: 'change' }],
 }
 
 onMounted(async () => {
@@ -247,7 +242,6 @@ async function loadVideo() {
     form.resolution = video.resolution || ''
     form.fileSize = video.fileSize || 0
     form.status = video.status
-    form.sortOrder = video.sortOrder || 0
     form.required = video.required
   } catch {
     ElMessage.error('加载视频信息失败')
@@ -287,6 +281,10 @@ async function handleSave() {
     ElMessage.warning('请先上传视频文件')
     return
   }
+  if (!form.categoryId) {
+    ElMessage.warning('请选择所属分类')
+    return
+  }
   if (coverUploading.value) {
     ElMessage.warning('首帧封面仍在保存，请稍后再试')
     return
@@ -306,7 +304,6 @@ async function handleSave() {
       resolution: form.resolution,
       fileSize: form.fileSize,
       status: form.status,
-      sortOrder: form.sortOrder,
       required: form.required,
       estDuration: studyMinutes(form.duration),
     }

@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Literal, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class QuestionCreate(BaseModel):
@@ -77,8 +77,10 @@ class QuestionResponse(BaseModel):
 class AIQuestionGenerate(BaseModel):
     """Payload for AI question generation."""
 
+    model_config = ConfigDict(extra="forbid")
+
     video_id: int = Field(..., description="关联视频ID")
-    topic: Optional[str] = Field(default="", description="补充主题或知识点")
+    user_requirements: Optional[str] = Field(default="", description="可选：用户补充的出题要求或建议")
     count: int = Field(default=5, ge=1, le=50, description="生成题目数量")
     difficulty_level: Literal["L1", "L2", "L3"] = Field(default="L2", description="难度 L1/L2/L3")
     question_type_ratios: dict[str, int] = Field(
@@ -88,7 +90,6 @@ class AIQuestionGenerate(BaseModel):
     category_id: Optional[int] = None
     product_category_id: Optional[int] = None
     knowledge_points: list[str] = Field(default_factory=list)
-    transcript: Optional[str] = Field(default="", description="可选：人工提供的字幕/转写文本")
 
 
 class AIQuestionDraft(BaseModel):

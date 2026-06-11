@@ -85,11 +85,7 @@
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="openDialog(row)">编辑</el-button>
             <el-button text type="primary" size="small" @click="previewProduct(row)">预览</el-button>
-            <el-popconfirm teleported :persistent="false" popper-class="delete-popconfirm" title="确定删除吗？" @confirm="handleDelete(row.id)">
-              <template #reference>
-                <el-button text type="danger" size="small">删除</el-button>
-              </template>
-            </el-popconfirm>
+            <el-button text type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -184,6 +180,7 @@
 <script setup lang="ts">
 import { computed, ref, onMounted, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
+import { confirmDanger } from '@/utils/confirm'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getProductList, createProduct, updateProduct, deleteProduct, getProductCategoryOptions } from '@/api/products'
 import type { ProductKnowledge } from '@/types'
@@ -302,7 +299,8 @@ async function handleSubmit() {
 }
 
 async function handleDelete(id: number) {
-  try { await deleteProduct(id); ElMessage.success('删除成功'); getList() } catch { /* handled */ }
+  try { await confirmDanger('确定删除此产品吗？')
+    await deleteProduct(id); ElMessage.success('删除成功'); getList() } catch { /* handled */ }
 }
 
 function categoryLabel(cat: string): string {

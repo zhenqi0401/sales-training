@@ -30,6 +30,7 @@
         @change="handleSearch"
       >
         <el-option label="草稿" value="draft" />
+        <el-option label="转码中" value="transcoding" />
         <el-option label="已上架" value="published" />
         <el-option label="已下架" value="archived" />
       </el-select>
@@ -111,10 +112,10 @@
             <span v-else class="muted-text">选修</span>
           </template>
         </el-table-column>
-        <el-table-column label="排序" prop="sortOrder" width="90" align="center" />
         <el-table-column label="状态" width="100" align="center">
           <template #default="{ row }">
             <el-tag v-if="row.status === 'published'" type="success" size="small">已上架</el-tag>
+            <el-tag v-else-if="row.status === 'transcoding'" type="primary" size="small">转码中</el-tag>
             <el-tag v-else-if="row.status === 'draft'" type="info" size="small">草稿</el-tag>
             <el-tag v-else type="warning" size="small">已下架</el-tag>
           </template>
@@ -122,7 +123,7 @@
         <el-table-column label="创建时间" width="170">
           <template #default="{ row }">{{ formatDate(row.createdAt) }}</template>
         </el-table-column>
-        <el-table-column label="操作" width="210" fixed="right">
+        <el-table-column label="操作" width="210" fixed="right" align="center">
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="router.push(`/videos/edit/${row.id}`)">编辑</el-button>
             <el-button
@@ -133,11 +134,7 @@
             >
               {{ row.status === 'published' ? '下架' : '上架' }}
             </el-button>
-            <el-popconfirm teleported :persistent="false" popper-class="delete-popconfirm" title="确定归档该视频吗？" @confirm="handleDelete((row as Video).id)">
-              <template #reference>
-                <el-button text type="danger" size="small">归档</el-button>
-              </template>
-            </el-popconfirm>
+            <el-button text type="danger" size="small" @click="handleDelete((row as Video).id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -161,6 +158,7 @@
 import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { confirmDanger } from '@/utils/confirm'
 import { batchUpdateVideoStatus, deleteVideo, getVideoList, toggleVideoStatus } from '@/api/videos'
 import { getCategoryList } from '@/api/categories'
 import type { Category, Video } from '@/types'
@@ -255,8 +253,9 @@ async function handleBatchStatus(status: string) {
 
 async function handleDelete(id: number) {
   try {
+    await confirmDanger('确定删除该视频吗？此操作不可恢复。', { title: '确认删除', confirmButtonText: '删除' })
     await deleteVideo(id)
-    ElMessage.success('视频已归档')
+    ElMessage.success('视频已删除')
     getList()
   } catch {
     // Error handled by interceptor.

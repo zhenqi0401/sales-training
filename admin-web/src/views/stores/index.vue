@@ -54,11 +54,7 @@
         <el-table-column label="操作" width="180" fixed="right">
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="openDialog(row as Store)">编辑</el-button>
-            <el-popconfirm teleported :persistent="false" popper-class="delete-popconfirm" title="确定删除此门店吗？" @confirm="handleDelete(row.id)">
-              <template #reference>
-                <el-button text type="danger" size="small">删除</el-button>
-              </template>
-            </el-popconfirm>
+            <el-button text type="danger" size="small" @click="handleDelete(row.id)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -122,6 +118,7 @@
 <script setup lang="ts">
 import { ref, onMounted, reactive } from 'vue'
 import { ElMessage } from 'element-plus'
+import { confirmDanger } from '@/utils/confirm'
 import type { FormInstance, FormRules } from 'element-plus'
 import { getStoreList, createStore, updateStore, deleteStore, toggleStoreStatus } from '@/api/stores'
 import type { Store } from '@/types'
@@ -214,7 +211,8 @@ async function handleToggleStatus(row: Store, enabled: boolean) {
 }
 
 async function handleDelete(id: number) {
-  try { await deleteStore(id); ElMessage.success('删除成功'); getList() } catch { /* handled */ }
+  try { await confirmDanger('确定删除此门店吗？')
+    await deleteStore(id); ElMessage.success('删除成功'); getList() } catch { /* handled */ }
 }
 </script>
 

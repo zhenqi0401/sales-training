@@ -8,6 +8,7 @@ function normalizeCategory(data: any): Category {
     ...data,
     parentId: data.parentId ?? data.parent_id ?? null,
     sort: data.sort ?? data.sort_order ?? 0,
+    videoCount: data.videoCount ?? data.video_count ?? 0,
     createdAt: data.createdAt ?? data.created_at ?? '',
     children: Array.isArray(data.children) ? data.children.map(normalizeCategory) : data.children,
   }

@@ -1,5 +1,7 @@
 """Question management endpoints."""
 
+import logging
+
 from fastapi import APIRouter, HTTPException
 from sqlalchemy import String, cast, func, select
 
@@ -20,6 +22,7 @@ from app.schemas.question import (
 )
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 @router.get("/", response_model=PaginatedResponse[QuestionResponse], summary="题目列表")
@@ -130,7 +133,7 @@ async def ai_generate_questions(
     Drafts are intentionally not persisted. Use /ai-review-save after the
     administrator edits/deletes/supplements and approves them.
     """
-    from app.services.ai_service import generate_questions
+    from app.services.ai_service import AIQuestionGenerationError, generate_questions
 
     video = await session.get(Video, body.video_id)
     if not video:
@@ -159,20 +162,23 @@ async def ai_generate_questions(
         for product in products
     ]
 
-    questions = await generate_questions(
-        video_title=video.title,
-        video_file_url=video.file_url,
-        count=body.count,
-        difficulty_level=body.difficulty_level,
-        question_type_ratios=body.question_type_ratios,
-        category_id=body.category_id,
-        video_id=body.video_id,
-        product_category_id=product_category_id,
-        knowledge_points=body.knowledge_points,
-        topic=body.topic,
-        transcript=body.transcript,
-        product_knowledge=product_knowledge,
-    )
+    try:
+        questions = await generate_questions(
+            video_title=video.title,
+            video_file_url=video.file_url,
+            count=body.count,
+            difficulty_level=body.difficulty_level,
+            question_type_ratios=body.question_type_ratios,
+            category_id=body.category_id,
+            video_id=body.video_id,
+            product_category_id=product_category_id,
+            knowledge_points=body.knowledge_points,
+            user_requirements=body.user_requirements,
+            product_knowledge=product_knowledge,
+        )
+    except AIQuestionGenerationError as exc:
+        logger.warning("AI question generation failed for video_id=%s: %s", body.video_id, exc)
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
 
     return [AIQuestionDraft.model_validate(q) for q in questions]
 

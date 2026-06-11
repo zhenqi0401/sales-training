@@ -2,22 +2,22 @@
   <div class="page-container">
     <div class="page-header">
       <h2>AI 生成题目</h2>
-      <p>选择视频并配置生成规则，管理员审核通过后再写入题库</p>
+      <p>根据视频画面内容生成题目，管理员审核通过后再写入题库</p>
     </div>
 
-    <el-row :gutter="20">
+    <el-row :gutter="20" class="ai-generate-layout">
       <el-col :xs="24" :lg="9">
         <el-card shadow="hover">
           <template #header>
             <span>生成配置</span>
           </template>
 
-          <el-form ref="formRef" :model="form" :rules="rules" label-width="118px">
+          <el-form ref="formRef" :model="form" :rules="rules" class="generate-form" label-width="92px">
             <el-form-item label="关联视频" prop="videoId">
               <el-select
                 v-model="form.videoId"
                 filterable
-                placeholder="选择要出题的视频"
+                placeholder="请选择视频"
                 style="width: 100%"
                 @change="handleVideoChange"
               >
@@ -54,7 +54,7 @@
             </el-form-item>
 
             <el-form-item label="题目数量" prop="count">
-              <el-input-number v-model="form.count" :min="1" :max="50" />
+              <el-input-number v-model="form.count" :min="1" :max="50" class="compact-number" />
             </el-form-item>
 
             <el-form-item label="难度级别" prop="difficultyLevel">
@@ -69,17 +69,17 @@
                 <div class="ratio-row">
                   <span>单选</span>
                   <el-slider v-model="form.questionTypeRatios.single" :min="0" :max="100" />
-                  <el-input-number v-model="form.questionTypeRatios.single" :min="0" :max="100" size="small" />
+                  <el-input-number v-model="form.questionTypeRatios.single" :min="0" :max="100" size="small" class="ratio-number" />
                 </div>
                 <div class="ratio-row">
                   <span>多选</span>
                   <el-slider v-model="form.questionTypeRatios.multiple" :min="0" :max="100" />
-                  <el-input-number v-model="form.questionTypeRatios.multiple" :min="0" :max="100" size="small" />
+                  <el-input-number v-model="form.questionTypeRatios.multiple" :min="0" :max="100" size="small" class="ratio-number" />
                 </div>
                 <div class="ratio-row">
                   <span>判断</span>
                   <el-slider v-model="form.questionTypeRatios.true_false" :min="0" :max="100" />
-                  <el-input-number v-model="form.questionTypeRatios.true_false" :min="0" :max="100" size="small" />
+                  <el-input-number v-model="form.questionTypeRatios.true_false" :min="0" :max="100" size="small" class="ratio-number" />
                 </div>
                 <span class="form-tip">比例按权重计算，不要求总和等于 100</span>
               </div>
@@ -99,19 +99,10 @@
 
             <el-form-item label="补充要求">
               <el-input
-                v-model="form.topic"
+                v-model="form.userRequirements"
                 type="textarea"
                 :rows="3"
-                placeholder="可填写重点场景、产品卖点或出题要求"
-              />
-            </el-form-item>
-
-            <el-form-item label="字幕/转写">
-              <el-input
-                v-model="form.transcript"
-                type="textarea"
-                :rows="4"
-                placeholder="可选。未填写时后端会调用 ASR 占位方法"
+                placeholder="可选填。作为出题角度建议，题目仍会严格依据视频画面内容生成"
               />
             </el-form-item>
 
@@ -272,7 +263,7 @@ const difficultyOptions = [
 ]
 
 const form = reactive<AiGenerateParams>({
-  videoId: 0,
+  videoId: null,
   categoryId: null,
   productCategoryId: null,
   count: 10,
@@ -283,8 +274,7 @@ const form = reactive<AiGenerateParams>({
     true_false: 10,
   },
   knowledgePoints: ['产品知识'],
-  topic: '',
-  transcript: '',
+  userRequirements: '',
 })
 
 const rules: FormRules = {
@@ -315,7 +305,8 @@ async function loadVideos() {
   }
 }
 
-function handleVideoChange(videoId: number) {
+function handleVideoChange(videoId: number | null) {
+  if (!videoId) return
   const video = videos.value.find((item) => item.id === videoId)
   if (!video) return
   if (!form.categoryId) form.categoryId = video.categoryId
@@ -362,6 +353,10 @@ async function handleSaveAll() {
 }
 
 function addQuestion() {
+  if (!form.videoId) {
+    ElMessage.warning('请先选择视频')
+    return
+  }
   generatedQuestions.value.push(toReviewQuestion({
     type: 'single',
     categoryId: form.categoryId,
@@ -423,11 +418,21 @@ function defaultOptions(type: ReviewQuestion['type']): QuestionOption[] {
 
 function isQuestionValid(question: ReviewQuestion): boolean {
   const hasContent = question.content.trim().length > 0
-  const hasAnswer = Array.isArray(question.answer)
-    ? question.answer.length > 0
-    : String(question.answer || '').trim().length > 0
   const hasOptions = question.options.every((option) => option.value.trim().length > 0)
-  return hasContent && hasAnswer && hasOptions && !!question.categoryId && !!question.videoId
+  return hasContent && hasValidAnswer(question) && hasOptions && !!question.categoryId && !!question.videoId
+}
+
+function hasValidAnswer(question: ReviewQuestion): boolean {
+  const validLabels = new Set(question.options.map((option) => option.label))
+  if (question.type === 'true_false') {
+    validLabels.clear()
+    validLabels.add('A')
+    validLabels.add('B')
+  }
+  const answers = Array.isArray(question.answer)
+    ? question.answer
+    : String(question.answer || '').split(',').map((item) => item.trim()).filter(Boolean)
+  return answers.length > 0 && answers.every((answer) => validLabels.has(answer))
 }
 
 function difficultyFromLevel(level: string): 'easy' | 'medium' | 'hard' {
@@ -474,14 +479,72 @@ function toAnswerArray(answer: unknown): string[] {
 
 .ratio-list {
   width: 100%;
+  min-width: 0;
 }
 
 .ratio-row {
   display: grid;
-  grid-template-columns: 42px minmax(120px, 1fr) 92px;
+  grid-template-columns: 36px minmax(0, 1fr) 76px;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin-bottom: 8px;
+}
+
+.ai-generate-layout {
+  min-width: 0;
+}
+
+.generate-form {
+  min-width: 0;
+
+  :deep(.el-form-item__content),
+  :deep(.el-select),
+  :deep(.el-tree-select),
+  :deep(.el-segmented),
+  :deep(.el-textarea),
+  :deep(.el-slider) {
+    min-width: 0;
+  }
+}
+
+.compact-number {
+  width: 132px;
+}
+
+.ratio-number {
+  width: 76px;
+}
+
+@media (max-width: 1280px) {
+  .generate-form {
+    :deep(.el-form-item) {
+      display: block;
+    }
+
+    :deep(.el-form-item__label) {
+      justify-content: flex-start;
+      width: 100% !important;
+      height: auto;
+      margin-bottom: 6px;
+      padding-right: 0;
+      line-height: 20px;
+    }
+
+    :deep(.el-form-item__content) {
+      margin-left: 0 !important;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .ratio-row {
+    grid-template-columns: 36px minmax(0, 1fr);
+  }
+
+  .ratio-number {
+    grid-column: 2;
+    width: 100%;
+  }
 }
 
 .review-list {
