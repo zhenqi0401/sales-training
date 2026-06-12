@@ -236,7 +236,12 @@
 - 根因是选择框显示条件直接绑定 `form.parentId`，选择父分类后组件被 `v-if` 卸载；现改为使用独立的 `parentSelectorVisible` 控制显示，选择值变化不会影响控件存在。
 - 已通过最小回归检查确认不再存在 `v-if="!form.parentId"` 绑定，并通过管理端 `npm run build` 验证。
 
-## 2026-07-01 生产环境部署配置
+## 2026-06-11 销售角色与权限调整需求文档
+- 新增 `docs/sales-role-permission-adjustment.md`，固化管理端单管理员角色、培训端销售/学员双角色的权限划分。
+- 明确销售看板和销售方法论对所有销售角色可见，销售可上传个人销售语音文件，管理员可后台查看全部销售语音文件。
+- 明确 Agent 话术演练本阶段只做培训端前端入口展示，入口放在“实战演练”页面最上方，管理员后台暂不查看演练记录，后续再完善记录、评分和复盘闭环。
+
+## 2026-06-11 生产环境部署配置
 
 ### 影响范围
 - **基础设施**：`docker-compose.yml`、`backend/Dockerfile`、新增 `nginx/default.conf`、`.env.example`、`admin-web/vite.config.ts`、`admin-web/.env.production`
@@ -252,3 +257,47 @@
 - `admin-web/vite.config.ts` 增加 `base` 从环境变量 `VITE_BASE` 读取，新建 `admin-web/.env.production` 设置 `VITE_BASE=/admin/`，使管理端构建产物正确匹配 Nginx `/admin` 子路径部署。
 - 新建 `deploy.sh` 一键部署脚本，自动检查依赖、构建前端、启动服务、运行迁移。
 - 保留现有 `backend/deploy/nginx-videos.conf` 作为参考，生产使用 `nginx/default.conf`。
+
+## 2026-06-12 销售角色与权限调整（角色统一 + 销售功能）
+
+### 影响范围
+- **后端**：`core/dependencies.py`、`api/v1/users.py`、`api/v1/stores.py`、`api/v1/categories.py`、`api/v1/videos.py`、`api/v1/scripts.py`、`api/v1/products.py`、`api/v1/questions.py`、`api/v1/exam_papers.py`、`api/v1/dashboard.py`、`api/v1/auth.py`、新增 `api/v1/sales.py`、新增 `models/sales_methodology.py`、新增 `models/sales_audio_file.py`、新增迁移 `c01_role_unify_sales_tables.py`、`schemas/user.py`、`seed_data/seed_all.py`
+- **管理端**：`types/index.ts`、`router/index.ts`、`stores/auth.ts`、`stores/app.ts`、`views/users/index.vue`、`views/users/detail.vue`
+- **培训端**：`types/index.ts`、`stores/auth-user.ts`、`stores/auth.ts`、`router/index.ts`、`components/layout/TabBar.vue`、`views/practice/index.vue`、新增 `api/sales.ts`、新增 `views/sales/dashboard.vue`、新增 `views/sales/methodology.vue`
+
+### 变更要点
+
+**角色统一**
+- 系统角色由旧的 `super_admin`/`training_admin`/`instructor`/`student` 统一为 `admin`/`sales`/`student` 三种。
+- 新增 Alembic 迁移 `c01_role_unify_sales_tables.py`，upgrade 时自动将旧角色值迁移为 `admin`，并创建 `sales_methodologies` 和 `sales_audio_files` 两张新表。
+- 测试种子账号同步更新：admin(admin123)、admin2(admin123)、sales1(sales123)、student(student123/验证码 123456)。
+
+**后端权限收紧**
+- 新增四个权限依赖快捷函数：`require_admin()`、`require_training_user()`（sales+student）、`require_sales()`、`require_sales_or_admin()`。
+- `/users`、`/stores`、`/questions`、`/exam-papers` 全部接口限 admin；`/categories`、`/videos`、`/scripts`、`/products` 写操作限 admin；`/dashboard/admin-overview` 和导出接口限 admin。
+- 手机验证码登录支持 `sales` 和 `student` 角色（旧版仅 `student`）。
+- 登录返回的 `TrainingUserResponse` 新增 `role` 字段，培训端可感知当前登录角色。
+
+**新增销售专属 API**（`/api/v1/sales/`）
+- `GET /sales/dashboard`：销售看板统计（sales/admin 可访问）。
+- `GET/POST/PUT/DELETE /sales/methodologies`：销售方法论 CRUD（读操作 sales/admin，写操作 admin）。
+- `POST /sales/audio-files`：销售上传个人语音文件（仅 sales）。
+- `GET /sales/audio-files/my`：查看自己上传的语音文件（仅 sales）。
+- `GET /sales/admin/audio-files`：管理员查看全部销售语音文件（仅 admin）。
+
+**管理端调整**
+- `UserInfo.role` 类型更新为 `'admin' | 'sales' | 'student'`。
+- 路由守卫：登录后检查 `role !== 'admin'`，非管理员角色跳回登录页（含 `error=no_permission` 参数）。
+- 用户管理角色选项和表格 Tag 统一为管理员/销售/学员，移除旧的"培训师"选项。
+- 侧边栏用户管理子菜单增加"销售管理"入口。
+
+**培训端调整**
+- `UserInfo` 增加 `role` 字段；auth store 暴露 `userRole` 和 `isSales` computed。
+- 路由守卫：非 `sales`/`student` 角色自动退出；带 `requiresSales: true` 的路由对学员不可访问。
+- TabBar 根据角色动态显示：sales 角色额外展示「看板」和「方法论」两个 tab。
+- 新增销售看板页（`/sales/dashboard`）和销售方法论列表页（`/sales/methodology`）。
+- 实战演练页面顶部新增 AI 话术演练横幅卡片（当前为占位入口，点击弹 Toast，后续对接实际 Agent）。
+
+**文档同步**
+- 更新 `README.md`：默认账号表、角色说明、端口说明。
+- 更新 `AGENTS.md`：角色系统说明、常用命令（含 seed 数据步骤）、端口说明。

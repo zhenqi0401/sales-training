@@ -6,9 +6,23 @@
 
 - 项目名称：销售培训系统。
 - 后端：`backend/`，FastAPI + SQLAlchemy Async + Alembic + Celery + Redis。
-- 管理端：`admin-web/`，Vue 3 + TypeScript + Vite + Element Plus + Pinia。
-- 培训端：`training-web/`，Vue 3 + TypeScript + Vite + Vant + Pinia，移动端优先。
+- 管理端：`admin-web/`，Vue 3 + TypeScript + Vite + Element Plus + Pinia。开发端口 3000，仅 `admin` 角色可登录。
+- 培训端：`training-web/`，Vue 3 + TypeScript + Vite + Vant + Pinia，移动端优先。开发端口 3001（或 3000 未被占时为 3000），仅 `sales`/`student` 角色可登录。
 - 基础设施：`docker-compose.yml` 提供 MySQL、Redis 等本地依赖。
+
+## 角色系统
+
+系统统一三种角色，旧角色 `super_admin`/`training_admin`/`instructor` 已通过 Alembic 迁移统一为 `admin`。
+
+| 角色 | 值 | 使用端 |
+|------|----|--------|
+| 管理员 | `admin` | 仅管理端 |
+| 销售 | `sales` | 仅培训端 |
+| 学员 | `student` | 仅培训端 |
+
+- 后端权限依赖：`require_admin()`、`require_training_user()`（sales+student）、`require_sales()`、`require_sales_or_admin()` 均定义在 `backend/app/core/dependencies.py`。
+- 管理端路由守卫：读取 `localStorage` 中 `auth-store.role`，非 `admin` 时跳回登录页。
+- 培训端路由守卫：非 `sales`/`student` 角色自动退出；`requiresSales: true` 路由对学员不可见。
 
 ## 重要维护规则
 
@@ -31,32 +45,29 @@
 cd backend
 pip install -r requirements.txt
 alembic upgrade head
+python seed_data/seed_all.py     # 写入测试账号（可选）
 uv run python -m uvicorn app.main:app --reload --port 8080
 ```
 
-后端接口文档通常位于 `http://localhost:8080/api/docs`。
+后端接口文档位于 `http://localhost:8080/api/docs`。
 
 ### 管理端
 
 ```bash
 cd admin-web
 npm install
-npm run dev
+npm run dev    # http://localhost:3000（admin 角色账号）
 npm run build
 ```
-
-管理端开发服务通常使用 `http://localhost:5173`。
 
 ### 培训端
 
 ```bash
 cd training-web
 npm install
-npm run dev
+npm run dev    # http://localhost:3001（sales/student 角色账号）
 npm run build
 ```
-
-培训端开发服务通常使用 `http://localhost:5174`。
 
 ### 基础服务
 
