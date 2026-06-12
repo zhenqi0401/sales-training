@@ -1,12 +1,12 @@
 """Script (sales talk) management endpoints."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, func, or_
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-from app.core.dependencies import CurrentUserDep, SessionDep
+from app.core.dependencies import CurrentUserDep, SessionDep, require_admin
 from app.models.script import Script
 from app.schemas.common import MessageResponse, PaginatedResponse
 
@@ -165,7 +165,8 @@ async def get_script(
     return ScriptResponse.model_validate(script)
 
 
-@router.post("/", response_model=ScriptResponse, status_code=201, summary="创建话术")
+@router.post("/", response_model=ScriptResponse, status_code=201, summary="创建话术",
+             dependencies=[Depends(require_admin())])
 async def create_script(
     body: ScriptCreate,
     session: SessionDep,
@@ -177,7 +178,8 @@ async def create_script(
     return ScriptResponse.model_validate(script)
 
 
-@router.put("/{script_id}", response_model=ScriptResponse, summary="更新话术")
+@router.put("/{script_id}", response_model=ScriptResponse, summary="更新话术",
+            dependencies=[Depends(require_admin())])
 async def update_script(
     script_id: int,
     body: ScriptUpdate,
@@ -196,7 +198,8 @@ async def update_script(
     return ScriptResponse.model_validate(script)
 
 
-@router.delete("/{script_id}", response_model=MessageResponse, summary="删除话术")
+@router.delete("/{script_id}", response_model=MessageResponse, summary="删除话术",
+               dependencies=[Depends(require_admin())])
 async def delete_script(
     script_id: int,
     session: SessionDep,

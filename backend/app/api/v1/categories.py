@@ -1,9 +1,9 @@
 """Category management endpoints."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import func, select
 
-from app.core.dependencies import CurrentUserDep, SessionDep
+from app.core.dependencies import CurrentUserDep, SessionDep, require_admin
 from app.models.category import Category
 from app.models.video import Video
 from app.schemas.category import CategoryCreate, CategoryResponse, CategoryUpdate
@@ -132,7 +132,8 @@ async def get_category(
     return to_category_response(category, video_count=video_counts.get(category.id, 0))
 
 
-@router.post("/", response_model=CategoryResponse, status_code=201, summary="创建分类")
+@router.post("/", response_model=CategoryResponse, status_code=201, summary="创建分类",
+             dependencies=[Depends(require_admin())])
 async def create_category(
     body: CategoryCreate,
     session: SessionDep,
@@ -150,7 +151,8 @@ async def create_category(
     return to_category_response(category)
 
 
-@router.put("/{category_id}", response_model=CategoryResponse, summary="更新分类")
+@router.put("/{category_id}", response_model=CategoryResponse, summary="更新分类",
+            dependencies=[Depends(require_admin())])
 async def update_category(
     category_id: int,
     body: CategoryUpdate,
@@ -170,7 +172,8 @@ async def update_category(
     return to_category_response(category, video_count=video_counts.get(category.id, 0))
 
 
-@router.delete("/{category_id}", response_model=MessageResponse, summary="删除分类")
+@router.delete("/{category_id}", response_model=MessageResponse, summary="删除分类",
+               dependencies=[Depends(require_admin())])
 async def delete_category(
     category_id: int,
     session: SessionDep,

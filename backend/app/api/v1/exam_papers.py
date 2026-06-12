@@ -1,14 +1,14 @@
 """Exam paper management endpoints."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, func
 
-from app.core.dependencies import CurrentUserDep, SessionDep
+from app.core.dependencies import CurrentUserDep, SessionDep, require_admin
 from app.models.exam_paper import ExamPaper
 from app.schemas.common import MessageResponse, PaginatedResponse
 from app.schemas.exam import ExamPaperCreate, ExamPaperResponse, ExamPaperUpdate
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_admin())])
 
 
 @router.get("/", response_model=PaginatedResponse[ExamPaperResponse], summary="试卷列表")

@@ -1,12 +1,12 @@
 """Product knowledge management endpoints."""
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, func, or_
 from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-from app.core.dependencies import CurrentUserDep, SessionDep
+from app.core.dependencies import CurrentUserDep, SessionDep, require_admin
 from app.models.category import Category
 from app.models.product import Product
 from app.schemas.common import MessageResponse, PaginatedResponse
@@ -197,7 +197,8 @@ async def get_product(
     return to_product_response(product, category)
 
 
-@router.post("/", response_model=ProductResponse, status_code=201, summary="创建产品")
+@router.post("/", response_model=ProductResponse, status_code=201, summary="创建产品",
+             dependencies=[Depends(require_admin())])
 async def create_product(
     body: ProductCreate,
     session: SessionDep,
@@ -210,7 +211,8 @@ async def create_product(
     return to_product_response(product, category)
 
 
-@router.put("/{product_id}", response_model=ProductResponse, summary="更新产品")
+@router.put("/{product_id}", response_model=ProductResponse, summary="更新产品",
+            dependencies=[Depends(require_admin())])
 async def update_product(
     product_id: int,
     body: ProductUpdate,
@@ -230,7 +232,8 @@ async def update_product(
     return to_product_response(product, category)
 
 
-@router.delete("/{product_id}", response_model=MessageResponse, summary="删除产品")
+@router.delete("/{product_id}", response_model=MessageResponse, summary="删除产品",
+               dependencies=[Depends(require_admin())])
 async def delete_product(
     product_id: int,
     session: SessionDep,

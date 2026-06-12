@@ -8,11 +8,11 @@ from datetime import datetime, timedelta, timezone
 from io import StringIO
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from fastapi.responses import Response
 from sqlalchemy import func, select
 
-from app.core.dependencies import CurrentUserDep, SessionDep
+from app.core.dependencies import CurrentUserDep, SessionDep, require_admin
 from app.models.category import Category
 from app.models.exam_answer import ExamAnswer
 from app.models.exam_paper import ExamPaper
@@ -432,12 +432,14 @@ async def get_study_stats(session: SessionDep, user: CurrentUserDep):
     )
 
 
-@router.get("/admin-overview", summary="管理员数据概览")
+@router.get("/admin-overview", summary="管理员数据概览",
+            dependencies=[Depends(require_admin())])
 async def get_admin_overview(session: SessionDep, user: CurrentUserDep):
     return await build_dashboard_payload(session)
 
 
-@router.get("/student-progress-export", summary="导出学员学习进度")
+@router.get("/student-progress-export", summary="导出学员学习进度",
+            dependencies=[Depends(require_admin())])
 async def export_student_progress(session: SessionDep, user: CurrentUserDep):
     payload = await build_dashboard_payload(session)
     rows = payload["studentStats"]["progressList"]

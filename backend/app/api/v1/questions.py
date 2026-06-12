@@ -2,10 +2,10 @@
 
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import String, cast, func, select
 
-from app.core.dependencies import CurrentUserDep, SessionDep
+from app.core.dependencies import CurrentUserDep, SessionDep, require_admin
 from app.models.question import Question
 from app.models.product import Product
 from app.models.video import Video
@@ -21,7 +21,7 @@ from app.schemas.question import (
     QuestionUpdate,
 )
 
-router = APIRouter()
+router = APIRouter(dependencies=[Depends(require_admin())])
 logger = logging.getLogger(__name__)
 
 

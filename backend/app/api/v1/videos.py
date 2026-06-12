@@ -13,7 +13,7 @@ from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, Uploa
 from sqlalchemy import func, or_, select, text
 
 from app.core.config import settings
-from app.core.dependencies import CurrentUserDep, SessionDep
+from app.core.dependencies import CurrentUserDep, SessionDep, require_admin
 from app.models.category import Category
 from app.models.product import Product
 from app.models.video import Video
@@ -263,7 +263,8 @@ async def get_video(video_id: int, session: SessionDep, user: CurrentUserDep):
     return await build_video_response(video, category, products)
 
 
-@router.post("/", response_model=VideoResponse, status_code=201, summary="Create video")
+@router.post("/", response_model=VideoResponse, status_code=201, summary="Create video",
+             dependencies=[Depends(require_admin())])
 async def create_video(body: VideoCreate, session: SessionDep, user: CurrentUserDep, background_tasks: BackgroundTasks):
     await ensure_video_schema(session)
     data = normalize_video_payload(body.model_dump())
@@ -278,7 +279,8 @@ async def create_video(body: VideoCreate, session: SessionDep, user: CurrentUser
     return await build_video_response(video, category, products)
 
 
-@router.put("/{video_id:int}", response_model=VideoResponse, summary="Update video")
+@router.put("/{video_id:int}", response_model=VideoResponse, summary="Update video",
+            dependencies=[Depends(require_admin())])
 async def update_video(video_id: int, body: VideoUpdate, session: SessionDep, user: CurrentUserDep):
     await ensure_video_schema(session)
     video = await session.get(Video, video_id)
@@ -305,7 +307,8 @@ async def update_video(video_id: int, body: VideoUpdate, session: SessionDep, us
     return await build_video_response(video, category, products)
 
 
-@router.put("/{video_id:int}/status", response_model=VideoResponse, summary="Update video status")
+@router.put("/{video_id:int}/status", response_model=VideoResponse, summary="Update video status",
+            dependencies=[Depends(require_admin())])
 async def update_video_status(
     video_id: int,
     body: VideoStatusUpdate,
@@ -325,7 +328,8 @@ async def update_video_status(
     return await build_video_response(video, category, products)
 
 
-@router.post("/batch/status", response_model=MessageResponse, summary="Batch update video status")
+@router.post("/batch/status", response_model=MessageResponse, summary="Batch update video status",
+             dependencies=[Depends(require_admin())])
 async def batch_update_video_status(
     body: VideoBatchStatusUpdate,
     session: SessionDep,
@@ -345,7 +349,8 @@ async def batch_update_video_status(
     return MessageResponse(message=f"Updated {len(videos)} video(s)")
 
 
-@router.delete("/{video_id:int}", response_model=MessageResponse, summary="Delete video")
+@router.delete("/{video_id:int}", response_model=MessageResponse, summary="Delete video",
+               dependencies=[Depends(require_admin())])
 async def delete_video(video_id: int, session: SessionDep, user: CurrentUserDep):
     await ensure_video_schema(session)
     video = await session.get(Video, video_id)
