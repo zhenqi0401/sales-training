@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { showToast } from 'vant'
 
 const router = useRouter()
 
@@ -31,6 +32,10 @@ const categoryColors: Record<string, string> = {
 function goModule(moduleId: number) {
   router.push(`/practice/module/${moduleId}`)
 }
+
+function goAgentPractice() {
+  showToast('AI 话术演练即将上线')
+}
 </script>
 
 <template>
@@ -38,6 +43,18 @@ function goModule(moduleId: number) {
     <div class="page-header">
       <h2 class="page-title">实战演练</h2>
       <p class="page-subtitle">通过情景模拟提升实战能力</p>
+    </div>
+
+    <!-- Agent 话术演练入口 -->
+    <div class="agent-banner" @click="goAgentPractice">
+      <div class="agent-icon">
+        <van-icon name="chat-o" size="28" color="#fff" />
+      </div>
+      <div class="agent-info">
+        <div class="agent-title">AI 话术演练</div>
+        <div class="agent-desc">与 AI 对话，模拟真实销售场景</div>
+      </div>
+      <van-icon name="arrow" size="16" color="rgba(255,255,255,0.8)" />
     </div>
 
     <div class="module-list">
@@ -141,5 +158,44 @@ function goModule(moduleId: number) {
 .module-desc {
   font-size: 12px;
   color: var(--text-muted);
+}
+
+.agent-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 16px 4px;
+  padding: 16px;
+  border-radius: $radius;
+  background: linear-gradient(135deg, #0e7490 0%, #0f766e 100%);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(14, 116, 144, 0.35);
+
+  &:active {
+    opacity: 0.9;
+  }
+}
+.agent-icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.agent-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 3px;
+}
+.agent-desc {
+  font-size: 12px;
+  opacity: 0.85;
+}
+.agent-info {
+  flex: 1;
 }
 </style>
