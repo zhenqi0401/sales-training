@@ -20,6 +20,8 @@ export const useAuthStore = defineStore('auth', () => {
   const userAvatar = computed(() => user.value?.avatar ?? '')
   const storeName = computed(() => user.value?.storeName ?? '')
   const mustChangePassword = computed(() => user.value?.mustChangePassword === true)
+  const userRole = computed(() => user.value?.role ?? 'student')
+  const isSales = computed(() => userRole.value === 'sales')
 
   // Actions
   function setToken(newToken: string, newRefreshToken: string) {
@@ -123,6 +125,8 @@ export const useAuthStore = defineStore('auth', () => {
     userAvatar,
     storeName,
     mustChangePassword,
+    userRole,
+    isSales,
     setToken,
     setUser,
     login,

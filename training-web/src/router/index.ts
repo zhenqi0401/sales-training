@@ -126,7 +126,19 @@ const routes: RouteRecordRaw[] = [
     name: 'LearningRecords',
     component: () => import('@/views/profile/records.vue'),
     meta: { requiresAuth: true, keepAlive: false, showTabBar: false }
-  }
+  },
+  {
+    path: '/sales/dashboard',
+    name: 'SalesDashboard',
+    component: () => import('@/views/sales/dashboard.vue'),
+    meta: { requiresAuth: true, keepAlive: false, showTabBar: true, requiresSales: true }
+  },
+  {
+    path: '/sales/methodology',
+    name: 'SalesMethodology',
+    component: () => import('@/views/sales/methodology.vue'),
+    meta: { requiresAuth: true, keepAlive: false, showTabBar: true, requiresSales: true }
+  },
 ]
 
 const router = createRouter({
@@ -149,6 +161,16 @@ router.beforeEach(async (to, _from, next) => {
   } else if (to.path === '/init-password' && authStore.isLoggedIn && !authStore.mustChangePassword) {
     next({ path: '/home' })
   } else if (to.path === '/login' && authStore.isLoggedIn) {
+    next({ path: '/home' })
+  } else if (
+    to.meta.requiresAuth !== false &&
+    authStore.isLoggedIn &&
+    authStore.userRole !== '' &&
+    !['sales', 'student'].includes(authStore.userRole)
+  ) {
+    authStore.logout()
+    next({ path: '/login' })
+  } else if (to.meta.requiresSales && authStore.userRole !== 'sales') {
     next({ path: '/home' })
   } else {
     next()

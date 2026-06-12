@@ -10,6 +10,7 @@ type RawTrainingUser = {
   level?: number | null
   point?: number | null
   mustChangePassword?: boolean | null
+  role?: string | null
   username?: string | null
   real_name?: string | null
   realName?: string | null
@@ -40,6 +41,7 @@ export function normalizeTrainingUser(raw: RawTrainingUser): UserInfo {
     level: numberValue(raw.level, 1),
     point: numberValue(raw.point, 0),
     mustChangePassword: raw.mustChangePassword === true || raw.must_change_password === true,
+    role: typeof raw.role === 'string' ? raw.role : 'student',
   }
 }
 

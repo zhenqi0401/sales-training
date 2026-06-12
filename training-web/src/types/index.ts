@@ -11,6 +11,7 @@ export interface UserInfo {
   level: number
   point: number
   mustChangePassword?: boolean
+  role?: string
 }
 
 export interface AuthState {

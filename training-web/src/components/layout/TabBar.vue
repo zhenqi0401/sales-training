@@ -9,16 +9,25 @@ const authStore = useAuthStore()
 
 const pendingActive = ref<number | null>(null)
 
-const tabs = [
+const baseTabs = [
   { name: 'Home', label: '首页', icon: 'home-o', path: '/home' },
   { name: 'Courses', label: '课程', icon: 'shopping-cart-o', path: '/courses' },
   { name: 'Practice', label: '演练', icon: 'fire-o', path: '/practice' },
   { name: 'Exam', label: '考试', icon: 'records-o', path: '/exam' },
-  { name: 'Profile', label: '我的', icon: 'contact-o', path: '/profile' }
+  { name: 'Profile', label: '我的', icon: 'contact-o', path: '/profile' },
 ]
 
+const salesTabs = [
+  { name: 'SalesDashboard', label: '看板', icon: 'chart-trending-o', path: '/sales/dashboard' },
+  { name: 'SalesMethodology', label: '方法论', icon: 'medal-o', path: '/sales/methodology' },
+]
+
+const tabs = computed(() =>
+  authStore.isSales ? [...baseTabs, ...salesTabs] : baseTabs
+)
+
 const routeActive = computed(() => {
-  const idx = tabs.findIndex((t) => route.path.startsWith(t.path))
+  const idx = tabs.value.findIndex((t) => route.path.startsWith(t.path))
   return idx !== -1 ? idx : 0
 })
 
@@ -38,7 +47,7 @@ watch(
 
 async function onTabChange(index: number | string) {
   const nextIndex = Number(index)
-  const tab = tabs[nextIndex]
+  const tab = tabs.value[nextIndex]
   if (!tab) {
     pendingActive.value = null
     return
