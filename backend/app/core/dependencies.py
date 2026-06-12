@@ -96,3 +96,23 @@ def require_role(*roles: str):
         return user
 
     return _role_checker
+
+
+def require_admin():
+    """Only allow admin role."""
+    return require_role("admin")
+
+
+def require_training_user():
+    """Allow sales and student roles (training-web users)."""
+    return require_role("sales", "student")
+
+
+def require_sales():
+    """Only allow sales role."""
+    return require_role("sales")
+
+
+def require_sales_or_admin():
+    """Allow sales (read) and admin (manage)."""
+    return require_role("sales", "admin")
