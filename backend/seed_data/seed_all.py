@@ -30,14 +30,14 @@ PRODUCT_CATEGORIES = [
     {"name": "企业文化", "code": "qiwenhua", "description": "企业文化宣导"},
 ]
 
-# Multi-role admin accounts for testing
+# Unified role accounts for testing
 ADMINS = [
     {"username": "admin", "phone": "13800000000", "password": "admin123",
-     "real_name": "超级管理员", "role": "super_admin"},
-    {"username": "trainer", "phone": "13800000001", "password": "trainer123",
-     "real_name": "培训管理员", "role": "training_admin"},
-    {"username": "teacher", "phone": "13800000002", "password": "teacher123",
-     "real_name": "张讲师", "role": "instructor"},
+     "real_name": "超级管理员", "role": "admin"},
+    {"username": "admin2", "phone": "13800000001", "password": "admin123",
+     "real_name": "培训管理员", "role": "admin"},
+    {"username": "sales1", "phone": "13800000002", "password": "sales123",
+     "real_name": "张销售", "role": "sales"},
     {"username": "student", "phone": "13800000003", "password": "student123",
      "real_name": "李学员", "role": "student"},
 ]

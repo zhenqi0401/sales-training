@@ -12,6 +12,8 @@ from app.models.exam_answer import ExamAnswer
 from app.models.favorite import Favorite
 from app.models.script import Script
 from app.models.product import Product
+from app.models.sales_methodology import SalesMethodology
+from app.models.sales_audio_file import SalesAudioFile
 
 __all__ = [
     "Base",
@@ -28,4 +30,6 @@ __all__ = [
     "Favorite",
     "Script",
     "Product",
+    "SalesMethodology",
+    "SalesAudioFile",
 ]
