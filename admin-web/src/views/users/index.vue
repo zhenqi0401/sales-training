@@ -166,7 +166,7 @@
     <el-dialog v-model="showImportDialog" title="批量导入用户" width="500px">
       <div class="import-tip">
         <p>请上传包含用户信息的 Excel 文件（.xlsx 或 .xls）</p>
-        <p class="import-format">格式要求：用户名、密码、姓名、角色（admin/trainer/student）</p>
+        <p class="import-format">格式要求：用户名、密码、姓名、角色（admin/sales/student）</p>
       </div>
       <el-upload
         drag
