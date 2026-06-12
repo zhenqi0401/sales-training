@@ -35,13 +35,14 @@ const router = createRouter({
   routes,
 })
 
-function getToken(): string | null {
+function getAuthInfo(): { token: string | null; role: string | null } {
   try {
     const raw = localStorage.getItem('auth-store')
-    if (!raw) return null
-    return JSON.parse(raw).token || null
+    if (!raw) return { token: null, role: null }
+    const parsed = JSON.parse(raw)
+    return { token: parsed.token || null, role: parsed.role || null }
   } catch {
-    return null
+    return { token: null, role: null }
   }
 }
 
@@ -53,9 +54,15 @@ router.beforeEach((to, _from, next) => {
     return
   }
 
-  const token = getToken()
+  const { token, role } = getAuthInfo()
   if (!token) {
     next({ path: '/login', query: { redirect: to.fullPath } })
+    return
+  }
+
+  // 管理端只允许 admin
+  if (role && role !== 'admin') {
+    next({ path: '/login', query: { error: 'no_permission' } })
     return
   }
 

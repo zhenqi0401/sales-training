@@ -10,6 +10,7 @@ export const useAuthStore = defineStore('auth', () => {
   const userInfo = ref<UserInfo | null>(null)
 
   const isLoggedIn = computed(() => !!token.value)
+  const isAdmin = computed(() => userInfo.value?.role === 'admin')
 
   async function login(username: string, password: string) {
     const res = await post<LoginResult & { access_token?: string; user?: any }>('/auth/login', { username, password })
@@ -29,7 +30,7 @@ export const useAuthStore = defineStore('auth', () => {
       createdAt: user.created_at || user.createdAt || '',
     }
 
-    localStorage.setItem('auth-store', JSON.stringify({ token: t }))
+    localStorage.setItem('auth-store', JSON.stringify({ token: t, role: user.role }))
   }
 
   async function fetchUserInfo() {
@@ -50,5 +51,5 @@ export const useAuthStore = defineStore('auth', () => {
     router.push('/login')
   }
 
-  return { token, refreshTokenVal, userInfo, isLoggedIn, login, fetchUserInfo, logout }
+  return { token, refreshTokenVal, userInfo, isLoggedIn, isAdmin, login, fetchUserInfo, logout }
 })

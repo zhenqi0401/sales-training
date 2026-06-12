@@ -6,7 +6,7 @@ export interface UserInfo {
   avatar?: string
   email?: string
   phone?: string
-  role: 'admin' | 'trainer' | 'student'
+  role: 'admin' | 'sales' | 'student'
   storeId?: number
   storeName?: string
   status: 0 | 1
