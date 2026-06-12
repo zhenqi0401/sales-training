@@ -16,6 +16,7 @@ from app.api.v1 import (
     products,
     favorites,
     dashboard,
+    sales,
 )
 
 router = APIRouter(prefix="/api/v1")
@@ -33,3 +34,4 @@ router.include_router(scripts.router, prefix="/scripts", tags=["话术管理"])
 router.include_router(products.router, prefix="/products", tags=["产品管理"])
 router.include_router(favorites.router, prefix="/favorites", tags=["收藏管理"])
 router.include_router(dashboard.router, prefix="/dashboard", tags=["数据统计"])
+router.include_router(sales.router, prefix="/sales", tags=["销售功能"])
