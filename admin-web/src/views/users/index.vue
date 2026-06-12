@@ -21,7 +21,7 @@
         @change="handleSearch"
       >
         <el-option label="管理员" value="admin" />
-        <el-option label="培训师" value="trainer" />
+        <el-option label="销售" value="sales" />
         <el-option label="学员" value="student" />
       </el-select>
       <el-select
@@ -64,7 +64,7 @@
         <el-table-column label="角色" width="100" align="center">
           <template #default="{ row }">
             <el-tag v-if="row.role === 'admin'" type="danger" size="small">管理员</el-tag>
-            <el-tag v-else-if="row.role === 'trainer'" type="warning" size="small">培训师</el-tag>
+            <el-tag v-else-if="row.role === 'sales'" type="warning" size="small">销售</el-tag>
             <el-tag v-else type="primary" size="small">学员</el-tag>
           </template>
         </el-table-column>
@@ -132,7 +132,7 @@
             <el-form-item label="角色" prop="role">
               <el-select v-model="userForm.role" style="width: 100%">
                 <el-option label="管理员" value="admin" />
-                <el-option label="培训师" value="trainer" />
+                <el-option label="销售" value="sales" />
                 <el-option label="学员" value="student" />
               </el-select>
             </el-form-item>

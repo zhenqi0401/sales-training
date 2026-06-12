@@ -23,7 +23,7 @@
             <el-descriptions-item label="姓名">{{ userInfo.realName }}</el-descriptions-item>
             <el-descriptions-item label="角色">
               <el-tag v-if="userInfo.role === 'admin'" type="danger" size="small">管理员</el-tag>
-              <el-tag v-else-if="userInfo.role === 'trainer'" type="warning" size="small">培训师</el-tag>
+              <el-tag v-else-if="userInfo.role === 'sales'" type="warning" size="small">销售</el-tag>
               <el-tag v-else type="primary" size="small">学员</el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="状态">
