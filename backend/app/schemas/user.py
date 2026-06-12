@@ -136,6 +136,7 @@ class TrainingUserResponse(BaseModel):
     level: int = 1
     point: int = 0
     mustChangePassword: bool = False
+    role: str = "student"
 
 
 class UserBatchImport(BaseModel):

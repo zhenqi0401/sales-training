@@ -60,6 +60,7 @@ def _to_training_user(user: User) -> TrainingUserResponse:
         level=1,
         point=0,
         mustChangePassword=_get_user_must_change_password(user),
+        role=user.role,
     )
 
 
@@ -169,8 +170,8 @@ async def send_code(
     user = (
         await session.execute(select(User).where(User.phone == phone))
     ).scalar_one_or_none()
-    if user is None or user.role != "student":
-        raise HTTPException(status_code=404, detail="学员账号不存在")
+    if user is None or user.role not in ("sales", "student"):
+        raise HTTPException(status_code=404, detail="培训账号不存在")
     if not user.is_active:
         raise HTTPException(status_code=403, detail="账号已被禁用")
 
@@ -208,8 +209,8 @@ async def phone_login(
     user = (
         await session.execute(select(User).where(User.phone == phone))
     ).scalar_one_or_none()
-    if user is None or user.role != "student":
-        raise HTTPException(status_code=404, detail="学员账号不存在")
+    if user is None or user.role not in ("sales", "student"):
+        raise HTTPException(status_code=404, detail="培训账号不存在")
     if not user.is_active:
         raise HTTPException(status_code=403, detail="账号已被禁用")
 
