@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select, func, delete
 
-from app.core.dependencies import CurrentUserDep, SessionDep, require_role
+from app.core.dependencies import CurrentUserDep, SessionDep, require_admin
 from app.core.security import hash_password
 from app.models.user import User
 from app.schemas.common import MessageResponse, PaginatedResponse
@@ -14,7 +14,7 @@ from app.schemas.user import (
     UserUpdate,
 )
 
-router = APIRouter(dependencies=[Depends(require_role("super_admin", "training_admin"))])
+router = APIRouter(dependencies=[Depends(require_admin())])
 
 
 @router.get("/", response_model=PaginatedResponse[UserResponse], summary="用户列表")

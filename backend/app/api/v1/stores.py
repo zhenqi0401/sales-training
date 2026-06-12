@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import func, select
 
-from app.core.dependencies import CurrentUserDep, SessionDep, require_role
+from app.core.dependencies import CurrentUserDep, SessionDep, require_admin
 from app.models.store import Store
 from app.schemas.common import MessageResponse, PaginatedResponse
 
@@ -49,7 +49,7 @@ class StoreResponse(BaseModel):
     model_config = {"from_attributes": True}
 
 
-router = APIRouter(dependencies=[Depends(require_role("super_admin", "training_admin"))])
+router = APIRouter(dependencies=[Depends(require_admin())])
 
 
 @router.get("/", response_model=PaginatedResponse[StoreResponse], summary="门店列表")
