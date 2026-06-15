@@ -217,7 +217,7 @@ function expandScript(script: any) {
               round
               plain
               type="primary"
-              icon="copy-o"
+              icon="description-o"
               @click.stop="copyContent(script.content)"
             >
               一键复制

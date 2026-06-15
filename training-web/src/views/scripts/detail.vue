@@ -105,7 +105,7 @@ function copyContent() {
           round
           block
           color="linear-gradient(135deg, var(--primary), var(--primary-dark))"
-          icon="copy-o"
+          icon="description-o"
           @click="copyContent"
         >
           复制话术

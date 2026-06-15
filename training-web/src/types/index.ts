@@ -274,3 +274,61 @@ export interface PaginatedData<T> {
   pageSize: number
   totalPages: number
 }
+
+// ===== Practice (AI 话术演练) =====
+export interface PracticeSession {
+  id: number
+  user_id: number
+  module_code: string
+  title: string
+  status: 'active' | 'completed' | 'abandoned'
+  total_turns: number
+  average_score: number | null
+  summary: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface PracticeMessage {
+  id: number
+  session_id: number
+  role: 'user' | 'assistant' | 'tool'
+  content: string | null
+  tool_calls: any
+  tool_results: any
+  evaluation: PracticeEvaluation | null
+  turn_number: number
+  created_at: string
+}
+
+export interface PracticeEvaluation {
+  score: number
+  max_score: number
+  feedback: string
+  highlights: string[]
+  improvements: string[]
+}
+
+export interface ChatEvent {
+  type: 'text' | 'tool_call' | 'tool_result' | 'evaluation' | 'error' | 'done'
+  data: any
+}
+
+export interface PracticeModuleConfig {
+  code: string
+  title: string
+  description: string
+  icon: string
+  category: string
+}
+
+export const PRACTICE_MODULES: PracticeModuleConfig[] = [
+  { code: 'reception', title: '接待流程', description: '标准接待流程七步法', icon: 'service-o', category: '流程' },
+  { code: 'question', title: '问诊话术', description: '专业问诊技巧与话术', icon: 'chat-o', category: '话术' },
+  { code: 'product', title: '产品介绍', description: '产品卖点讲解练习', icon: 'label-o', category: '产品' },
+  { code: 'objection', title: '异议处理', description: '常见顾客异议应对', icon: 'warning-o', category: '技巧' },
+  { code: 'closing', title: '成交技巧', description: '促单成交技巧练习', icon: 'gold-coin-o', category: '技巧' },
+  { code: 'fitting', title: '验光配镜', description: '验光配镜流程模拟', icon: 'eye-o', category: '流程' },
+  { code: 'aftercare', title: '售后服务', description: '售后回访与维护', icon: 'smile-o', category: '流程' },
+  { code: 'general', title: '自由演练', description: '综合销售能力训练', icon: 'fire-o', category: '综合' },
+]

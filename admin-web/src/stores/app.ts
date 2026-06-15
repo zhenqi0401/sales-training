@@ -42,9 +42,8 @@ export const useAppStore = defineStore('app', () => {
       icon: 'User',
       path: '',
       children: [
-        { title: '管理员', icon: 'UserFilled', path: '/users?role=admin' },
-        { title: '销售管理', icon: 'TrendCharts', path: '/users?role=sales' },
-        { title: '学员管理', icon: 'User', path: '/users?role=student' },
+        { title: '账号管理', icon: 'UserFilled', path: '/users?role=admin' },
+        { title: '销售管理', icon: 'TrendCharts', path: '/sales' },
       ],
     },
     {

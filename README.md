@@ -65,6 +65,14 @@ SALES_TRAINING_AI_VIDEO_COMPRESS_CRF=38
 SALES_TRAINING_AI_VIDEO_COMPRESS_AUDIO_BITRATE=32k
 ```
 
+AI 话术演练 Agent 使用独立的模型配置：
+
+```bash
+SALES_TRAINING_AGENT_MODEL=qwen3.6-plus-2026-04-02
+SALES_TRAINING_AGENT_MAX_TURNS=15
+SALES_TRAINING_AGENT_MAX_TOOL_ITERATIONS=3
+```
+
 AI 出题会按百炼 Qwen-Omni 全模态文档的 OpenAI 兼容 `video_url` 输入格式读取视频画面和音频讲解生成题目，`SALES_TRAINING_AI_VIDEO_FPS` 用于控制抽帧频率。Qwen-Omni 使用 Base64 传文件时，编码后的 Base64 字符串必须小于 10MB；对于 `/uploads` 本地视频，后端会在文件不超过 `SALES_TRAINING_AI_VIDEO_MAX_INLINE_MB` 时编码为 data URL 发送，如果超过 `SALES_TRAINING_AI_VIDEO_MAX_DATA_URL_CHARS`，会自动用 ffmpeg 生成低分辨率、保留音频的 AI 识别压缩版视频再发送。生产环境建议配置可公网访问的视频 URL。使用 Docker Compose 启动后端时，可在宿主机环境或本地 `.env` 中设置上述变量；不要将真实 API Key 提交到仓库。
 
 ### 3. 启动管理端
@@ -92,7 +100,6 @@ npm run dev
 | 角色 | 账号 | 密码 | 手机号 | 登录端 |
 |------|------|------|--------|--------|
 | 管理员 | admin | admin123 | 13800000000 | 管理端 |
-| 管理员 | admin2 | admin123 | 13800000001 | 管理端 |
 | 销售 | sales1 | sales123 | 13800000002 | 培训端（密码登录）|
 | 学员 | student | student123 | 13800000003 | 培训端（验证码 123456）|
 

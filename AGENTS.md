@@ -102,6 +102,16 @@ winget install ffmpeg
 - 修改登录、鉴权、考试、学习进度、收藏、视频上传等跨端流程时，需要同时检查后端、管理端和培训端调用是否一致。
 - 不要提交上传的视频、封面等大体积运行时文件，除非用户明确要求保留为测试资产。
 
+## AI 话术演练 Agent 开发约定
+
+- Agent 引擎位于 `backend/app/services/practice_agent.py`，基于 MCP 工具调用模式实现 Agent 循环。
+- 工具（Tools）定义在 `backend/app/services/practice_tools.py`，每个工具包含 JSON Schema 定义和异步执行函数，通过 `register_tool()` 注册到全局注册表。
+- 记忆层分三层：用户画像（`app/services/user_profile.py`）、当前会话上下文（`practice_memory.get_session_context()`）、长期记忆（`long_term_memories` 表）。
+- SSE 事件类型：`text`（LLM 文本 token）、`tool_call`（工具调用开始）、`tool_result`（工具返回结果）、`evaluation`（回复评估）、`error`、`done`（本轮结束）。
+- 前端使用 `fetch` + `ReadableStream` 消费 SSE 流，不使用 WebSocket。
+- Agent 模型通过 `SALES_TRAINING_AGENT_MODEL` 环境变量配置，默认 `qwen3.6-plus-2026-04-02`。
+- 新增 MCP 工具需同时更新 `get_all_tool_definitions()` 返回的工具列表，确保 LLM 可以感知新工具。
+
 ## 验证建议
 
 - 后端逻辑改动后，优先运行相关接口或服务层的最小验证；涉及数据库结构时确认迁移可执行。

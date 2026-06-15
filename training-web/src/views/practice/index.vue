@@ -11,7 +11,7 @@ const practiceModules = [
   { id: 3, code: 'product', title: '产品介绍演练', description: '产品卖点讲解练习', icon: 'label-o', category: '产品' },
   { id: 4, code: 'objection', title: '异议处理演练', description: '常见顾客异议应对', icon: 'warning-o', category: '技巧' },
   { id: 5, code: 'closing', title: '成交技巧演练', description: '促单成交技巧练习', icon: 'gold-coin-o', category: '技巧' },
-  { id: 6, code: 'fitting', title: '验光配镜演练', description: '验光配镜流程模拟', icon: 'medical-o', category: '流程' },
+  { id: 6, code: 'fitting', title: '验光配镜演练', description: '验光配镜流程模拟', icon: 'eye-o', category: '流程' },
   { id: 7, code: 'aftercare', title: '售后服务演练', description: '售后回访与维护', icon: 'smile-o', category: '流程' }
 ]
 
@@ -34,7 +34,7 @@ function goModule(moduleId: number) {
 }
 
 function goAgentPractice() {
-  showToast('AI 话术演练即将上线')
+  router.push('/practice/agent')
 }
 </script>
 

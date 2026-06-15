@@ -64,7 +64,7 @@ const sprintMode: ExamConfig & { level: 'SPRINT'; icon: string; color: string } 
   duration: 10,
   passScore: 60,
   totalScore: 100,
-  icon: 'flash-o',
+  icon: 'fire-o',
   color: 'var(--danger)'
 }
 

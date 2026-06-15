@@ -301,3 +301,72 @@
 **文档同步**
 - 更新 `README.md`：默认账号表、角色说明、端口说明。
 - 更新 `AGENTS.md`：角色系统说明、常用命令（含 seed 数据步骤）、端口说明。
+
+## 2026-06-12 后端视频接口启动报错修复
+- 影响范围：后端 `app/api/v1/videos.py` 启动导入链路；管理端、培训端页面和接口契约无变化。
+- 要点：补充 `fastapi.Depends` 导入，修复视频路由中 `Depends(require_admin())` 在模块加载阶段触发 `NameError`，恢复后端启动导入。
+
+## 2026-06-12 管理端登录跳转修复 + 响应格式统一
+
+### 影响范围
+- **后端**：`app/schemas/user.py`（新增 `LoginTokenPayload`）、`app/api/v1/auth.py`（`/auth/login` 响应改为 `ApiResponse` 包裹）
+- **管理端**：`stores/auth.ts`（`login()` 兼容新旧格式 + token 缺失显式 throw）、`views/login/index.vue`（catch 加 `console.error`）、`router/index.ts`（`beforeEach` 加诊断 `console.warn`）
+- **基础设施**：`docker-compose.yml`（MySQL/Redis 端口重新暴露给宿主机）
+
+### 变更要点
+- `docker-compose.yml`：MySQL `3306` 和 Redis `6379` 端口取消注释，恢复宿主机可访问，确保本地开发后端可直接连接容器内数据库。
+- 后端 `/auth/login` 响应统一为 `{ code, message, data: { token, refreshToken, user } }` 格式，与 `/auth/phone-login` 保持一致；`LoginTokenPayload` 包含 `token`、`refreshToken`、`user` 三个字段。
+- 管理端 `authStore.login()` 支持 ApiResponse 包裹和旧裸格式双路径，token 或 user 缺失时显式 throw 明确错误，避免 `undefined` token 写入 localStorage 后 `JSON.stringify` 丢弃该键，导致 `router.beforeEach` 将登录态误判为空并踢回登录页。
+- 管理端路由守卫 `beforeEach` 兼容旧角色值（`super_admin`/`training_admin`/`instructor`）按 admin 放行；`authStore.login()` 存储前自动将旧角色值标准化为 `admin`，双重防御。
+- 修复本地数据库 admin 用户 role 仍为 `super_admin` 的问题（UPDATE 为 `admin`），根因是旧 seed 数据未随迁移更新。
+
+## 2026-06-12 管理端销售管理页面
+
+### 影响范围
+- **后端**：`app/api/v1/sales.py`（新增 `GET /sales/admin/sales-list`）、`app/models/sales_methodology.py`（修复 TEXT 列默认值）、`alembic/versions/c01_role_unify_sales_tables.py`（修复 TEXT 列 server_default）
+- **管理端**：`stores/app.ts`（侧边栏菜单重组合并）、新增 `views/sales/index.vue`（卡片网格页面）、新增 `api/sales.ts`、`router/index.ts`（新增 `/sales` 路由）
+
+### 变更要点
+- 管理端侧边栏「用户管理」子菜单从 3 项（管理员/销售管理/学员管理）重组合并为 2 项：「账号管理」（`/users`）和「销售管理」（`/sales`）。
+- 新建销售管理页：卡片网格展示每位销售的头像、姓名、销售次数、成交次数、方法论数量；点击「查看方法论」弹窗展示该销售的方法论列表。
+- 后端新增 `GET /sales/admin/sales-list` 接口，一次性返回所有销售用户及其方法论列表，避免前端多次请求。
+- 修复 Alembic 迁移 `c01_role_unify_sales_tables` 中 TEXT 列设置 `server_default` 导致 MySQL 1101 错误的问题；同步修正 `SalesMethodology.tags` 模型定义。
+
+## 2026-06-12 培训端销售看板与方法论改造
+
+### 影响范围
+- **后端**：`app/api/v1/sales.py`（`/admin/sales-list` 权限放宽为 `require_sales_or_admin`；`POST /methodologies` 创建权限放宽；新增 `POST /methodologies/generate` AI 生成草稿接口）
+- **培训端**：`components/layout/TabBar.vue`（导航栏重排序）、`views/sales/dashboard.vue`（卡片网格重做）、`views/sales/methodology.vue`（上传→AI生成→保存流程）、`api/sales.ts`（新增 `getSalesList`、`createMethodology`）
+
+### 变更要点
+- 培训端底部导航栏重排序：顺序变为「首页 | 课程 | 演练 | 考试 | 看板 | 方法论 | 我的」，「我的」固定在最右端。
+- 培训端销售看板改为卡片网格布局：每个销售一个卡片，展示头像、销售次数、成交次数、方法论数量，点击按钮弹窗查看方法论。
+- 培训端方法论页面改为全流程：上传录音 → 调用 AI 生成方法论草稿 → 预览 → 保存到账户，保存后显示在个人方法论列表中。
+- 后端新增 `POST /sales/methodologies/generate`：两段式 AI 管道 — ① `qwen3-asr-flash`（DashScope）语音转写 ② `qwen3.6-flash`（OpenAI 兼容 Chat Completions）提炼方法论 JSON。新增 `dashscope` 依赖和 `methodology_model` 配置。AI 未配置时返回占位说明。
+- 修复培训端 axios 全局 `Content-Type: application/json` 导致 FormData 文件上传报 422 的问题，改为不设默认头由 axios 自动判断。
+- 修复方法论页上传按钮 `<label>` 嵌套导致点击事件重复触发的问题。
+
+## 2026-06-13 AI 话术演练 Agent 功能
+
+### 影响范围
+- **后端**：新增 `app/models/practice_session.py`（PracticeSession/PracticeMessage/LongTermMemory 模型）、新增 `alembic/versions/d01_add_practice_tables.py` 迁移、新增 `app/services/practice_agent.py`（Agent 循环引擎 + SSE 流式）、新增 `app/services/practice_tools.py`（MCP 工具层：search_scripts/get_product_info/get_methodology/evaluate_response）、新增 `app/services/practice_memory.py`（三层记忆管理）、新增 `app/services/user_profile.py`（用户画像服务）、新增 `app/api/v1/practice.py`（会话 CRUD + SSE 聊天端点）、新增 `app/schemas/practice.py`（Pydantic schema）、修改 `app/core/config.py`（agent_model 等配置）、修改 `app/api/v1/router.py`、修改 `requirements.txt`（新增 mcp 依赖）
+- **培训端**：新增 `views/practice/agent.vue`（场景选择 + 对话聊天页）、新增 `api/practice.ts`（SSE 流式 API 封装）、修改 `router/index.ts`（新增 `/practice/agent/:moduleCode?` 路由）、修改 `views/practice/index.vue`（横幅跳转至 Agent 页）、修改 `types/index.ts`（新增实践相关类型）
+
+### 变更要点
+- **Agent 引擎**：实现完整 Agent 循环，支持 MCP 工具调用（最多 3 次迭代）。每轮对话自动注入用户画像 + 当前会话上下文 + 相关长期记忆。流式输出使用 SSE（text/tool_call/tool_result/evaluation/done 事件）。
+- **MCP 工具层**：4 个注册工具 — `search_scripts`（话术搜索）、`get_product_info`（产品查询）、`get_methodology`（方法论检索）、`evaluate_response`（回复质量评估 1-5 分）。
+- **三层记忆**：用户画像（聚合 6 类数据源）→ 当前会话（最近 N 轮上下文）→ 长期记忆（重要性评分 + 召回计数 + 去重合并）。会话结束后自动提取洞察写入长期记忆。
+- **培训端对话页**：8 个演练场景选择 → 聊天气泡 UI → SSE 实时流式渲染 → 每轮评估卡片（亮星 + 亮点 + 改进建议）→ 会话结束评分。
+- **模型配置**：默认使用 `qwen3.6-plus-2026-04-02`，通过 `SALES_TRAINING_AGENT_MODEL` 环境变量配置，复用现有 `SALES_TRAINING_AI_BASE_URL` 和 `SALES_TRAINING_AI_API_KEY`。
+- 新增 `mcp>=1.0.0` Python 依赖；数据库新增 `practice_sessions`、`practice_messages`、`long_term_memories` 三张表。
+
+## 2026-06-15 培训端图标显示修复
+
+### 影响范围
+- **培训端**：课程分类页、产品知识页、实战演练页、考试页、话术详情/列表复制按钮。
+
+### 变更要点
+- 修复培训端使用不存在的 Vant 图标名导致图标空白的问题，将 `medical-o`、`aiming-o`、`glasses-o`、`scan-o`、`flash-o`、`copy-o` 替换为 Vant 4 已支持且语义接近的内置图标。
+- 课程分类中“斜弱视”改用 `closed-eye`，“角塑”改用 `aim`，保证截图所示分类卡片能正常显示图标。
+- 同步检查其余培训端硬编码 Vant 图标，确认静态图标名均存在于本地 Vant 图标字体中。
+- 已通过培训端 `npm run build` 验证。

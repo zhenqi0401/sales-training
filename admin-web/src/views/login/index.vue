@@ -93,6 +93,7 @@ async function handleLogin() {
     const redirect = (route.query.redirect as string) || '/dashboard'
     router.push(redirect)
   } catch (e: any) {
+    console.error('Login failed:', e)
     const msg = e?.response?.data?.detail || e?.message || '登录失败'
     ElMessage.error(msg)
     refreshCaptcha()

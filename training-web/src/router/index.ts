@@ -68,6 +68,12 @@ const routes: RouteRecordRaw[] = [
     meta: { requiresAuth: true, keepAlive: false, showTabBar: false }
   },
   {
+    path: '/practice/agent/:moduleCode?',
+    name: 'PracticeAgent',
+    component: () => import('@/views/practice/agent.vue'),
+    meta: { requiresAuth: true, keepAlive: false, showTabBar: false }
+  },
+  {
     path: '/scripts',
     name: 'Scripts',
     component: () => import('@/views/scripts/index.vue'),

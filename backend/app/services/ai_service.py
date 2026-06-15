@@ -30,6 +30,25 @@ async def transcribe_video(video_file_url: str) -> str:
     return ""
 
 
+async def call_llm(messages: list[dict[str, str]], max_tokens: int = 1024) -> str:
+    """Generic LLM call returning the first assistant message text."""
+    if not settings.ai_api_key:
+        raise AIQuestionGenerationError("AI_API_KEY 未配置")
+
+    payload = {
+        "model": settings.ai_model,
+        "messages": messages,
+        "max_tokens": max_tokens,
+        "temperature": 0.3,
+    }
+    response = await asyncio.to_thread(
+        _post_chat_completion,
+        payload,
+        settings.ai_request_timeout_seconds,
+    )
+    return extract_message_content(response)
+
+
 async def call_question_llm(prompt: dict[str, Any]) -> list[dict[str, Any]]:
     """Call Bailian's OpenAI-compatible chat completion API."""
     if not settings.ai_api_key:
@@ -375,6 +394,107 @@ def strip_json_fence(content: str) -> str:
 def truncate_text(text: str, max_chars: int) -> str:
     text = text.strip()
     return text if len(text) <= max_chars else text[:max_chars]
+
+
+async def call_methodology_llm(audio_path: Path) -> dict[str, str]:
+    """ASR + LLM pipeline for sales methodology extraction.
+
+    Step 1 — ASR via qwen3-asr-flash (DashScope MultiModalConversation).
+    Step 2 — LLM via qwen3.6-flash (OpenAI-compatible Chat Completions).
+    Returns ``{"title": "...", "content": "..."}``.
+    """
+    if not audio_path.exists():
+        raise AIQuestionGenerationError(f"音频文件不存在：{audio_path}")
+
+    # ── Step 1: ASR ───────────────────────────────────────────────────
+    transcript = await _call_asr(audio_path)
+    if not transcript:
+        raise AIQuestionGenerationError("语音转写结果为空，请确认音频包含有效语音内容")
+
+    # ── Step 2: LLM methodology extraction ────────────────────────────
+    return await _call_methodology_llm_from_text(transcript)
+
+
+async def _call_asr(audio_path: Path) -> str:
+    """Transcribe audio via qwen3-asr-flash."""
+    import dashscope
+
+    mime_type = mimetypes.guess_type(audio_path.name)[0] or "audio/mpeg"
+    base64_str = base64.b64encode(audio_path.read_bytes()).decode("ascii")
+    data_uri = f"data:{mime_type};base64,{base64_str}"
+
+    messages = [{"role": "user", "content": [{"audio": data_uri}]}]
+
+    response = await asyncio.to_thread(
+        dashscope.MultiModalConversation.call,
+        api_key=settings.ai_api_key,
+        model="qwen3-asr-flash",
+        messages=messages,
+        result_format="message",
+        asr_options={"enable_itn": False},
+    )
+
+    output = response.get("output", {}) if isinstance(response, dict) else {}
+    choices = output.get("choices", [])
+    if choices:
+        message = choices[0].get("message", {})
+        content = message.get("content", [])
+        if isinstance(content, list):
+            texts = [item.get("text", "") for item in content if isinstance(item, dict)]
+            return "".join(texts).strip()
+        if isinstance(content, str):
+            return content.strip()
+
+    # Fallback: check top-level text
+    text = response.get("text", "") if isinstance(response, dict) else ""
+    return text.strip() if isinstance(text, str) else ""
+
+
+async def _call_methodology_llm_from_text(transcript: str) -> dict[str, str]:
+    """Generate methodology from transcript via qwen3.6-flash."""
+    system_prompt = (
+        "你是一位资深的销售培训专家。请根据以下销售对话的语音转写内容，"
+        "提炼出一条可复用的销售方法论。"
+        "只输出纯 JSON，格式：{\"title\": \"方法论标题\", \"content\": \"详细的方法论内容\"}。"
+        "不要输出 Markdown 代码块。"
+    )
+
+    payload = {
+        "model": settings.methodology_model,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": f"以下是销售录音的转写文本，请提炼方法论：\n\n{transcript}"},
+        ],
+        "temperature": 0.3,
+        "max_tokens": 2048,
+        "stream": True,
+    }
+
+    response = await asyncio.to_thread(
+        _post_chat_completion,
+        payload,
+        settings.ai_request_timeout_seconds,
+    )
+    content = extract_message_content(response)
+    if not content:
+        raise AIQuestionGenerationError("大模型返回空响应，请稍后重试")
+
+    # Parse JSON from response
+    cleaned = strip_json_fence(content)
+    try:
+        result = json.loads(cleaned)
+    except json.JSONDecodeError:
+        match = re.search(r"\{.*\}", cleaned, re.DOTALL)
+        if not match:
+            raise AIQuestionGenerationError("大模型返回内容不是有效 JSON")
+        result = json.loads(match.group(0))
+
+    title = str(result.get("title") or "").strip()
+    content_val = str(result.get("content") or "").strip()
+    if not title and not content_val:
+        raise AIQuestionGenerationError("大模型未返回方法论内容")
+
+    return {"title": title or "未命名方法论", "content": content_val}
 
 
 def resolve_upload_path(file_url: str) -> Path | None:

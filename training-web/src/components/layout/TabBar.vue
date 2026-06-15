@@ -14,7 +14,6 @@ const baseTabs = [
   { name: 'Courses', label: '课程', icon: 'shopping-cart-o', path: '/courses' },
   { name: 'Practice', label: '演练', icon: 'fire-o', path: '/practice' },
   { name: 'Exam', label: '考试', icon: 'records-o', path: '/exam' },
-  { name: 'Profile', label: '我的', icon: 'contact-o', path: '/profile' },
 ]
 
 const salesTabs = [
@@ -22,8 +21,10 @@ const salesTabs = [
   { name: 'SalesMethodology', label: '方法论', icon: 'medal-o', path: '/sales/methodology' },
 ]
 
+const profileTab = { name: 'Profile', label: '我的', icon: 'contact-o', path: '/profile' }
+
 const tabs = computed(() =>
-  authStore.isSales ? [...baseTabs, ...salesTabs] : baseTabs
+  authStore.isSales ? [...baseTabs, ...salesTabs, profileTab] : [...baseTabs, profileTab]
 )
 
 const routeActive = computed(() => {

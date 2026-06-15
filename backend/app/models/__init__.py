@@ -14,6 +14,7 @@ from app.models.script import Script
 from app.models.product import Product
 from app.models.sales_methodology import SalesMethodology
 from app.models.sales_audio_file import SalesAudioFile
+from app.models.practice_session import PracticeSession, PracticeMessage, LongTermMemory
 
 __all__ = [
     "Base",
@@ -32,4 +33,7 @@ __all__ = [
     "Product",
     "SalesMethodology",
     "SalesAudioFile",
+    "PracticeSession",
+    "PracticeMessage",
+    "LongTermMemory",
 ]

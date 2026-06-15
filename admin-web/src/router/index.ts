@@ -26,6 +26,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'scripts', name: 'Scripts', component: () => import('@/views/scripts/index.vue'), meta: { title: '话术管理' } },
       { path: 'products', name: 'Products', component: () => import('@/views/products/index.vue'), meta: { title: '产品知识' } },
       { path: 'stores', name: 'Stores', component: () => import('@/views/stores/index.vue'), meta: { title: '门店管理' } },
+      { path: 'sales', name: 'Sales', component: () => import('@/views/sales/index.vue'), meta: { title: '销售管理' } },
     ],
   },
 ]
@@ -56,12 +57,15 @@ router.beforeEach((to, _from, next) => {
 
   const { token, role } = getAuthInfo()
   if (!token) {
+    console.warn('[RouterGuard] No token found, redirecting to login. Target:', to.fullPath)
     next({ path: '/login', query: { redirect: to.fullPath } })
     return
   }
 
-  // 管理端只允许 admin
-  if (role && role !== 'admin') {
+  // 管理端只允许 admin（兼容旧角色值 super_admin / training_admin / instructor）
+  const ADMIN_ROLES = ['admin', 'super_admin', 'training_admin', 'instructor']
+  if (role && !ADMIN_ROLES.includes(role)) {
+    console.warn('[RouterGuard] Non-admin role detected:', role, 'redirecting to login.')
     next({ path: '/login', query: { error: 'no_permission' } })
     return
   }

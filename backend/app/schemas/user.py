@@ -50,6 +50,14 @@ class TrainingTokenPayload(BaseModel):
     user: "TrainingUserResponse"
 
 
+class LoginTokenPayload(BaseModel):
+    """Token payload for admin-web login response envelope."""
+
+    token: str
+    refreshToken: str = ""
+    user: "UserResponse"
+
+
 class ApiResponse(BaseModel):
     """Frontend-compatible response envelope."""
 

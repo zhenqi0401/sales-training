@@ -62,6 +62,14 @@ class Settings(BaseSettings):
     ai_video_compress_crf: int = 38
     ai_video_compress_audio_bitrate: str = "32k"
 
+    # ---------- Methodology generation ----------
+    methodology_model: str = "qwen3.6-flash"
+
+    # ---------- Practice Agent ----------
+    agent_model: str = "qwen3.6-plus-2026-04-02"
+    agent_max_turns: int = 15
+    agent_max_tool_iterations: int = 3
+
     # ---------- Pagination ----------
     default_page_size: int = 20
     max_page_size: int = 100

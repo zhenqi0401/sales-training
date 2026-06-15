@@ -11,9 +11,9 @@ const categories = ref<Category[]>([])
 
 const categoryIcons: Record<string, string> = {
   qingkong: 'eye-o',
-  xieruoshi: 'medical-o',
-  jiaosu: 'aiming-o',
-  yanjing: 'glasses-o',
+  xieruoshi: 'closed-eye',
+  jiaosu: 'aim',
+  yanjing: 'goods-collect-o',
   zhoubian: 'gift-o',
   gongneng: 'gem-o',
   qiwenhua: 'fire-o'

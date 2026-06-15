@@ -17,18 +17,12 @@ const AUTH_TOKEN_REFRESHED_EVENT = 'auth-token-refreshed'
 
 const http: AxiosInstance = axios.create({
   baseURL: '/api/v1',
-  timeout: 15000,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  timeout: 180000
 })
 
 const refreshHttp: AxiosInstance = axios.create({
   baseURL: '/api/v1',
-  timeout: 15000,
-  headers: {
-    'Content-Type': 'application/json'
-  }
+  timeout: 180000
 })
 
 let refreshPromise: Promise<string | null> | null = null

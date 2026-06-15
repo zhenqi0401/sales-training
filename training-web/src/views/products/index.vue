@@ -7,14 +7,14 @@ const router = useRouter()
 const searchValue = ref('')
 
 const categories = [
-  { id: 1, name: '镜架', icon: 'glasses-o', productCount: 24, color: '#0e7490' },
+  { id: 1, name: '镜架', icon: 'goods-collect-o', productCount: 24, color: '#0e7490' },
   { id: 2, name: '镜片', icon: 'more-o', productCount: 36, color: '#7c3aed' },
   { id: 3, name: '青控产品', icon: 'eye-o', productCount: 12, color: '#059669' },
-  { id: 4, name: '角塑产品', icon: 'aiming-o', productCount: 8, color: '#0891b2' },
+  { id: 4, name: '角塑产品', icon: 'aim', productCount: 8, color: '#0891b2' },
   { id: 5, name: '太阳镜', icon: 'gem-o', productCount: 18, color: '#d97706' },
   { id: 6, name: '隐形眼镜', icon: 'underway-o', productCount: 15, color: '#dc2626' },
-  { id: 7, name: '护眼产品', icon: 'medical-o', productCount: 10, color: '#4f46e5' },
-  { id: 8, name: '仪器设备', icon: 'scan-o', productCount: 7, color: '#0891b2' }
+  { id: 7, name: '护眼产品', icon: 'shield-o', productCount: 10, color: '#4f46e5' },
+  { id: 8, name: '仪器设备', icon: 'scan', productCount: 7, color: '#0891b2' }
 ]
 
 function goCategory(id: number) {

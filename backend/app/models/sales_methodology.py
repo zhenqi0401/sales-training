@@ -15,6 +15,6 @@ class SalesMethodology(Base, TimestampMixin):
     content: Mapped[str] = mapped_column(Text, nullable=False)
     source: Mapped[Optional[str]] = mapped_column(String(64), default="manual")
     source_audio_file_id: Mapped[Optional[int]] = mapped_column(nullable=True)
-    tags: Mapped[Optional[str]] = mapped_column(Text, default="")
+    tags: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     status: Mapped[str] = mapped_column(String(32), default="published")
     created_by: Mapped[Optional[int]] = mapped_column(ForeignKey("users.id"), nullable=True)

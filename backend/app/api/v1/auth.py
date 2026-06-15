@@ -21,6 +21,7 @@ from app.schemas.user import (
     ChangePasswordRequest,
     InitPasswordRequest,
     LoginRequest,
+    LoginTokenPayload,
     PhoneLoginRequest,
     RefreshTokenRequest,
     SmsCodeRequest,
@@ -117,7 +118,7 @@ async def _send_sms_code(phone: str, code: str) -> None:
     logger.info("Training login SMS code for %s is %s", phone, code)
 
 
-@router.post("/login", response_model=TokenResponse, summary="User login")
+@router.post("/login", response_model=ApiResponse, summary="User login")
 async def login(
     body: LoginRequest,
     session: SessionDep,
@@ -151,10 +152,11 @@ async def login(
     await session.flush()
 
     token = create_access_token(data={"sub": str(user.id), "role": user.role})
-    return TokenResponse(
-        access_token=token,
+    payload = LoginTokenPayload(
+        token=token,
         user=UserResponse.model_validate(user),
     )
+    return ApiResponse(message="登录成功", data=payload.model_dump())
 
 
 @router.post("/send-code", response_model=ApiResponse, summary="Send SMS code")

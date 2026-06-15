@@ -6,6 +6,26 @@ function unwrapResponse<T>(request: Promise<unknown>) {
 }
 
 export const salesApi = {
+  getSalesList() {
+    return unwrapResponse<Array<{
+      id: number
+      username: string
+      real_name: string
+      avatar: string
+      phone: string
+      sales_count: number
+      deal_count: number
+      methodology_count: number
+      methodologies: Array<{
+        id: number
+        title: string
+        content: string
+        source: string
+        created_at: string
+      }>
+    }>>(http.get('/sales/admin/sales-list'))
+  },
+
   getDashboard() {
     return unwrapResponse<{
       totalSales: number
@@ -53,6 +73,16 @@ export const salesApi = {
       file_size: number
       status: string
     }>(http.post('/sales/audio-files', form))
+  },
+
+  createMethodology(title: string, content: string) {
+    return unwrapResponse<{
+      id: number
+      title: string
+      content: string
+      source: string
+      created_at: string
+    }>(http.post('/sales/methodologies', { title, content, source: 'ai' }))
   },
 
   getMyAudioFiles(page = 1, pageSize = 20) {
