@@ -1,6 +1,7 @@
 """Category management endpoints."""
 
 from fastapi import APIRouter, Depends, HTTPException
+from pypinyin import lazy_pinyin
 from sqlalchemy import func, select
 
 from app.core.dependencies import CurrentUserDep, SessionDep, require_admin
@@ -139,13 +140,24 @@ async def create_category(
     session: SessionDep,
     user: CurrentUserDep,
 ):
-    existing = (
-        await session.execute(select(Category).where(Category.code == body.code))
-    ).scalar_one_or_none()
-    if existing:
+    # Auto-generate code from name using pinyin if not provided
+    code = body.code
+    if not code:
+        code = "_".join(lazy_pinyin(body.name.strip()))
+        if not code:
+            code = "unknown"
+        # Ensure uniqueness
+        base_code = code
+        suffix = 2
+        while (await session.execute(select(Category).where(Category.code == code))).scalar_one_or_none():
+            code = f"{base_code}_{suffix}"
+            suffix += 1
+    elif (await session.execute(select(Category).where(Category.code == code))).scalar_one_or_none():
         raise HTTPException(status_code=400, detail="分类编码已存在")
 
-    category = Category(**body.model_dump())
+    data = body.model_dump()
+    data["code"] = code
+    category = Category(**data)
     session.add(category)
     await session.flush()
     return to_category_response(category)

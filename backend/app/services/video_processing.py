@@ -218,7 +218,7 @@ def compress_mobile_mp4_in_place(final_path: Path, upload_root: Path) -> MobileV
         "-map",
         "0:a:0?",
         "-vf",
-        build_mobile_video_filter(metadata.width, metadata.height),
+        "fps=fps=30,pad=ceil(iw/2)*2:ceil(ih/2)*2",
         "-c:v",
         "libx264",
         "-preset",

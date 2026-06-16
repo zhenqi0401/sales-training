@@ -12,19 +12,29 @@ function unwrapResponse<T>(request: Promise<unknown>) {
  */
 export const authApi = {
   /**
-   * Send SMS verification code
+   * Send SMS verification code (保留兼容，暂不使用)
    */
   sendCode(phone: string) {
     return unwrapResponse(http.post<ApiResponse>('/auth/send-code', { phone }))
   },
 
   /**
-   * Login with phone + code
+   * Login with phone + code (保留兼容，暂不使用)
    */
   loginByPhone(phone: string, code: string) {
     return unwrapResponse<PhoneLoginData>(http.post<ApiResponse<PhoneLoginData>>('/auth/phone-login', {
       phone,
       code
+    }))
+  },
+
+  /**
+   * Login with phone + password
+   */
+  loginByPassword(phone: string, password: string) {
+    return unwrapResponse<PhoneLoginData>(http.post<ApiResponse<PhoneLoginData>>('/auth/login', {
+      username: phone,
+      password,
     }))
   },
 

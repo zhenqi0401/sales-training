@@ -17,6 +17,7 @@ from app.models.favorite import Favorite
 from app.models.learning_progress import LearningProgress
 from app.models.practice_session import LongTermMemory, PracticeSession
 from app.models.script import Script
+from app.models.store import Store
 from app.models.user import User
 from app.models.video import Video
 
@@ -43,8 +44,10 @@ async def build_user_profile(user_id: int, session: Any) -> dict[str, Any]:
     if user:
         basic_info["role"] = user.role
         basic_info["real_name"] = user.real_name or user.username
-        if user.store:
-            basic_info["store_name"] = user.store.name
+        if user.store_id:
+            store = await session.get(Store, user.store_id)
+            if store:
+                basic_info["store_name"] = store.name
 
     # ── Learning stats ──────────────────────────────────────────────
     total_videos_result = await session.execute(

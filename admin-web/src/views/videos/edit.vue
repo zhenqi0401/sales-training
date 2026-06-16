@@ -71,12 +71,16 @@
 
             <el-row :gutter="16">
               <el-col :xs="24" :sm="12">
-                <el-form-item label="上下架状态">
+                <el-form-item v-if="isEditing" label="上下架状态">
                   <el-radio-group v-model="form.status">
                     <el-radio-button label="draft">草稿</el-radio-button>
                     <el-radio-button label="published">上架</el-radio-button>
                     <el-radio-button label="archived">下架</el-radio-button>
                   </el-radio-group>
+                </el-form-item>
+                <el-form-item v-else label="上下架状态">
+                  <el-tag type="info">草稿</el-tag>
+                  <span class="status-hint">上传后默认为草稿，需在视频管理中手动上架</span>
                 </el-form-item>
               </el-col>
             </el-row>
@@ -167,7 +171,7 @@ import type { FormInstance, FormRules } from 'element-plus'
 import { createVideo, getVideoDetail, updateVideo, uploadGeneratedCover, type VideoUploadResult } from '@/api/videos'
 import { getCategoryTree } from '@/api/categories'
 import { getProductList } from '@/api/products'
-import type { Category, ProductKnowledge } from '@/types'
+import type { Category, ProductKnowledge, Video } from '@/types'
 import VideoUploader from '@/components/common/VideoUploader.vue'
 
 const route = useRoute()
@@ -194,7 +198,7 @@ const form = reactive({
   duration: 0,
   resolution: '',
   fileSize: 0,
-  status: 'draft' as 'draft' | 'published' | 'archived',
+  status: 'draft' as Video['status'],
   required: false,
 })
 
@@ -406,6 +410,12 @@ function mediaUrl(url: string): string {
     margin: 10px 0 0;
     font-size: 14px;
   }
+}
+
+.status-hint {
+  margin-left: 8px;
+  font-size: 12px;
+  color: #909399;
 }
 
 .form-actions {

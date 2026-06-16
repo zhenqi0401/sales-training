@@ -17,6 +17,22 @@ const wrongAnswers = computed(() => {
   return (record.value?.answers || []).filter((answer) => !(answer.isCorrect ?? answer.correct))
 })
 
+const passRatePercent = computed(() => {
+  if (record.value?.passRate) return Math.round(record.value.passRate * 100)
+  if (record.value?.passScore && record.value?.totalScore) return Math.round((record.value.passScore / record.value.totalScore) * 100)
+  return 60
+})
+
+const neededCorrect = computed(() => {
+  if (!record.value || record.value.passed) return 0
+  const required = record.value.passRate
+    ? Math.ceil(record.value.totalCount * record.value.passRate)
+    : (record.value.passScore && record.value.totalScore
+      ? Math.ceil(record.value.totalCount * record.value.passScore / record.value.totalScore)
+      : 0)
+  return Math.max(0, required - record.value.correctCount)
+})
+
 onMounted(async () => {
   try {
     const res = await examsApi.getExamRecord(recordId.value)
@@ -61,6 +77,10 @@ function selectedText(answer: UserAnswer) {
       <div class="result-page">
         <div class="result-section">
           <div class="result-title">{{ record.passed ? '恭喜通过' : '未通过' }}</div>
+          <div class="pass-rate-hint">通过标准：正确率 ≥ {{ passRatePercent }}%</div>
+          <p v-if="!record.passed && neededCorrect > 0" class="fail-hint">
+            还差 <strong>{{ neededCorrect }}</strong> 题即可通过
+          </p>
           <ResultBox :record="record" />
         </div>
 
@@ -161,7 +181,23 @@ function selectedText(answer: UserAnswer) {
   font-size: 22px;
   font-weight: 700;
   color: var(--text);
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+}
+
+.pass-rate-hint {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
+.fail-hint {
+  font-size: 13px;
+  color: var(--danger);
+  margin-bottom: 12px;
+
+  strong {
+    font-size: 16px;
+  }
 }
 
 .breakdown-title {

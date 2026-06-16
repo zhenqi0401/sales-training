@@ -145,7 +145,7 @@
           </div>
           <div class="summary-item">
             <span class="label">及格分数</span>
-            <span class="value">{{ form.passScore }} 分</span>
+            <span class="value">{{ form.passScore }} 分 <template v-if="form.totalScore">({{ Math.round(form.passScore / form.totalScore * 100) }}%)</template></span>
           </div>
         </el-card>
       </el-col>

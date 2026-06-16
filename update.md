@@ -1,5 +1,25 @@
 # Update Log
 
+## 2026-06-18 ASR 统一为 qwen3-asr-flash，移除本地 Whisper
+
+- **变更**：删除所有 faster-whisper 本地模型相关代码，ASR 统一使用百炼云端 `qwen3-asr-flash`。
+- **影响**：`ai_service.py`（删除三个 Whisper 函数，替换为 async `transcribe_video_audio`）、`videos.py`（去掉 semaphore 和 asyncio.to_thread 包装）、`requirements.txt`（移除 faster-whisper）
+- **原因**：`qwen3-asr-flash` 不支持词级时间戳，因此一并去掉 AI 出题 prompt 中的时间戳要求，改为"依据视频音频内容逐项说明"。
+- **验证**：后端语法检查通过、App 正常加载、两个前端 vue-tsc 零错误。
+
+## 2026-06-18 视频管线健壮性修复
+
+- **变更**：修复「视频上传 → 转码 → ASR → AI 出题 → 上架」完整链路的可靠性和可重试性。
+- **影响**：后端 `videos.py`（管线逻辑 + retry 端点 + pipeline_log）、`ai_service.py`（ASR fallback）、`models/video.py`（pipeline_log 字段）、`schemas/video.py`（VideoResponse）、`config.py`（默认模型名）；管理端 `index.vue`/`edit.vue`/`types/index.ts`/`api/videos.ts`。
+- **详细**：
+  1. **管线可重试**：压缩失败时回退 `draft`；新增 `POST /videos/{id}/retry` 端点；重试时自动清理旧 AI 题目；`update_video_status` 支持 `transcoding`/`generating` → `draft` 回退。
+  2. **前端 UX**：`transcoding`/`generating` 状态显示「重新处理」按钮替代上架/下架；筛选器增加「生成中」选项；编辑页移除手动选择 `transcoding`；类型新增 `generating`。
+  3. **配置修复**：`.env`/`.env.example`/`config.py` 补充 `AI_QUESTION_TEXT_MODEL=qwen3.6-flash`，去掉带日期的旧默认值。
+  4. **ASR fallback**：本地 `faster-whisper` 不可用时自动降级到 DashScope `qwen3-asr-flash` 云端转写。
+  5. **管线日志**：Video 模型新增 `pipeline_log` JSON 字段，管线各步骤写入状态；新增 `GET /videos/{id}/pipeline-log` 接口；前端状态标签 hover 显示步骤进度。
+  6. **Celery 清理**：`celery_app.py`/`tasks.py` 加注释说明未启用，导入失败时优雅降级不阻塞启动。
+- **验证**：后端语法检查通过、App 加载正常；前端 `vue-tsc --noEmit` 零错误、`vite build` 构建成功。
+
 ## 2026-06-05 FR-A05 视频上传与管理
 
 - 补全视频管理后端字段：标签、关联产品、时长、分辨率、文件大小、上下架状态、排序权重、必修标记。
@@ -370,3 +390,55 @@
 - 课程分类中“斜弱视”改用 `closed-eye`，“角塑”改用 `aim`，保证截图所示分类卡片能正常显示图标。
 - 同步检查其余培训端硬编码 Vant 图标，确认静态图标名均存在于本地 Vant 图标字体中。
 - 已通过培训端 `npm run build` 验证。
+
+## 2026-06-15 分类管理修复与视频分类导入
+
+### 影响范围
+- **后端**：分类 Schema、分类创建接口。
+- **管理端**：分类管理页面（间接，无需改前端）。
+
+### 变更要点
+- 修复分类管理「添加子分类」失败的问题：根因是 `CategoryCreate` schema 的 `code` 字段为必填但管理端表单从未发送该字段，后端返回 422 校验错误。
+- 将 `CategoryCreate.code` 改为 `Optional[str]`（默认 `None`）；`create_category` 端点新增自动生成逻辑：若 code 为空则通过 `pypinyin` 根据 name 生成拼音编码，并自动追加后缀去重。
+- 新增依赖 `pypinyin>=0.55.0` 写入 `requirements.txt`。
+- 新增导入脚本 `backend/seed_data/import_video_categories.py`：遍历 `C:\Users\Admin\Desktop\培训视频` 文件夹结构，将 4 个一级文件夹导入为顶级分类、29 个二级子文件夹导入为对应父分类下的子分类。脚本幂等，按 `name + parent_id` 去重。
+
+## 2026-06-15 视频上传流程改造与批量导入
+
+### 影响范围
+- **后端**：`videos.py`（create / update_video_status / batch_update_video_status 端点）、视频导入脚本。
+- **管理端**：视频上传页（edit.vue）、视频列表页（index.vue）、types 定义。
+
+### 变更要点
+- **上传=草稿**：`create_video` 端点不再自动触发后台转码，新建视频固定为 `draft` 状态，从 `BackgroundTasks` 移除转码触发。
+- **手动上架才转码**：`update_video_status` 和 `batch_update_video_status` 端点在目标状态为 `published` 时，先设为 `transcoding` 再通过 `background_tasks` 触发 `_transcode_and_publish` 后台转码。转码完成后自动更新 `file_size`、`resolution`、`cover_url` 并设为 `published`，转码后文件原地替换原文件（`compress_mobile_mp4_in_place` 逻辑不变）。
+- **管理端上传页**：新建视频时隐藏"上下架状态"选择器，固定显示"草稿"标签+提示文字；编辑已有视频时增加 `transcoding` 选项。
+- **管理端列表页**：`transcoding` 状态时显示"转码中..."标签，隐藏上架/下架操作按钮，避免重复触发转码。
+- **类型更新**：`Video`/`VideoUploadParams` 的 `status` 类型新增 `'transcoding'`。
+- 新增批量导入脚本 `backend/seed_data/import_videos.py`：遍历培训视频文件夹，匹配二级分类，复制视频到 `uploads/videos/` 并做 faststart remux + 元数据提取 + 封面生成，创建 `draft` 状态记录。共导入 175 个视频。
+
+## 2026-06-15 考试模块 L1/L2/L3 等级改革
+
+### 影响范围
+- **后端**：`app/api/v1/exams.py`（LEVEL_RULES、ensure_paper_for_level、questions_for_level、submit_exam、exam_record_payload、get_exam_config）
+- **培训端**：`views/exam/index.vue`（默认卡片和确认文案）、`views/exam/result.vue`（通过标准和差几题提示）、`types/index.ts`（ExamConfig/ExamRecord 增加 passRate）
+- **管理端**：`views/exams/index.vue`（列表及格分列显示百分比）、`views/exams/edit.vue`（概要卡及格分显示百分比）
+
+### 变更要点
+- **等级参数调整**：L1 改为 20 题/80% 通过（passScore=16/totalScore=20）、L2 改为 25 题/85% 通过（passScore=22/totalScore=25）、L3 改为 30 题/90% 通过（passScore=27/totalScore=30）。每题值 1 分，passScore = ceil(题数 × 通过率)。
+- **随机抽题**：每次考试从题库中按难度过滤后 `random.shuffle()` 随机选取题目，不再复用固定试卷的 `question_ids`，确保每次考试题目不同。
+- **提交安全**：submit_exam 对 L1/L2/L3 优先使用用户提交的 body.answers 中的 questionIds，避免并发请求覆盖 paper.question_ids 导致评分错乱。
+- **通过率展示**：后端配置和记录接口均返回 `passRate` 字段；培训端考试入口确认框和结果页展示"正确率 ≥ XX% 及格"；结果页未通过时提示"还差 X 题即可通过"。
+- **管理端**：试卷列表和编辑页的及格分旁增加百分比换算显示。
+
+## 2026-06-15 考试模块难度去除与时长统一
+
+### 影响范围
+- **后端**：`app/api/v1/exams.py`（LEVEL_RULES 删除 difficulty、find_paper_for_level 简化、ensure_paper_for_level/questions_for_level 不再按难度过滤、question_payload 增加 exam_level 参数、submit_exam 创建试卷不再写入 difficulty_level）
+- **培训端**：`views/exam/index.vue`（defaultCards duration 统一为 60）
+
+### 变更要点
+- **去除难度过滤**：L1/L2/L3 考试不再按 `difficulty` 字段过滤题目，改为从全量启用题库随机抽取。`LEVEL_RULES` 中所有 level 删除 `difficulty` 键。
+- **抽题 fallback 修复**：原逻辑按 difficulty 过滤后候选集可能不足 `questionCount`，且只在候选集为空时才回退全库；现改为直接从全库随机抽取，天然保证题量充足。
+- **时长统一**：L1/L2/L3 `duration` 统一改为 60 分钟（原 30/40/50），前后端同步。
+- **向后兼容**：`Question.difficulty` 数据库列保留；`difficulty_to_level()` 函数保留作为 `question_payload` 和 `paper_level` 的 fallback；管理端题库管理仍可显示 difficulty 字段。

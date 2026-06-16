@@ -151,6 +151,10 @@ async def login(
     user.last_login = datetime.now(timezone.utc)
     await session.flush()
 
+    # 培训端用户（sales/student）返回含 refreshToken + mustChangePassword 的格式
+    if user.role in ("sales", "student"):
+        return _create_training_token_response(user)
+
     token = create_access_token(data={"sub": str(user.id), "role": user.role})
     payload = LoginTokenPayload(
         token=token,

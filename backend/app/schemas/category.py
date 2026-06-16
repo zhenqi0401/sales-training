@@ -10,7 +10,7 @@ class CategoryCreate(BaseModel):
     """Create a new category."""
 
     name: str = Field(..., min_length=1, max_length=64)
-    code: str = Field(..., min_length=1, max_length=64)
+    code: Optional[str] = None
     icon: Optional[str] = ""
     description: Optional[str] = ""
     sort_order: int = 0

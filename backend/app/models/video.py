@@ -41,6 +41,9 @@ class Video(Base, TimestampMixin):
     published_at: Mapped[Optional[datetime]] = mapped_column(
         DateTime(timezone=True), nullable=True, comment="Published time"
     )
+    pipeline_log: Mapped[Optional[dict]] = mapped_column(
+        JSON, default=None, comment="Pipeline execution log (step, status, error)"
+    )
 
     category: Mapped[Optional["Category"]] = relationship(back_populates="videos")
     learning_progresses: Mapped[list["LearningProgress"]] = relationship(

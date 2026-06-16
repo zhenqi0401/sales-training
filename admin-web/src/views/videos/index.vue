@@ -31,6 +31,7 @@
       >
         <el-option label="草稿" value="draft" />
         <el-option label="转码中" value="transcoding" />
+        <el-option label="生成中" value="generating" />
         <el-option label="已上架" value="published" />
         <el-option label="已下架" value="archived" />
       </el-select>
@@ -114,8 +115,16 @@
         </el-table-column>
         <el-table-column label="状态" width="100" align="center">
           <template #default="{ row }">
-            <el-tag v-if="row.status === 'published'" type="success" size="small">已上架</el-tag>
-            <el-tag v-else-if="row.status === 'transcoding'" type="primary" size="small">转码中</el-tag>
+            <el-tooltip
+              v-if="row.status === 'transcoding' || row.status === 'generating'"
+              :content="pipelineTooltip(row)"
+              placement="top"
+              :disabled="!pipelineTooltip(row)"
+            >
+              <el-tag v-if="row.status === 'transcoding'" type="primary" size="small">转码中</el-tag>
+              <el-tag v-else-if="row.status === 'generating'" type="warning" size="small">生成中</el-tag>
+            </el-tooltip>
+            <el-tag v-else-if="row.status === 'published'" type="success" size="small">已上架</el-tag>
             <el-tag v-else-if="row.status === 'draft'" type="info" size="small">草稿</el-tag>
             <el-tag v-else type="warning" size="small">已下架</el-tag>
           </template>
@@ -127,9 +136,21 @@
           <template #default="{ row }">
             <el-button text type="primary" size="small" @click="router.push(`/videos/edit/${row.id}`)">编辑</el-button>
             <el-button
+              v-if="row.status === 'transcoding' || row.status === 'generating'"
+              text
+              type="warning"
+              size="small"
+              :loading="retryingIds.has(row.id)"
+              @click="handleRetry(row as Video)"
+            >
+              重新处理
+            </el-button>
+            <el-button
+              v-else
               text
               :type="row.status === 'published' ? 'warning' : 'success'"
               size="small"
+              :loading="togglingIds.has(row.id)"
               @click="toggleStatus(row as Video)"
             >
               {{ row.status === 'published' ? '下架' : '上架' }}
@@ -159,7 +180,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { confirmDanger } from '@/utils/confirm'
-import { batchUpdateVideoStatus, deleteVideo, getVideoList, toggleVideoStatus } from '@/api/videos'
+import { batchUpdateVideoStatus, deleteVideo, getVideoList, retryVideoPipeline, toggleVideoStatus } from '@/api/videos'
 import { getCategoryList } from '@/api/categories'
 import type { Category, Video } from '@/types'
 
@@ -168,6 +189,8 @@ const loading = ref(false)
 const videoList = ref<Video[]>([])
 const categories = ref<Category[]>([])
 const selectedIds = ref<number[]>([])
+const togglingIds = ref(new Set<number>())
+const retryingIds = ref(new Set<number>())
 const total = ref(0)
 const currentPage = ref(1)
 const pageSize = ref(10)
@@ -229,13 +252,30 @@ function handleSelectionChange(rows: Video[]) {
 }
 
 async function toggleStatus(row: Video) {
+  if (row.status === 'transcoding' || row.status === 'generating') return
   const newStatus = row.status === 'published' ? 'archived' : 'published'
+  togglingIds.value.add(row.id)
   try {
     await toggleVideoStatus(row.id, newStatus)
     ElMessage.success(newStatus === 'published' ? '已上架' : '已下架')
     getList()
   } catch {
     // Error handled by interceptor.
+  } finally {
+    togglingIds.value.delete(row.id)
+  }
+}
+
+async function handleRetry(row: Video) {
+  retryingIds.value.add(row.id)
+  try {
+    await retryVideoPipeline(row.id)
+    ElMessage.success('已重新开始处理，请等待转码和 AI 出题完成')
+    getList()
+  } catch {
+    // Error handled by interceptor.
+  } finally {
+    retryingIds.value.delete(row.id)
   }
 }
 
@@ -282,6 +322,34 @@ function formatFileSize(bytes: number): string {
 function formatDate(value: string): string {
   if (!value) return '--'
   return value.replace('T', ' ').slice(0, 16)
+}
+
+const STEP_LABELS: Record<string, string> = {
+  init: '初始化',
+  transcode: '视频压缩',
+  asr: '语音转文字',
+  ai_generate: 'AI 生成题目',
+  done: '完成',
+}
+const STATUS_LABELS: Record<string, string> = {
+  running: '进行中',
+  success: '已完成',
+  failed: '失败',
+  skipped: '已跳过',
+}
+
+function pipelineTooltip(row: any): string {
+  const log = row.pipelineLog || row.pipeline_log
+  if (!log || typeof log !== 'object') return ''
+  const steps = Object.entries(log as Record<string, any>)
+  if (!steps.length) return ''
+  return steps
+    .map(([key, val]: [string, any]) => {
+      const step = STEP_LABELS[key] || key
+      const status = STATUS_LABELS[val.status] || val.status
+      return `${step}: ${status}${val.message ? ' — ' + val.message : ''}`
+    })
+    .join('\n')
 }
 
 function mediaUrl(url: string): string {

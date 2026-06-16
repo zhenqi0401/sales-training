@@ -52,13 +52,14 @@ export interface Video {
   duration: number
   resolution?: string
   fileSize: number
-  status: 'draft' | 'published' | 'archived'
+  status: 'draft' | 'published' | 'archived' | 'transcoding' | 'generating'
   viewCount: number
   required: boolean
   sortOrder: number
   estDuration: number
   createdAt: string
   updatedAt: string
+  pipelineLog?: Record<string, { status: string; message?: string; error?: string }>
 }
 
 export interface VideoUploadParams {
@@ -72,7 +73,7 @@ export interface VideoUploadParams {
   duration?: number
   resolution?: string
   fileSize?: number
-  status?: 'draft' | 'published' | 'archived'
+  status?: 'draft' | 'published' | 'archived' | 'transcoding' | 'generating'
   sortOrder?: number
   required?: boolean
   estDuration?: number

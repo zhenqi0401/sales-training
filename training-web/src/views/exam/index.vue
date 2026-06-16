@@ -20,9 +20,10 @@ const defaultCards: ExamCard[] = [
     title: '初级考核',
     description: '基础产品知识 + 接待流程',
     questionCount: 20,
-    duration: 30,
-    passScore: 60,
-    totalScore: 100,
+    duration: 60,
+    passScore: 16,
+    totalScore: 20,
+    passRate: 0.80,
     icon: 'smile-o',
     color: 'var(--success)',
     bg: 'linear-gradient(135deg, #d1fae5, #a7f3d0)'
@@ -31,10 +32,11 @@ const defaultCards: ExamCard[] = [
     level: 'L2',
     title: '中级考核',
     description: '专业知识 + 销售技巧',
-    questionCount: 30,
-    duration: 45,
-    passScore: 70,
-    totalScore: 100,
+    questionCount: 25,
+    duration: 60,
+    passScore: 22,
+    totalScore: 25,
+    passRate: 0.85,
     icon: 'star-o',
     color: 'var(--primary)',
     bg: 'linear-gradient(135deg, #cffafe, #a5f3fc)'
@@ -43,10 +45,11 @@ const defaultCards: ExamCard[] = [
     level: 'L3',
     title: '高级考核',
     description: '综合能力 + 实战场景',
-    questionCount: 40,
+    questionCount: 30,
     duration: 60,
-    passScore: 80,
-    totalScore: 100,
+    passScore: 27,
+    totalScore: 30,
+    passRate: 0.90,
     icon: 'award-o',
     color: 'var(--warning)',
     bg: 'linear-gradient(135deg, #fef3c7, #fde68a)'
@@ -87,9 +90,10 @@ async function loadConfigs() {
 }
 
 async function confirmStart(config: ExamConfig, pathLevel: string) {
+  const passRatePercent = config.passRate ? `${Math.round(config.passRate * 100)}%` : `${config.passScore}分`
   await showConfirmDialog({
     title: config.title,
-    message: `考试时长 ${config.duration} 分钟，共 ${config.questionCount} 题，满分 ${config.totalScore} 分，${config.passScore} 分及格。开始后会进入倒计时。`,
+    message: `考试时长 ${config.duration} 分钟，共 ${config.questionCount} 题，满分 ${config.totalScore} 分，正确率 ≥ ${passRatePercent} 及格。开始后会进入倒计时。`,
     confirmButtonText: '开始考试',
     cancelButtonText: '再看看'
   })
@@ -146,7 +150,7 @@ async function startSprint() {
             <span class="meta-dot">|</span>
             <span>{{ exam.duration }}分钟</span>
             <span class="meta-dot">|</span>
-            <span>{{ exam.passScore }}分及格</span>
+            <span>{{ exam.passRate ? Math.round(exam.passRate * 100) + '%及格' : exam.passScore + '分及格' }}</span>
           </div>
         </div>
         <van-icon name="arrow" size="18" color="var(--text-muted)" />

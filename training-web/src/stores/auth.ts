@@ -37,8 +37,8 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.setItem('auth-user', JSON.stringify(normalizedUser))
   }
 
-  async function login(phone: string, code: string) {
-    const res = await authApi.loginByPhone(phone, code)
+  async function login(phone: string, password: string) {
+    const res = await authApi.loginByPassword(phone, password)
     const data = res.data
     setToken(data.token, data.refreshToken)
     setUser(data.user)

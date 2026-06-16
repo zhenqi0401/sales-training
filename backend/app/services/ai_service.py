@@ -13,7 +13,7 @@ from pathlib import Path
 from typing import Any
 
 from app.core.config import settings
-from app.services.video_processing import resolve_video_tool
+from app.services.video_processing import probe_video, resolve_video_tool
 
 SUPPORTED_TYPES = ("single", "multiple", "true_false")
 DIFFICULTY_TO_SCORE = {"L1": 1, "L2": 3, "L3": 5}
@@ -24,10 +24,155 @@ class AIQuestionGenerationError(RuntimeError):
     """Raised when the configured LLM cannot return usable question drafts."""
 
 
-async def transcribe_video(video_file_url: str) -> str:
-    """Reserved hook for a future video content extraction provider."""
-    _ = resolve_upload_path(video_file_url)
-    return ""
+async def transcribe_video_audio(video_path: Path) -> str:
+    """Extract audio from video and transcribe via DashScope paraformer-v2.
+
+    Returns transcript with sentence-level timestamps:
+        [00:00] 第一句内容
+        [00:15] 第二句内容
+    """
+    import logging
+    logger = logging.getLogger(__name__)
+
+    if not video_path.exists():
+        raise AIQuestionGenerationError(f"视频文件不存在：{video_path}")
+
+    ffmpeg = resolve_video_tool("ffmpeg")
+    if not ffmpeg:
+        raise AIQuestionGenerationError("ffmpeg 未安装，无法提取视频音频")
+
+    audio_path = video_path.with_suffix(".asr.mp3")
+    # DashScope data-uri 限制 20MB，base64 膨胀约 33%，原始 mp3 需 < 15MB
+    MAX_AUDIO_BYTES = 15 * 1024 * 1024
+    try:
+        # 用 ffprobe 快速获取视频时长，预计算合适码率，避免二次编码
+        try:
+            meta = await asyncio.to_thread(probe_video, video_path)
+            duration_sec = meta.duration
+        except Exception:
+            duration_sec = 0
+
+        # 计算刚好不超过 15MB 的最大码率（留 10% 余量）
+        bitrate = "24k"  # 默认
+        if duration_sec > 0:
+            max_bps = int((MAX_AUDIO_BYTES * 8) / duration_sec * 0.9)
+            for candidate in ["64k", "48k", "32k", "24k", "16k"]:
+                candidate_bps = int(candidate.replace("k", "")) * 1000
+                if candidate_bps <= max_bps:
+                    bitrate = candidate
+                    break
+
+        cmd = [
+            ffmpeg, "-y", "-i", str(video_path),
+            "-map", "0:a:0?",  # 只取音频流，跳过视频解码
+            "-acodec", "libmp3lame", "-ar", "16000", "-ac", "1",
+            "-b:a", bitrate,
+            str(audio_path),
+        ]
+        logger.info("提取音频 bitrate=%s duration=%ss", bitrate, duration_sec)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=600)
+        if result.returncode != 0:
+            raise AIQuestionGenerationError(f"音频提取失败：{(result.stderr or '')[-300:]}")
+
+        file_size = audio_path.stat().st_size
+        if file_size > MAX_AUDIO_BYTES:
+            raise AIQuestionGenerationError(
+                f"音频文件过大（{file_size} bytes），超过 DashScope 20MB 限制，请上传更短的视频"
+            )
+
+        logger.info("正在使用 paraformer-v2 转写 video_path=%s", video_path)
+        transcript = await _call_asr_paraformer(audio_path, logger)
+        logger.info("ASR 转写完成 chars=%s", len(transcript))
+        return transcript
+    except subprocess.TimeoutExpired:
+        raise AIQuestionGenerationError("音频提取超时，视频可能过长")
+    finally:
+        audio_path.unlink(missing_ok=True)
+
+
+async def _call_asr_paraformer(audio_path: Path, logger) -> str:
+    """Transcribe audio via DashScope paraformer-v2 (supports word-level timestamps).
+
+    Returns formatted transcript with sentence-level timestamps:
+        [MM:SS] sentence text
+    """
+    import dashscope
+    from dashscope.audio.asr import Transcription
+
+    mime_type = mimetypes.guess_type(audio_path.name)[0] or "audio/mpeg"
+    base64_str = base64.b64encode(audio_path.read_bytes()).decode("ascii")
+    data_uri = f"data:{mime_type};base64,{base64_str}"
+
+    # Submit sync transcription with model fallback
+    models = ["paraformer-v2", "paraformer-v1", "paraformer-8k-v2", "paraformer-8k-v1", "paraformer-mtl-v1"]
+    last_error = ""
+    response = None
+    for model_name in models:
+        try:
+            response = await asyncio.to_thread(
+                Transcription.call,
+                model=model_name,
+                file_urls=[data_uri],
+                api_key=settings.ai_api_key,
+            )
+            resp_output = response.output if hasattr(response, 'output') and response.output else {}
+            if resp_output and resp_output.get("results"):
+                logger.info("ASR 模型 %s 调用成功", model_name)
+                break
+            last_error = getattr(response, 'message', '') or getattr(response, 'code', '')
+            logger.warning("ASR 模型 %s 返回空结果（%s），尝试下一个", model_name, last_error)
+        except Exception as exc:
+            last_error = str(exc)
+            logger.warning("ASR 模型 %s 异常: %s，尝试下一个", model_name, last_error)
+
+    output = response.output if response and hasattr(response, 'output') and response.output else {}
+    if not output:
+        raise AIQuestionGenerationError(
+            f"所有 ASR 模型均失败，最后错误：{last_error}"
+        )
+
+    # Get transcription JSON URL
+    results = output.get("results", [])
+    if not results:
+        raise AIQuestionGenerationError("语音转写失败：无结果返回")
+
+    transcription_url = results[0].get("transcription_url", "")
+    if not transcription_url:
+        code = results[0].get("code", "")
+        msg = results[0].get("message", "")
+        raise AIQuestionGenerationError(f"语音转写失败：{code} - {msg}")
+
+    # Download and parse the transcription JSON
+    transcript_data = await asyncio.to_thread(_download_transcription_json, transcription_url)
+
+    # Format sentences with timestamps
+    transcripts = transcript_data.get("transcripts", [])
+    lines: list[str] = []
+    for t in transcripts:
+        for sent in t.get("sentences", []):
+            start_ms = sent.get("begin_time", 0)
+            start_min = int(start_ms // 60000)
+            start_sec = int((start_ms % 60000) // 1000)
+            timestamp = f"[{start_min:02d}:{start_sec:02d}]"
+            text = sent.get("text", "").strip()
+            if text:
+                lines.append(f"{timestamp} {text}")
+
+    transcript = "\n".join(lines)
+    logger.info("paraformer-v2 转写完成 chars=%s sentences=%s", len(transcript), len(lines))
+    return transcript
+
+
+def _download_transcription_json(url: str) -> dict[str, Any]:
+    """Download and parse the transcription result JSON from OSS URL."""
+    import urllib.request
+    try:
+        with urllib.request.urlopen(url, timeout=30) as resp:
+            return json.loads(resp.read().decode("utf-8"))
+    except urllib.error.URLError as exc:
+        raise AIQuestionGenerationError(f"无法下载转写结果：{exc.reason}") from exc
+    except json.JSONDecodeError as exc:
+        raise AIQuestionGenerationError("转写结果 JSON 解析失败") from exc
 
 
 async def call_llm(messages: list[dict[str, str]], max_tokens: int = 1024) -> str:
@@ -138,6 +283,96 @@ async def generate_questions(
     return normalized
 
 
+async def generate_questions_from_transcript(
+    *,
+    transcript: str,
+    video_title: str,
+    count: int,
+    difficulty_level: str,
+    question_type_ratios: dict[str, int],
+    category_id: int | None = None,
+    video_id: int | None = None,
+) -> list[dict[str, Any]]:
+    """Generate questions from a text transcript (after ASR), using a text-only model."""
+    if not transcript.strip():
+        raise AIQuestionGenerationError("视频转录文本为空，无法生成题目")
+
+    question_types = expand_question_types(question_type_ratios, count)
+    difficulty = DIFFICULTY_TO_SCORE.get(difficulty_level, 3)
+    difficulty_label = DIFFICULTY_LABELS.get(difficulty_level, "场景应用")
+
+    system_prompt = (
+        "你是销售培训系统的题库生成助手。必须只输出 JSON，不要输出 Markdown。"
+        "JSON 顶层字段必须是 questions。题型只允许 single、multiple、true_false。"
+        "single 和 true_false 的 answer 只能是单个选项字母；multiple 的 answer 使用逗号分隔选项字母。"
+        "题目必须严格依据下面提供的视频转录文本生成，不得编造视频中没有的事实。"
+        "单选题只能使用 A/B/C/D 中的一个作为 answer。"
+        "多选题只能使用 A/B/C/D，多个答案用英文逗号分隔。"
+        "true_false 只能使用 A 或 B，A=正确，B=错误，禁止返回 C 或 D。"
+        "analysis 必须和题目及答案严格对应，必须引用转录文本中的时间戳证据（如 [02:15]），"
+        "并逐项说明每个选项正确或错误的原因。"
+    )
+
+    user_prompt = json.dumps({
+        "task": "根据视频转录文本生成题库",
+        "video_title": video_title,
+        "count": count,
+        "difficulty": difficulty_label,
+        "question_types_in_order": question_types,
+        "transcript_with_timestamps": transcript,
+        "output_schema": {
+            "questions": [{
+                "content": "题干",
+                "type": "single|multiple|true_false",
+                "options": {"A": "选项A", "B": "选项B", "C": "选项C", "D": "选项D"},
+                "answer": "A 或 A,B",
+                "analysis": "解析，引用 [MM:SS] 时间段证据",
+                "tags": ["标签"],
+            }],
+        },
+    }, ensure_ascii=False)
+
+    payload = {
+        "model": settings.ai_question_text_model,
+        "messages": [
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
+        "temperature": 0.2,
+        "max_tokens": min(32768, max(8192, count * 1200)),
+        "stream": True,
+    }
+
+    response = await asyncio.to_thread(
+        _post_chat_completion,
+        payload,
+        settings.ai_request_timeout_seconds,
+    )
+    content = extract_message_content(response)
+    if not content:
+        raise AIQuestionGenerationError("大模型返回空响应，请稍后重试")
+
+    questions = parse_questions_from_content(content)
+    if not questions:
+        raise AIQuestionGenerationError("大模型未返回题目，请补充视频文本或知识点后重试")
+
+    normalized = [
+        normalize_generated_question(
+            item,
+            fallback_type=question_types[index % len(question_types)],
+            difficulty=difficulty,
+            category_id=category_id,
+            video_id=video_id,
+            fallback_tags=[video_title, difficulty_level],
+        )
+        for index, item in enumerate(questions[:count])
+    ]
+    normalized = [item for item in normalized if item["content"] and item["answer"]]
+    if not normalized:
+        raise AIQuestionGenerationError("大模型返回内容格式无效，未生成可入库题目")
+    return normalized
+
+
 def build_chat_completion_payload(prompt: dict[str, Any]) -> dict[str, Any]:
     count = int(prompt.get("count") or 5)
     question_types = prompt.get("question_types") or ["single"]
@@ -194,7 +429,7 @@ def build_chat_completion_payload(prompt: dict[str, Any]) -> dict[str, Any]:
             },
         ],
         "temperature": 0.2,
-        "max_tokens": min(4096, max(1024, count * 450)),
+        "max_tokens": min(32768, max(8192, count * 1200)),
         "stream": True,
         "modalities": ["text"],
     }
@@ -365,22 +600,136 @@ def extract_stream_message_content(stream_text: str) -> str:
 
 
 def parse_questions_from_content(content: str) -> list[dict[str, Any]]:
-    cleaned = strip_json_fence(content)
-    try:
-        payload = json.loads(cleaned)
-    except json.JSONDecodeError:
-        match = re.search(r"\{.*\}", cleaned, re.DOTALL)
-        if not match:
-            raise AIQuestionGenerationError("大模型返回内容不是有效 JSON")
-        payload = json.loads(match.group(0))
+    """Parse LLM response into question dicts. Handles common LLM JSON errors."""
+    import logging
+    logger = logging.getLogger(__name__)
 
-    if isinstance(payload, list):
-        questions = payload
-    else:
+    cleaned = strip_json_fence(content)
+
+    def _try_parse(text: str) -> list[dict[str, Any]] | None:
+        """Try parsing, return None if failed."""
+        try:
+            payload = json.loads(text)
+        except json.JSONDecodeError:
+            # Try to fix common LLM JSON issues
+            fixed = _fix_llm_json(text)
+            if fixed is not None:
+                try:
+                    payload = json.loads(fixed)
+                except json.JSONDecodeError:
+                    # Fallback: regex extract
+                    match = re.search(r"\{.*\}", text, re.DOTALL)
+                    if match:
+                        try:
+                            payload = json.loads(match.group(0))
+                        except json.JSONDecodeError:
+                            fixed_sub = _fix_llm_json(match.group(0))
+                            if fixed_sub:
+                                try:
+                                    payload = json.loads(fixed_sub)
+                                except json.JSONDecodeError:
+                                    return None
+                            else:
+                                return None
+                    else:
+                        return None
+            else:
+                return None
+
+        if isinstance(payload, list):
+            return [item for item in payload if isinstance(item, dict)]
         questions = payload.get("questions") if isinstance(payload, dict) else None
-    if not isinstance(questions, list):
-        raise AIQuestionGenerationError("大模型返回 JSON 缺少 questions 数组")
-    return [item for item in questions if isinstance(item, dict)]
+        if isinstance(questions, list):
+            return [item for item in questions if isinstance(item, dict)]
+        # Check if top-level object IS a question
+        if isinstance(payload, dict) and "content" in payload:
+            return [payload]
+        return None
+
+    questions = _try_parse(cleaned)
+    if questions:
+        return questions
+
+    # Last resort: try to extract individual question objects from the text
+    logger.warning("JSON 解析失败，尝试逐个提取题目对象。原始内容前500字符: %s", content[:500])
+    questions = _extract_question_objects(cleaned)
+    if questions:
+        logger.info("逐个提取成功，获得 %s 道题目", len(questions))
+        return questions
+
+    raise AIQuestionGenerationError(
+        f"大模型返回内容不是有效 JSON。原始内容前300字符: {content[:300]}"
+    )
+
+
+def _fix_llm_json(text: str) -> str | None:
+    """Fix common LLM JSON formatting errors. Returns None if unfixable."""
+    import re as regex
+    changed = False
+
+    # 1. Remove trailing commas before ] or }
+    fixed = regex.sub(r",\s*([}\]])", r"\1", text)
+    if fixed != text:
+        changed = True
+        text = fixed
+
+    # 2. Remove trailing comma at end of file
+    fixed = regex.sub(r",\s*$", "", text)
+    if fixed != text:
+        changed = True
+        text = fixed
+
+    # 3. Fix single quotes used instead of double quotes (inside arrays/objects only)
+    # Skip this for now as it could break content with apostrophes
+
+    return text if changed else None
+
+
+def _extract_question_objects(text: str) -> list[dict[str, Any]]:
+    """Extract individual question objects by tracking brace depth (handles nested JSON)."""
+    import re as regex
+    results: list[dict[str, Any]] = []
+
+    # Find start of each question object: { followed by a known question key
+    start_pattern = regex.compile(
+        r'\{\s*"(?:content|type|options|answer|analysis|difficulty|tags)"\s*:',
+        regex.DOTALL,
+    )
+
+    for match in start_pattern.finditer(text):
+        start_idx = match.start()
+        depth = 0
+        in_string = False
+        escape = False
+        for i in range(start_idx, len(text)):
+            ch = text[i]
+            if escape:
+                escape = False
+                continue
+            if ch == '\\':
+                escape = True
+                continue
+            if ch == '"' and not escape:
+                in_string = not in_string
+                continue
+            if in_string:
+                continue
+            if ch == '{':
+                depth += 1
+            elif ch == '}':
+                depth -= 1
+                if depth == 0:
+                    obj_str = text[start_idx:i + 1]
+                    try:
+                        fixed = _fix_llm_json(obj_str)
+                        obj = json.loads(fixed if fixed else obj_str)
+                        if isinstance(obj, dict) and "content" in obj:
+                            results.append(obj)
+                    except json.JSONDecodeError:
+                        pass
+                    break
+
+    return results
 
 
 def strip_json_fence(content: str) -> str:
@@ -399,7 +748,7 @@ def truncate_text(text: str, max_chars: int) -> str:
 async def call_methodology_llm(audio_path: Path) -> dict[str, str]:
     """ASR + LLM pipeline for sales methodology extraction.
 
-    Step 1 — ASR via qwen3-asr-flash (DashScope MultiModalConversation).
+    Step 1 — ASR via paraformer-v2 (DashScope Transcription).
     Step 2 — LLM via qwen3.6-flash (OpenAI-compatible Chat Completions).
     Returns ``{"title": "...", "content": "..."}``.
     """
@@ -407,47 +756,14 @@ async def call_methodology_llm(audio_path: Path) -> dict[str, str]:
         raise AIQuestionGenerationError(f"音频文件不存在：{audio_path}")
 
     # ── Step 1: ASR ───────────────────────────────────────────────────
-    transcript = await _call_asr(audio_path)
+    import logging
+    logger = logging.getLogger(__name__)
+    transcript = await _call_asr_paraformer(audio_path, logger)
     if not transcript:
         raise AIQuestionGenerationError("语音转写结果为空，请确认音频包含有效语音内容")
 
     # ── Step 2: LLM methodology extraction ────────────────────────────
     return await _call_methodology_llm_from_text(transcript)
-
-
-async def _call_asr(audio_path: Path) -> str:
-    """Transcribe audio via qwen3-asr-flash."""
-    import dashscope
-
-    mime_type = mimetypes.guess_type(audio_path.name)[0] or "audio/mpeg"
-    base64_str = base64.b64encode(audio_path.read_bytes()).decode("ascii")
-    data_uri = f"data:{mime_type};base64,{base64_str}"
-
-    messages = [{"role": "user", "content": [{"audio": data_uri}]}]
-
-    response = await asyncio.to_thread(
-        dashscope.MultiModalConversation.call,
-        api_key=settings.ai_api_key,
-        model="qwen3-asr-flash",
-        messages=messages,
-        result_format="message",
-        asr_options={"enable_itn": False},
-    )
-
-    output = response.get("output", {}) if isinstance(response, dict) else {}
-    choices = output.get("choices", [])
-    if choices:
-        message = choices[0].get("message", {})
-        content = message.get("content", [])
-        if isinstance(content, list):
-            texts = [item.get("text", "") for item in content if isinstance(item, dict)]
-            return "".join(texts).strip()
-        if isinstance(content, str):
-            return content.strip()
-
-    # Fallback: check top-level text
-    text = response.get("text", "") if isinstance(response, dict) else ""
-    return text.strip() if isinstance(text, str) else ""
 
 
 async def _call_methodology_llm_from_text(transcript: str) -> dict[str, str]:
@@ -567,7 +883,7 @@ def normalize_options(options: Any, q_type: str) -> dict[str, str] | None:
 
 def normalize_answer(answer: Any, q_type: str) -> str:
     if isinstance(answer, list):
-        return ",".join(str(item).strip() for item in answer if str(item).strip())
+        return ",".join(sorted(str(item).strip() for item in answer if str(item).strip()))
     if answer is None and q_type == "true_false":
         return "A"
     return str(answer or "A").strip()

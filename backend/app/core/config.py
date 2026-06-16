@@ -54,6 +54,7 @@ class Settings(BaseSettings):
     ai_api_key: str = ""
     ai_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
     ai_model: str = "qwen3.5-omni-flash"
+    ai_question_text_model: str = "qwen3.6-flash"
     ai_request_timeout_seconds: int = 120
     ai_video_fps: int = 1
     ai_video_max_inline_mb: int = 100
@@ -66,7 +67,7 @@ class Settings(BaseSettings):
     methodology_model: str = "qwen3.6-flash"
 
     # ---------- Practice Agent ----------
-    agent_model: str = "qwen3.6-plus-2026-04-02"
+    agent_model: str = "qwen3.5-flash-2026-02-23"
     agent_max_turns: int = 15
     agent_max_tool_iterations: int = 3
 

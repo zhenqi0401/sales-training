@@ -5,6 +5,7 @@ import { learningApi } from '@/api/learning'
 import { useLearningStore } from '@/stores/learning'
 import type { Video } from '@/types'
 import { showToast } from 'vant'
+import QuestionCard from '@/components/exam/QuestionCard.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -19,6 +20,16 @@ const currentTime = ref(0)
 const duration = ref(0)
 const progress = ref(0)
 const videoOrientation = ref<'landscape' | 'portrait' | 'square'>('landscape')
+
+// ── Quiz / practice state ──
+const quizShow = ref(false)
+const quizLoading = ref(false)
+const quizQuestions = ref<any[]>([])
+const quizVideoTitle = ref('')
+const quizCurrentIndex = ref(0)
+const quizAnswers = ref<Record<number, string | string[]>>({})
+const quizChecked = ref<Record<number, { correct: boolean; correctAnswer: string; analysis: string }>>({})
+const quizSubmitted = ref(false)
 
 let progressTimer: ReturnType<typeof setInterval> | null = null
 let progressSaving = false
@@ -196,12 +207,120 @@ async function completeVideo() {
     // Keep the completion state locally if the network is temporarily unavailable.
   }
   showToast('学习完成！')
+  // Try to load practice questions
+  loadQuiz()
 }
 
 function formatTime(seconds: number): string {
   const m = Math.floor(seconds / 60)
   const s = Math.floor(seconds % 60)
   return `${m}:${String(s).padStart(2, '0')}`
+}
+
+// ── Quiz functions ──
+
+async function loadQuiz() {
+  if (!video.value) return
+  quizLoading.value = true
+  try {
+    const res = await learningApi.getVideoQuestions(video.value.id)
+    const data = (res as any).data
+    if (data && data.questions && data.questions.length > 0) {
+      quizVideoTitle.value = data.videoTitle || video.value.title
+      // Transform options from {A: text, B: text} to [{label, value, content}]
+      quizQuestions.value = data.questions.map((q: any) => ({
+        ...q,
+        type: mapQuestionType(q.type),
+        score: 0,
+        options: transformOptions(q.options),
+      }))
+      quizCurrentIndex.value = 0
+      quizAnswers.value = {}
+      quizChecked.value = {}
+      quizSubmitted.value = false
+      quizShow.value = true
+    }
+  } catch {
+    // No questions or error — silently skip
+  } finally {
+    quizLoading.value = false
+  }
+}
+
+function transformOptions(options: any): Array<{ label: string; value: string; content: string }> {
+  if (!options) return []
+  if (Array.isArray(options)) return options
+  // {A: "text", B: "text"} → [{label: "A", value: "A", content: "text"}]
+  return Object.entries(options).map(([label, content]) => ({
+    label,
+    value: label,
+    content: String(content),
+  }))
+}
+
+function mapQuestionType(type: string): string {
+  // Map backend types to QuestionCard types
+  const map: Record<string, string> = { single: 'single', multiple: 'multi', true_false: 'judge' }
+  return map[type] || 'single'
+}
+
+function quizCurrentQuestion(): any {
+  return quizQuestions.value[quizCurrentIndex.value] || null
+}
+
+function quizCurrentSelected(): string | string[] {
+  const q = quizCurrentQuestion()
+  if (!q) return ''
+  return quizAnswers.value[q.id] ?? ''
+}
+
+function onQuizSelect(val: string | string[]) {
+  const q = quizCurrentQuestion()
+  if (!q) return
+  quizAnswers.value[q.id] = val
+}
+
+async function submitQuizAnswer() {
+  const q = quizCurrentQuestion()
+  if (!q) return
+  const selected = quizAnswers.value[q.id]
+  if (!selected || (Array.isArray(selected) && selected.length === 0)) {
+    showToast('请先选择答案')
+    return
+  }
+  if (quizChecked.value[q.id] !== undefined) return // already checked
+
+  try {
+    const res = await learningApi.checkVideoAnswers(video.value!.id, [
+      { questionId: q.id, selected },
+    ])
+    const data = (res as any).data
+    if (data && data.results && data.results.length > 0) {
+      quizChecked.value[q.id] = data.results[0]
+    }
+  } catch {
+    showToast('提交失败，请重试')
+  }
+}
+
+function nextQuizQuestion() {
+  if (quizCurrentIndex.value < quizQuestions.value.length - 1) {
+    quizCurrentIndex.value++
+  } else {
+    quizSubmitted.value = true
+  }
+}
+
+function quizCorrectCount(): number {
+  return Object.values(quizChecked.value).filter((r: any) => r.correct).length
+}
+
+function closeQuiz() {
+  quizShow.value = false
+  quizQuestions.value = []
+  quizAnswers.value = {}
+  quizChecked.value = {}
+  quizSubmitted.value = false
 }
 </script>
 
@@ -272,6 +391,73 @@ function formatTime(seconds: number): string {
         </div>
       </div>
     </template>
+
+    <!-- Quiz Popup -->
+    <van-popup v-model:show="quizShow" position="bottom" round :style="{ height: '90vh' }" teleport="body">
+      <div class="quiz-container">
+        <div class="quiz-header">
+          <van-icon name="cross" size="20" @click="closeQuiz" />
+          <span class="quiz-title">课后练习</span>
+          <span class="quiz-progress">{{ quizCurrentIndex + 1 }}/{{ quizQuestions.length }}</span>
+        </div>
+        <div class="quiz-video-title">{{ quizVideoTitle }}</div>
+
+        <div class="quiz-body" v-if="!quizSubmitted">
+          <QuestionCard
+            v-if="quizCurrentQuestion()"
+            :question="quizCurrentQuestion()"
+            :index="quizCurrentIndex"
+            :selected="quizCurrentSelected()"
+            @select="onQuizSelect"
+          />
+
+          <!-- Feedback after check -->
+          <div v-if="quizChecked[quizCurrentQuestion()?.id]" class="quiz-feedback">
+            <div class="feedback-result" :class="quizChecked[quizCurrentQuestion()?.id].correct ? 'correct' : 'wrong'">
+              <van-icon :name="quizChecked[quizCurrentQuestion()?.id].correct ? 'success' : 'cross'" />
+              {{ quizChecked[quizCurrentQuestion()?.id].correct ? '回答正确！' : '回答错误' }}
+            </div>
+            <div class="feedback-answer" v-if="!quizChecked[quizCurrentQuestion()?.id].correct">
+              正确答案：{{ quizChecked[quizCurrentQuestion()?.id].correctAnswer }}
+            </div>
+            <div class="feedback-analysis" v-if="quizChecked[quizCurrentQuestion()?.id].analysis">
+              {{ quizChecked[quizCurrentQuestion()?.id].analysis }}
+            </div>
+          </div>
+        </div>
+
+        <!-- Quiz summary -->
+        <div class="quiz-body" v-else>
+          <div class="quiz-summary">
+            <van-icon name="checked" size="48" color="var(--success)" />
+            <h3>练习完成！</h3>
+            <p class="quiz-score">正确率 {{ quizCorrectCount() }} / {{ quizQuestions.length }}</p>
+            <van-button type="primary" round block @click="closeQuiz">关闭</van-button>
+          </div>
+        </div>
+
+        <div class="quiz-footer" v-if="!quizSubmitted">
+          <van-button
+            v-if="quizChecked[quizCurrentQuestion()?.id] === undefined"
+            type="primary"
+            round
+            block
+            @click="submitQuizAnswer"
+          >
+            提交
+          </van-button>
+          <van-button
+            v-else
+            type="primary"
+            round
+            block
+            @click="nextQuizQuestion"
+          >
+            {{ quizCurrentIndex < quizQuestions.length - 1 ? '下一题' : '查看结果' }}
+          </van-button>
+        </div>
+      </div>
+    </van-popup>
   </div>
 </template>
 
@@ -359,5 +545,111 @@ function formatTime(seconds: number): string {
   font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.7;
+}
+
+// ── Quiz popup ──
+.quiz-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.quiz-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.quiz-title {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.quiz-progress {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.quiz-video-title {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 8px 16px;
+  background: var(--bg-secondary, #f5f7fa);
+  flex-shrink: 0;
+}
+
+.quiz-body {
+  flex: 1;
+  overflow-y: auto;
+  padding-top: 12px;
+}
+
+.quiz-feedback {
+  margin: 0 16px 12px;
+  padding: 12px 16px;
+  background: $card;
+  border-radius: $radius;
+}
+
+.feedback-result {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+
+  &.correct {
+    color: var(--success);
+  }
+  &.wrong {
+    color: var(--danger, #e74c3c);
+  }
+}
+
+.feedback-answer {
+  font-size: 14px;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.feedback-analysis {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}
+
+.quiz-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 16px;
+  text-align: center;
+
+  h3 {
+    margin: 16px 0 8px;
+    font-size: 20px;
+    color: var(--text);
+  }
+}
+
+.quiz-score {
+  font-size: 18px;
+  color: var(--primary);
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.quiz-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  flex-shrink: 0;
 }
 </style>

@@ -143,6 +143,19 @@ async def count_streak_days(session: SessionDep, user_id: int) -> int:
     return streak
 
 
+async def _get_descendant_ids(session: SessionDep, category_id: int) -> list[int]:
+    """递归获取某分类及其所有子分类的 ID 列表。"""
+    ids = [category_id]
+    children = (
+        await session.execute(
+            select(Category.id).where(Category.parent_id == category_id, Category.is_active == True)
+        )
+    ).scalars().all()
+    for child_id in children:
+        ids.extend(await _get_descendant_ids(session, child_id))
+    return ids
+
+
 @router.get("/categories", response_model=ApiResponse, summary="培训端课程分类")
 async def list_training_categories(session: SessionDep, user: CurrentUserDep):
     categories = (
@@ -155,9 +168,10 @@ async def list_training_categories(session: SessionDep, user: CurrentUserDep):
 
     items: list[dict] = []
     for category in categories:
+        cat_ids = await _get_descendant_ids(session, category.id)
         video_ids = (
             await session.execute(
-                select(Video.id).where(Video.category_id == category.id, Video.status == "published")
+                select(Video.id).where(Video.category_id.in_(cat_ids), Video.status == "published")
             )
         ).scalars().all()
         completed_count = 0
@@ -190,15 +204,66 @@ async def list_training_categories(session: SessionDep, user: CurrentUserDep):
 
 @router.get("/categories/{category_id:int}/videos", response_model=ApiResponse, summary="培训端分类课程")
 async def list_training_category_videos(category_id: int, session: SessionDep, user: CurrentUserDep):
-    videos = (
+    # Load the category itself
+    category = await session.get(Category, category_id)
+    if not category or not category.is_active:
+        raise HTTPException(status_code=404, detail="分类不存在")
+
+    # Load direct children
+    children = (
         await session.execute(
-            select(Video)
-            .where(Video.category_id == category_id, Video.status == "published")
-            .order_by(Video.sort_order, Video.id.desc())
+            select(Category)
+            .where(Category.parent_id == category_id, Category.is_active == True)
+            .order_by(Category.sort_order, Category.id)
         )
     ).scalars().all()
-    progress_map = await user_video_progress_map(session, user.id, [video.id for video in videos])
-    return envelope([video_payload(video, progress_map.get(video.id)) for video in videos])
+
+    children_data: list[dict] = []
+    videos: list[Video] = []
+
+    if children:
+        # Folder mode: return children with video counts
+        for child in children:
+            child_ids = await _get_descendant_ids(session, child.id)
+            video_count = (
+                await session.execute(
+                    select(func.count()).select_from(Video).where(
+                        Video.category_id.in_(child_ids), Video.status == "published"
+                    )
+                )
+            ).scalar() or 0
+            children_data.append({
+                "id": child.id,
+                "name": child.name,
+                "code": child.code or "",
+                "icon": child.icon or "",
+                "description": child.description or "",
+                "videoCount": video_count,
+                "sort": child.sort_order,
+            })
+    else:
+        # Leaf mode: return videos
+        cat_ids = await _get_descendant_ids(session, category_id)
+        videos = (
+            await session.execute(
+                select(Video)
+                .where(Video.category_id.in_(cat_ids), Video.status == "published")
+                .order_by(Video.sort_order, Video.id.desc())
+            )
+        ).scalars().all()
+
+    progress_map = await user_video_progress_map(session, user.id, [v.id for v in videos])
+    return envelope({
+        "category": {
+            "id": category.id,
+            "name": category.name,
+            "code": category.code or "",
+            "icon": category.icon or "",
+            "description": category.description or "",
+        },
+        "children": children_data,
+        "videos": [video_payload(v, progress_map.get(v.id)) for v in videos],
+    })
 
 
 @router.get("/videos/{video_id:int}", response_model=ApiResponse, summary="培训端课程详情")
@@ -797,4 +862,110 @@ async def get_training_script(
         "isFavorite": fav is not None,
         "sortOrder": script.sort_order,
         "createdAt": script.created_at.isoformat() if script.created_at else "",
+    })
+
+
+# ── Video practice questions endpoints ────────────────────────────────────
+
+
+class VideoAnswerCheck(BaseModel):
+    question_id: int = Field(alias="questionId")
+    selected: str | list[str]
+
+    model_config = {"populate_by_name": True}
+
+
+class VideoCheckRequest(BaseModel):
+    answers: list[VideoAnswerCheck]
+
+
+@router.get("/videos/{video_id:int}/questions", response_model=ApiResponse, summary="获取视频配套练习题")
+async def get_video_questions(
+    video_id: int,
+    session: SessionDep,
+    user: CurrentUserDep,
+):
+    """Get all active practice questions bound to a video (answers hidden)."""
+    from app.models.question import Question
+
+    result = await session.execute(
+        select(Question).where(
+            Question.video_id == video_id,
+            Question.is_active == True,
+        ).order_by(Question.id)
+    )
+    questions = result.scalars().all()
+
+    items = []
+    for q in questions:
+        items.append({
+            "id": q.id,
+            "content": q.content,
+            "type": q.type,
+            "options": q.options,
+            "analysis": "",  # hidden until check
+            "videoId": q.video_id,
+            "categoryId": q.category_id,
+        })
+
+    # Get video title
+    video = await session.get(Video, video_id)
+    return envelope({
+        "videoTitle": video.title if video else "",
+        "questions": items,
+    })
+
+
+@router.post("/videos/{video_id:int}/check", response_model=ApiResponse, summary="提交视频练习题答案")
+async def check_video_answers(
+    video_id: int,
+    body: VideoCheckRequest,
+    session: SessionDep,
+    user: CurrentUserDep,
+):
+    """Submit answers and get correct/wrong feedback with analysis."""
+    from app.models.question import Question
+
+    question_ids = [a.question_id for a in body.answers]
+    if not question_ids:
+        raise HTTPException(status_code=400, detail="缺少答案")
+
+    result = await session.execute(
+        select(Question).where(Question.id.in_(question_ids))
+    )
+    question_map: dict[int, Question] = {q.id: q for q in result.scalars().all()}
+
+    # Validate all questions belong to this video
+    for q in question_map.values():
+        if q.video_id != video_id:
+            raise HTTPException(status_code=400, detail=f"题目 {q.id} 不属于该视频")
+
+    results = []
+    correct_count = 0
+    for ans in body.answers:
+        q = question_map.get(ans.question_id)
+        if not q:
+            continue
+
+        correct_answer = q.answer.strip()
+        if isinstance(ans.selected, list):
+            user_answer = ",".join(sorted(ans.selected))
+        else:
+            user_answer = str(ans.selected).strip()
+
+        is_correct = user_answer == correct_answer
+        if is_correct:
+            correct_count += 1
+
+        results.append({
+            "questionId": q.id,
+            "correct": is_correct,
+            "correctAnswer": correct_answer,
+            "analysis": q.analysis or "",
+        })
+
+    return envelope({
+        "total": len(results),
+        "correct": correct_count,
+        "results": results,
     })

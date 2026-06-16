@@ -32,7 +32,9 @@ export const learningApi = {
    * Get videos by category
    */
   getVideosByCategory(categoryId: number) {
-    return unwrapResponse<Video[]>(http.get<ApiResponse<Video[]>>(`/learning/categories/${categoryId}/videos`))
+    return unwrapResponse<{ category: { id: number; name: string; code: string; icon: string; description: string }; children: Array<{ id: number; name: string; code: string; icon: string; description: string; videoCount: number; sort: number }>; videos: Video[] }>(
+      http.get<ApiResponse<any>>(`/learning/categories/${categoryId}/videos`)
+    )
   },
 
   /**
@@ -142,5 +144,23 @@ export const learningApi = {
       return unwrapResponse<void>(http.delete<ApiResponse>(`/favorites/?type=script&target_id=${scriptId}`))
     }
     return unwrapResponse<void>(http.post<ApiResponse>('/favorites/', { type: 'script', target_id: scriptId }))
+  },
+
+  /**
+   * Get video practice questions (answers hidden)
+   */
+  getVideoQuestions(videoId: number) {
+    return unwrapResponse<{ videoTitle: string; questions: Array<{ id: number; content: string; type: string; options: any; analysis: string; videoId: number; categoryId: number }> }>(
+      http.get<ApiResponse<any>>(`/learning/videos/${videoId}/questions`)
+    )
+  },
+
+  /**
+   * Submit video practice answers and get feedback
+   */
+  checkVideoAnswers(videoId: number, answers: Array<{ questionId: number; selected: string | string[] }>) {
+    return unwrapResponse<{ total: number; correct: number; results: Array<{ questionId: number; correct: boolean; correctAnswer: string; analysis: string }> }>(
+      http.post<ApiResponse<any>>(`/learning/videos/${videoId}/check`, { answers })
+    )
   }
 }

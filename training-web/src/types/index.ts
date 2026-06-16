@@ -167,6 +167,7 @@ export interface ExamConfig {
   duration: number // minutes
   passScore: number
   totalScore: number
+  passRate?: number // e.g. 0.8, 0.85, 0.9
 }
 
 export interface Question {
@@ -198,6 +199,7 @@ export interface ExamRecord {
   score: number
   totalScore: number
   passScore?: number
+  passRate?: number
   passed: boolean
   duration: number
   correctCount: number

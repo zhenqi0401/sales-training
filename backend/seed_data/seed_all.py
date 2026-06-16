@@ -36,9 +36,12 @@ ADMINS = [
      "real_name": "超级管理员", "role": "admin"},
     {"username": "admin2", "phone": "13800000001", "password": "admin123",
      "real_name": "培训管理员", "role": "admin"},
-    {"username": "sales1", "phone": "13800000002", "password": "sales123",
+]
+# 培训端测试账号 — 初始密码统一为 123456，首次登录强制改密
+TRAINING_USERS = [
+    {"username": "sales1", "phone": "13800000002", "password": "123456",
      "real_name": "张销售", "role": "sales"},
-    {"username": "student", "phone": "13800000003", "password": "student123",
+    {"username": "student", "phone": "13800000003", "password": "123456",
      "real_name": "李学员", "role": "student"},
 ]
 
@@ -71,7 +74,7 @@ async def seed():
             if existing is None:
                 session.add(Store(**store_data, is_active=True))
 
-        # --- Admin users (all 4 roles) ---
+        # --- Admin users ---
         for admin_data in ADMINS:
             existing = await session.scalar(
                 select(User).where(User.username == admin_data["username"])
@@ -86,14 +89,33 @@ async def seed():
                     is_active=True,
                 ))
 
+        # --- Training users (must_change_password on first login) ---
+        for user_data in TRAINING_USERS:
+            existing = await session.scalar(
+                select(User).where(User.username == user_data["username"])
+            )
+            if existing is None:
+                session.add(User(
+                    username=user_data["username"],
+                    phone=user_data["phone"],
+                    password_hash=hash_password(user_data["password"]),
+                    real_name=user_data["real_name"],
+                    role=user_data["role"],
+                    is_active=True,
+                    must_change_password=True,
+                ))
+
         await session.commit()
 
     print("Seed data inserted successfully.")
     print(f"  {len(PRODUCT_CATEGORIES)} product categories")
     print(f"  {len(STORES)} stores")
-    print(f"  {len(ADMINS)} users:")
+    print(f"  {len(ADMINS)} admin users:")
     for a in ADMINS:
         print(f"    {a['username']:<10} / {a['password']:<12} role={a['role']}")
+    print(f"  {len(TRAINING_USERS)} training users (init password=123456, must change on first login):")
+    for u in TRAINING_USERS:
+        print(f"    {u['username']:<10} / {u['phone']:<14} role={u['role']}")
 
 
 if __name__ == "__main__":

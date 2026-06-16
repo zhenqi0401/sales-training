@@ -48,7 +48,11 @@
         </el-table-column>
         <el-table-column prop="questionCount" label="题量" width="80" align="center" />
         <el-table-column prop="totalScore" label="总分" width="80" align="center" />
-        <el-table-column prop="passScore" label="及格分" width="80" align="center" />
+        <el-table-column prop="passScore" label="及格分" width="110" align="center">
+          <template #default="{ row }">
+            {{ row.passScore }}<span v-if="row.totalScore"> ({{ Math.round(row.passScore / row.totalScore * 100) }}%)</span>
+          </template>
+        </el-table-column>
         <el-table-column prop="duration" label="时长(分钟)" width="100" align="center" />
         <el-table-column label="状态" width="100" align="center">
           <template #default="{ row }">

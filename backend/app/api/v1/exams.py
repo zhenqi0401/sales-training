@@ -27,29 +27,29 @@ LEVEL_RULES: dict[str, dict[str, Any]] = {
     "L1": {
         "title": "初级考核",
         "description": "基础产品知识 + 接待流程",
-        "duration": 30,
-        "passScore": 60,
-        "totalScore": 100,
+        "duration": 60,
+        "passScore": 16,
+        "totalScore": 20,
         "questionCount": 20,
-        "difficulty": 1,
+        "passRate": 0.80,
     },
     "L2": {
         "title": "中级考核",
         "description": "专业知识 + 销售技巧",
-        "duration": 45,
-        "passScore": 70,
-        "totalScore": 100,
-        "questionCount": 30,
-        "difficulty": 3,
+        "duration": 60,
+        "passScore": 22,
+        "totalScore": 25,
+        "questionCount": 25,
+        "passRate": 0.85,
     },
     "L3": {
         "title": "高级考核",
         "description": "综合能力 + 实战场景",
         "duration": 60,
-        "passScore": 80,
-        "totalScore": 100,
-        "questionCount": 40,
-        "difficulty": 5,
+        "passScore": 27,
+        "totalScore": 30,
+        "questionCount": 30,
+        "passRate": 0.90,
     },
     "SPRINT": {
         "title": "冲刺模式",
@@ -58,7 +58,6 @@ LEVEL_RULES: dict[str, dict[str, Any]] = {
         "passScore": 60,
         "totalScore": 100,
         "questionCount": 10,
-        "difficulty": 3,
     },
     "WRONG": {
         "title": "错题重练",
@@ -67,7 +66,6 @@ LEVEL_RULES: dict[str, dict[str, Any]] = {
         "passScore": 60,
         "totalScore": 100,
         "questionCount": 20,
-        "difficulty": 3,
     },
 }
 
@@ -140,11 +138,12 @@ async def question_payload(
     question: Question,
     score: int = 0,
     include_answer: bool = False,
+    exam_level: str | None = None,
 ) -> dict[str, Any]:
     category = await category_name(session, question)
     return {
         "id": question.id,
-        "examLevel": difficulty_to_level(question.difficulty),
+        "examLevel": exam_level or difficulty_to_level(question.difficulty),
         "type": frontend_question_type(question.type),
         "content": question.content,
         "options": option_payload(question.options, question.type),
@@ -190,14 +189,12 @@ async def find_paper_for_level(session: SessionDep, level: str) -> ExamPaper | N
     if level in {"SPRINT", "WRONG"}:
         return None
 
-    target = LEVEL_RULES[level]["difficulty"]
     expected_title = LEVEL_RULES[level]["title"]
-    temporary_titles = {LEVEL_RULES["SPRINT"]["title"], LEVEL_RULES["WRONG"]["title"]}
     papers = (
         await session.execute(
             select(ExamPaper)
             .where(ExamPaper.is_active == True)
-            .order_by(ExamPaper.difficulty_level, ExamPaper.id)
+            .order_by(ExamPaper.id)
         )
     ).scalars().all()
     if not papers:
@@ -205,11 +202,7 @@ async def find_paper_for_level(session: SessionDep, level: str) -> ExamPaper | N
     title_matches = [paper for paper in papers if paper.title == expected_title]
     if title_matches:
         return title_matches[0]
-    candidates = [paper for paper in papers if paper.title not in temporary_titles]
-    if not candidates:
-        return None
-    exact = [paper for paper in candidates if paper.difficulty_level == target]
-    return (exact or sorted(candidates, key=lambda paper: abs((paper.difficulty_level or 1) - target)))[0]
+    return papers[0]
 
 
 async def ensure_paper_for_level(session: SessionDep, level: str) -> ExamPaper:
@@ -218,16 +211,12 @@ async def ensure_paper_for_level(session: SessionDep, level: str) -> ExamPaper:
         return paper
 
     rules = LEVEL_RULES[level]
-    questions = [
-        question for question in await active_questions(session)
-        if question.difficulty <= rules["difficulty"]
-    ]
-    if not questions:
-        questions = await active_questions(session)
-    if not questions:
+    candidates = await active_questions(session)
+    if not candidates:
         raise HTTPException(status_code=400, detail="暂无可用题目")
 
-    question_ids = [question.id for question in questions[: rules["questionCount"]]]
+    random.shuffle(candidates)
+    question_ids = [question.id for question in candidates[: rules["questionCount"]]]
     paper = ExamPaper(
         title=rules["title"],
         description=rules["description"],
@@ -235,7 +224,6 @@ async def ensure_paper_for_level(session: SessionDep, level: str) -> ExamPaper:
         pass_score=rules["passScore"],
         total_score=rules["totalScore"],
         question_ids=question_ids,
-        difficulty_level=rules["difficulty"],
         is_active=True,
     )
     session.add(paper)
@@ -271,14 +259,17 @@ async def questions_for_level(session: SessionDep, user_id: int, level: str) -> 
         return None, [by_id[qid] for qid in unique_ids if qid in by_id][: LEVEL_RULES[level]["questionCount"]]
 
     paper = await ensure_paper_for_level(session, level)
-    questions = (
-        await session.execute(
-            select(Question).where(Question.id.in_(paper.question_ids or []), Question.is_active == True)
-        )
-    ).scalars().all()
-    by_id = {question.id: question for question in questions}
-    ordered_questions = [by_id[qid] for qid in (paper.question_ids or []) if qid in by_id]
-    return paper, ordered_questions
+    rules = LEVEL_RULES[level]
+    # Randomly select questions from the entire bank for each attempt
+    candidates = await active_questions(session)
+    if not candidates:
+        raise HTTPException(status_code=400, detail="暂无可用题目")
+    random.shuffle(candidates)
+    selected = candidates[: rules["questionCount"]]
+    # Update paper with the fresh selection for record-keeping
+    paper.question_ids = [question.id for question in selected]
+    await session.flush()
+    return paper, selected
 
 
 async def exam_record_payload(session: SessionDep, record: ExamRecord, include_answers: bool = False) -> dict[str, Any]:
@@ -315,6 +306,7 @@ async def exam_record_payload(session: SessionDep, record: ExamRecord, include_a
         "score": record.score,
         "totalScore": paper.total_score if paper else 100,
         "passScore": paper.pass_score if paper else 60,
+        "passRate": round((paper.pass_score / paper.total_score), 2) if paper and paper.total_score else 0.6,
         "passed": record.passed,
         "duration": duration,
         "correctCount": correct_count,
@@ -342,7 +334,7 @@ async def exam_record_payload(session: SessionDep, record: ExamRecord, include_a
             answer_items.append(
                 {
                     "questionId": answer.question_id,
-                    "question": await question_payload(session, question, round(score_per_question), include_answer=True),
+                    "question": await question_payload(session, question, round(score_per_question), include_answer=True, exam_level=paper_level(paper)),
                     "selected": answer.user_answer,
                     "userAnswer": answer.user_answer,
                     "correct": answer.is_correct,
@@ -379,18 +371,12 @@ async def get_exam_config(level: str, session: SessionDep, user: CurrentUserDep)
     rules = LEVEL_RULES[level].copy()
     paper = await find_paper_for_level(session, level)
     if paper:
-        rules.update(
-            {
-                "paperId": paper.id,
-                "title": paper.title,
-                "description": paper.description or rules["description"],
-                "duration": paper.duration,
-                "passScore": paper.pass_score,
-                "totalScore": paper.total_score,
-                "questionCount": len(paper.question_ids or []),
-            }
-        )
+        rules["paperId"] = paper.id
+        if paper.description:
+            rules["description"] = paper.description
     rules["level"] = level
+    if "passRate" not in rules or not rules.get("passRate"):
+        rules["passRate"] = LEVEL_RULES.get(level, {}).get("passRate", 0.6)
     return envelope(rules)
 
 
@@ -399,14 +385,15 @@ async def get_exam_questions(level: str, session: SessionDep, user: CurrentUserD
     paper, questions = await questions_for_level(session, user.id, normalize_level(level))
     total_score = paper.total_score if paper else LEVEL_RULES[normalize_level(level)]["totalScore"]
     score = round(total_score / len(questions)) if questions else 0
-    return envelope([await question_payload(session, question, score) for question in questions])
+    exam_level = normalize_level(level)
+    return envelope([await question_payload(session, question, score, exam_level=exam_level) for question in questions])
 
 
 @router.get("/sprint", response_model=ApiResponse, summary="冲刺模式题目")
 async def get_sprint_questions(session: SessionDep, user: CurrentUserDep):
     _, questions = await questions_for_level(session, user.id, "SPRINT")
     score = round(LEVEL_RULES["SPRINT"]["totalScore"] / len(questions)) if questions else 0
-    return envelope([await question_payload(session, question, score) for question in questions])
+    return envelope([await question_payload(session, question, score, exam_level="SPRINT") for question in questions])
 
 
 @router.post("/submit", response_model=ApiResponse, summary="提交考试")
@@ -427,7 +414,6 @@ async def submit_exam(body: ExamSubmit, session: SessionDep, user: CurrentUserDe
                 pass_score=rules["passScore"],
                 total_score=rules["totalScore"],
                 question_ids=question_ids,
-                difficulty_level=rules["difficulty"],
                 is_active=True,
             )
             session.add(paper)
@@ -438,6 +424,14 @@ async def submit_exam(body: ExamSubmit, session: SessionDep, user: CurrentUserDe
         raise HTTPException(status_code=404, detail="试卷不存在或已停用")
 
     question_ids = paper.question_ids or [item.question_id for item in body.answers]
+    if level not in {"SPRINT", "WRONG"}:
+        # For L1/L2/L3, prefer the user's actual answered questions
+        # because paper.question_ids may have been refreshed by another concurrent request
+        body_qids = [item.question_id for item in body.answers]
+        if body_qids:
+            question_ids = body_qids
+            paper.question_ids = body_qids
+            await session.flush()
     if not question_ids:
         raise HTTPException(status_code=400, detail="试卷没有题目")
 

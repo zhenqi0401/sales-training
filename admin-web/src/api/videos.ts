@@ -43,6 +43,7 @@ function normalizeVideo(data: any): Video {
     estDuration: data.estDuration ?? data.est_duration ?? 0,
     createdAt: data.createdAt ?? data.created_at ?? '',
     updatedAt: data.updatedAt ?? data.updated_at ?? '',
+    pipelineLog: data.pipelineLog ?? data.pipeline_log ?? null,
   }
 }
 
@@ -119,6 +120,14 @@ export function toggleVideoStatus(id: number, status: string): Promise<Video> {
 
 export function batchUpdateVideoStatus(ids: number[], status: string): Promise<void> {
   return post<void>('/videos/batch/status', { ids, status })
+}
+
+export function retryVideoPipeline(id: number): Promise<Video> {
+  return post<any>(`/videos/${id}/retry`).then(normalizeVideo)
+}
+
+export function getPipelineLog(id: number): Promise<{ videoId: number; status: string; log: Record<string, any> }> {
+  return get<any>(`/videos/${id}/pipeline-log`)
 }
 
 export function uploadGeneratedCover(file: Blob): Promise<{ coverUrl: string }> {

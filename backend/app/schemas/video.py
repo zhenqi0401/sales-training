@@ -67,6 +67,7 @@ class VideoResponse(BaseModel):
     published_at: Optional[datetime] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
+    pipeline_log: Optional[dict] = None
 
     model_config = {"from_attributes": True}
 

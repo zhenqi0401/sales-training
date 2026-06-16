@@ -1,50 +1,19 @@
 <script setup lang="ts">
-import { onBeforeUnmount, ref } from 'vue'
+import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { showToast, showLoadingToast, closeToast } from 'vant'
 import { useAuthStore } from '@/stores/auth'
-import { authApi } from '@/api/auth'
 
 const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 
 const phone = ref('')
-const code = ref('')
-const sending = ref(false)
-const countdown = ref(0)
-const agree = ref(true)
+const password = ref('')
 const loading = ref(false)
-let timer: ReturnType<typeof setInterval> | null = null
 
 function isPhoneValid() {
   return /^1[3-9]\d{9}$/.test(phone.value)
-}
-
-function startCountdown() {
-  countdown.value = 60
-  sending.value = true
-  timer = setInterval(() => {
-    countdown.value--
-    if (countdown.value <= 0) {
-      sending.value = false
-      if (timer) clearInterval(timer)
-    }
-  }, 1000)
-}
-
-async function sendCode() {
-  if (!isPhoneValid()) {
-    showToast('请输入正确的手机号')
-    return
-  }
-  try {
-    await authApi.sendCode(phone.value)
-    showToast('验证码已发送')
-    startCountdown()
-  } catch (e: any) {
-    showToast(e?.response?.data?.detail || e?.message || '发送失败，请重试')
-  }
 }
 
 function isValid() {
@@ -52,12 +21,8 @@ function isValid() {
     showToast('请输入正确的手机号')
     return false
   }
-  if (!code.value || code.value.length < 4) {
-    showToast('请输入验证码')
-    return false
-  }
-  if (!agree.value) {
-    showToast('请同意用户协议')
+  if (!password.value || password.value.length < 6) {
+    showToast('请输入密码（至少 6 位）')
     return false
   }
   return true
@@ -72,7 +37,7 @@ async function handleLogin() {
     duration: 0
   })
   try {
-    const user = await authStore.login(phone.value, code.value)
+    const user = await authStore.login(phone.value, password.value)
     closeToast()
     showToast('登录成功')
     const redirect = (route.query.redirect as string) || '/home'
@@ -84,10 +49,6 @@ async function handleLogin() {
     loading.value = false
   }
 }
-
-onBeforeUnmount(() => {
-  if (timer) clearInterval(timer)
-})
 </script>
 
 <template>
@@ -111,38 +72,17 @@ onBeforeUnmount(() => {
             maxlength="11"
             placeholder="请输入手机号"
             :rules="[{ pattern: /^1[3-9]\d{9}$/, message: '请输入正确的手机号' }]"
-          >
-            <template #button>
-              <van-button
-                round
-                size="small"
-                :disabled="sending"
-                @click="sendCode"
-                color="linear-gradient(135deg, var(--primary), var(--primary-dark))"
-              >
-                {{ sending ? `${countdown}s` : '获取验证码' }}
-              </van-button>
-            </template>
-          </van-field>
-
+          />
           <van-field
-            v-model="code"
-            label="验证码"
-            type="digit"
-            maxlength="6"
-            placeholder="请输入验证码"
-            :rules="[{ required: true, message: '请输入验证码' }]"
+            v-model="password"
+            label="密码"
+            type="password"
+            maxlength="128"
+            placeholder="请输入登录密码"
+            autocomplete="current-password"
+            :rules="[{ required: true, message: '请输入密码' }]"
           />
         </van-cell-group>
-
-        <div class="agreement">
-          <van-checkbox v-model="agree" shape="round" icon-size="14">
-            <span class="agree-text">登录即表示同意</span>
-            <span class="agree-link">《用户协议》</span>
-            <span class="agree-text">和</span>
-            <span class="agree-link">《隐私政策》</span>
-          </van-checkbox>
-        </div>
 
         <div class="login-button-wrap">
           <van-button
@@ -213,20 +153,6 @@ onBeforeUnmount(() => {
   font-weight: 700;
   color: var(--text);
   padding: 20px 24px 16px;
-}
-
-.agreement {
-  padding: 16px 24px 0;
-}
-
-.agree-text {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.agree-link {
-  font-size: 12px;
-  color: var(--primary);
 }
 
 .login-button-wrap {
