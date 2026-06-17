@@ -46,10 +46,6 @@ class Settings(BaseSettings):
     # ---------- Upload ----------
     upload_dir: str = str(Path(__file__).resolve().parent.parent.parent / "uploads")
 
-    # ---------- Celery / Redis ----------
-    celery_broker_url: str = "redis://localhost:6379/0"
-    celery_result_backend: str = "redis://localhost:6379/0"
-
     # ---------- AI Question Generation ----------
     ai_api_key: str = ""
     ai_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"

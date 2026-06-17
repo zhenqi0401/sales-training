@@ -35,7 +35,7 @@ winget install ffmpeg
 ### 1. 启动基础设施
 
 ```bash
-docker-compose up -d mysql redis
+docker-compose up -d mysql
 ```
 
 ### 2. 启动后端
@@ -109,10 +109,10 @@ npm run dev
 |------|------|
 | 管理端 | Vue 3 + Element Plus + Pinia + Vite |
 | 培训端 | Vue 3 + Vant 4 + Pinia + Vite (移动优先) |
-| 后端 | FastAPI + SQLAlchemy Async + Celery |
-| 数据库 | MySQL 8.0 + Redis 7 |
+| 后端 | FastAPI + SQLAlchemy Async |
+| 数据库 | MySQL 8.0 |
 | 认证 | JWT + bcrypt |
-| 异步任务 | Celery + Redis (AI出题) |
+| 异步任务 | FastAPI BackgroundTasks (视频处理 / AI 出题) |
 
 ## 产品分类编码
 

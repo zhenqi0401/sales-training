@@ -1,5 +1,14 @@
 # Update Log
 
+## 2026-06-17 清理未使用的占位代码与 Celery/Redis 基础设施
+
+- **变更**：移除项目中从未接入业务的占位代码和未启用的异步任务基础设施。
+- **删除的服务层（dead code，从未被 import，API 路由直接用 SQLAlchemy）**：`app/services/auth_service.py`、`exam_service.py`、`video_service.py`、`question_service.py`。
+- **删除的 Celery/Redis 体系（实际异步用 FastAPI BackgroundTasks，Redis 无真实缓存用途）**：整个 `app/tasks/` 目录（`celery_app.py`/`tasks.py`）；`config.py` 的 `celery_broker_url`/`celery_result_backend`；`requirements.txt` 的 `celery`/`redis`；`docker-compose.yml` 的 `redis` 服务、`celery-worker` 服务、`redis_data` 卷及 backend 的相关依赖与环境变量；`.env.example` 的 Celery 变量。部署从 5 容器精简为 3 容器（mysql / backend / nginx）。
+- **删除的零散文件**：根目录 `_read_docx.py`/`_read_docx.js`/`nul`；`backend/fix_practice_tables.py`（一次性建表修复）；`backend/setup.py`（与 alembic+seed_all 重复的引导脚本）。
+- **文档同步**：`README.md`、`部署方案.md`、`prd.md`、`.gitignore` 去除 Celery/Redis 相关内容。
+- **验证**：全局 grep 确认无残留引用（业务代码与配置）。
+
 ## 2026-06-18 ASR 统一为 qwen3-asr-flash，移除本地 Whisper
 
 - **变更**：删除所有 faster-whisper 本地模型相关代码，ASR 统一使用百炼云端 `qwen3-asr-flash`。

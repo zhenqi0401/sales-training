@@ -54,7 +54,7 @@
 | 管理端前端 | Vue 3 + Element Plus | 后台管理成熟方案 |
 | 培训端前端 | Vue 3 + Vant (移动优先) | 学员主要使用手机 |
 | 后端 | Node.js (Express/NestJS) 或 Python (FastAPI) | RESTful API |
-| 数据库 | MySQL + Redis | 关系数据 + 缓存 |
+| 数据库 | MySQL | 关系数据 |
 | 视频存储 | 云服务器本地存储 | 视频文件直接存放在云服务器磁盘，通过 Nginx 提供静态文件服务 + CDN 加速（可选） |
 | AI 题目生成 | LLM API (Claude/国产大模型) | 根据视频字幕/摘要生成题目 |
 

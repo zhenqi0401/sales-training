@@ -104,7 +104,7 @@ async def _call_asr_paraformer(audio_path: Path, logger) -> str:
     data_uri = f"data:{mime_type};base64,{base64_str}"
 
     # Submit sync transcription with model fallback
-    models = ["paraformer-v2", "paraformer-v1", "paraformer-8k-v2", "paraformer-8k-v1", "paraformer-mtl-v1"]
+    models = ["paraformer-8k-v1", "paraformer-mtl-v1", "fun-asr-2025-08-25", "fun-asr-2025-11-07", "fun-asr-mtl", "fun-asr-mtl-2025-08-25"]
     last_error = ""
     response = None
     for model_name in models:
@@ -332,25 +332,35 @@ async def generate_questions_from_transcript(
         },
     }, ensure_ascii=False)
 
-    payload = {
-        "model": settings.ai_question_text_model,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        "temperature": 0.2,
-        "max_tokens": min(32768, max(8192, count * 1200)),
-        "stream": True,
-    }
+    models = [settings.ai_question_text_model, "qwen3.6-flash-2026-04-16"]
+    last_error = ""
+    content = ""
+    for model_name in models:
+        try:
+            payload = {
+                "model": model_name,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt},
+                ],
+                "temperature": 0.2,
+                "max_tokens": min(32768, max(8192, count * 1200)),
+                "stream": True,
+            }
+            response = await asyncio.to_thread(
+                _post_chat_completion,
+                payload,
+                settings.ai_request_timeout_seconds,
+            )
+            content = extract_message_content(response)
+            if content:
+                break
+            last_error = "返回空响应"
+        except Exception as exc:
+            last_error = str(exc)
 
-    response = await asyncio.to_thread(
-        _post_chat_completion,
-        payload,
-        settings.ai_request_timeout_seconds,
-    )
-    content = extract_message_content(response)
     if not content:
-        raise AIQuestionGenerationError("大模型返回空响应，请稍后重试")
+        raise AIQuestionGenerationError(f"大模型返回空响应（已尝试 {len(models)} 个模型），最后错误：{last_error}")
 
     questions = parse_questions_from_content(content)
     if not questions:

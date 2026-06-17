@@ -29,24 +29,6 @@ services:
       retries: 5
 
   # ====================================================================
-  # Redis 7 — 缓存 + Celery 消息队列
-  # ====================================================================
-  redis:
-    image: redis:7-alpine
-    container_name: training-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    command: redis-server --appendonly yes
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  # ====================================================================
   # FastAPI 后端
   # ====================================================================
   backend:
@@ -58,45 +40,16 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      redis:
-        condition: service_healthy
     env_file:
       - .env
     environment:
       SALES_TRAINING_DATABASE_URL: mysql+asyncmy://${MYSQL_USER:-training}:${MYSQL_PASSWORD:-training123}@mysql:3306/sales_training
-      SALES_TRAINING_CELERY_BROKER_URL: redis://redis:6379/0
-      SALES_TRAINING_CELERY_RESULT_BACKEND: redis://redis:6379/0
       TZ: Asia/Shanghai
     # ports:                    # 仅 Nginx 通过 Docker 网络访问
     #   - "8080:8080"
     volumes:
       - uploads_data:/app/uploads
     command: uvicorn app.main:app --host 0.0.0.0 --port 8080
-
-  # ====================================================================
-  # Celery Worker — AI 出题异步任务
-  # ====================================================================
-  celery-worker:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: training-celery
-    restart: unless-stopped
-    depends_on:
-      mysql:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    env_file:
-      - .env
-    environment:
-      SALES_TRAINING_DATABASE_URL: mysql+asyncmy://${MYSQL_USER:-training}:${MYSQL_PASSWORD:-training123}@mysql:3306/sales_training
-      SALES_TRAINING_CELERY_BROKER_URL: redis://redis:6379/0
-      SALES_TRAINING_CELERY_RESULT_BACKEND: redis://redis:6379/0
-      TZ: Asia/Shanghai
-    volumes:
-      - uploads_data:/app/uploads
-    command: celery -A app.tasks.celery_app worker --loglevel=info --concurrency=2
 
   # ====================================================================
   # Nginx — 统一入口 + 静态文件 + 反向代理
@@ -117,5 +70,4 @@ services:
 
 volumes:
   mysql_data:
-  redis_data:
   uploads_data:
