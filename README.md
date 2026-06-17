@@ -50,30 +50,21 @@ uv run python -m uvicorn app.main:app --reload --port 8080
 
 API 文档：http://localhost:8080/api/docs
 
-AI 出题使用阿里云百炼 OpenAI 兼容接口，后端启动前需配置：
+AI 出题 / 语音转写 / 话术演练统一使用火山引擎方舟 Doubao（全模态），后端启动前需配置：
 
 ```bash
-SALES_TRAINING_AI_API_KEY=你的百炼APIKey
-SALES_TRAINING_AI_BASE_URL=https://dashscope.aliyuncs.com/compatible-mode/v1
-SALES_TRAINING_AI_MODEL=qwen3.5-omni-flash
-SALES_TRAINING_AI_REQUEST_TIMEOUT_SECONDS=120
-SALES_TRAINING_AI_VIDEO_FPS=1
-SALES_TRAINING_AI_VIDEO_MAX_INLINE_MB=100
-SALES_TRAINING_AI_VIDEO_MAX_DATA_URL_CHARS=10000000
-SALES_TRAINING_AI_VIDEO_COMPRESS_MAX_WIDTH=480
-SALES_TRAINING_AI_VIDEO_COMPRESS_CRF=38
-SALES_TRAINING_AI_VIDEO_COMPRESS_AUDIO_BITRATE=32k
-```
-
-AI 话术演练 Agent 使用独立的模型配置：
-
-```bash
-SALES_TRAINING_AGENT_MODEL=qwen3.6-plus-2026-04-02
+SALES_TRAINING_AI_API_KEY=ark-你的火山方舟APIKey
+SALES_TRAINING_AI_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
+SALES_TRAINING_AI_MODEL=doubao-seed-2-0-mini-260428
+SALES_TRAINING_AI_QUESTION_TEXT_MODEL=doubao-seed-2-0-mini-260428
+SALES_TRAINING_METHODOLOGY_MODEL=doubao-seed-2-0-mini-260428
+SALES_TRAINING_AGENT_MODEL=doubao-seed-2-0-mini-260428
 SALES_TRAINING_AGENT_MAX_TURNS=15
 SALES_TRAINING_AGENT_MAX_TOOL_ITERATIONS=3
+SALES_TRAINING_AI_REQUEST_TIMEOUT_SECONDS=120
 ```
 
-AI 出题会按百炼 Qwen-Omni 全模态文档的 OpenAI 兼容 `video_url` 输入格式读取视频画面和音频讲解生成题目，`SALES_TRAINING_AI_VIDEO_FPS` 用于控制抽帧频率。Qwen-Omni 使用 Base64 传文件时，编码后的 Base64 字符串必须小于 10MB；对于 `/uploads` 本地视频，后端会在文件不超过 `SALES_TRAINING_AI_VIDEO_MAX_INLINE_MB` 时编码为 data URL 发送，如果超过 `SALES_TRAINING_AI_VIDEO_MAX_DATA_URL_CHARS`，会自动用 ffmpeg 生成低分辨率、保留音频的 AI 识别压缩版视频再发送。生产环境建议配置可公网访问的视频 URL。使用 Docker Compose 启动后端时，可在宿主机环境或本地 `.env` 中设置上述变量；不要将真实 API Key 提交到仓库。
+出题流程为：视频上传后由 ffmpeg 提取音频（自动压到 15MB 以内）→ Doubao 转写为带 `[MM:SS]` 时间戳的转录稿（方舟 Responses API，音频以 Base64 内联传入，上限 25MB / 120 分钟）→ Doubao 依据转录稿生成题目，解析引用时间戳作为证据。语音转写、方法论提取走 Responses API，话术演练 Agent 走方舟 OpenAI 兼容的 chat/completions（流式 + 工具调用）。`SALES_TRAINING_AI_API_KEY` 填火山引擎 ARK API Key。使用 Docker Compose 启动时，可在宿主机环境或本地 `.env` 中设置上述变量；不要将真实 API Key 提交到仓库。
 
 ### 3. 启动管理端
 

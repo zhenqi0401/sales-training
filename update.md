@@ -1,5 +1,21 @@
 # Update Log
 
+## 2026-06-17 管理端数据看板聚焦学习与门店运营
+
+- **变更**：重做管理端数据看板信息层级，移除各试卷/等级统计和错题分析模块，改为重点展示学员视频学习完成度、考试通过率和门店达成情况。
+- **影响**：`admin-web/src/views/dashboard/index.vue`；保留现有 `/dashboard/admin-overview` 与学员进度导出接口契约，不新增图表库依赖。
+- **展示**：新增纯前端圆环图展示整体完课率/考试通过率，新增门店完成率与通过率柱状对比，并保留视频学习排行、学员学习表现、门店排行和学员进度明细。
+- **验证**：已运行管理端 `npm run build`，`vue-tsc` 与 Vite 构建通过；构建输出仅包含既有 Sass legacy API、Rollup 注释和 chunk size 警告。
+
+## 2026-06-17 AI 模型从阿里云百炼切换为火山引擎 Doubao-Seed-2.0-mini
+
+- **变更**：项目全部 AI 调用（视频出题、语音转写、销售方法论、话术演练 Agent）从阿里云百炼切换为火山引擎方舟 Doubao-Seed-2.0-mini（全模态）。
+- **端点**：出题 / 转写 / 方法论改用方舟 **Responses API**（官方 `volcenginesdkarkruntime` SDK，`AsyncArk`）；话术演练 Agent 保留 **chat/completions**（方舟兼容 OpenAI，流式 + 工具调用），只换 base_url/model/key。
+- **流程**：视频 → ffmpeg 提取音频（≤15MB）→ Doubao 转写为带 `[MM:SS]` 时间戳的转录稿（`input_audio` + Base64 `audio_url`，上限 25MB/120 分钟）→ Doubao 依据转录稿出题。两步均在 Doubao 完成。
+- **影响**：`ai_service.py`（重写 client/ASR/出题/方法论，删除 DashScope `Transcription`、urllib chat 调用与多模态视频 base64 机器）、`config.py`（base_url/模型改火山，删除 `ai_video_*` 配置）、`requirements.txt`（移除 `dashscope`，新增 `volcengine-python-sdk[ark]`）、`practice_agent.py`（注释）、`.env`/`.env.example`/`README.md`/`部署方案.md`（火山 ARK Key 与模型）、`tests/test_ai_service.py`+`test_config.py`（按新架构重写）。
+- **时间戳**：Doubao 经 ASR 模板提示输出逐句秒级时间戳，解析后转为 `[MM:SS]` 供题目证据引用，保持与原 prompt 兼容。
+- **验证**：后端导入检查、单元测试通过；样例音频冒烟测试确认 Responses API、ASR 时间戳、出题与 Agent 流式可用。
+
 ## 2026-06-17 清理未使用的占位代码与 Celery/Redis 基础设施
 
 - **变更**：移除项目中从未接入业务的占位代码和未启用的异步任务基础设施。
@@ -451,3 +467,9 @@
 - **抽题 fallback 修复**：原逻辑按 difficulty 过滤后候选集可能不足 `questionCount`，且只在候选集为空时才回退全库；现改为直接从全库随机抽取，天然保证题量充足。
 - **时长统一**：L1/L2/L3 `duration` 统一改为 60 分钟（原 30/40/50），前后端同步。
 - **向后兼容**：`Question.difficulty` 数据库列保留；`difficulty_to_level()` 函数保留作为 `question_payload` 和 `paper_level` 的 fallback；管理端题库管理仍可显示 difficulty 字段。
+
+## 2026-06-17 话术演练 Agent tool_call_id 缺失修复
+
+- **变更**：修复 `run_practice_agent` 重建历史会话消息时，`tool_results` 被错误处理导致发送给 LLM 的 `role: "tool"` 消息缺少 `tool_call_id` 参数，触发 API 400 `MissingParameter` 错误。
+- **影响**：`backend/app/services/practice_agent.py` — 会话上下文重建循环（第 457-482 行）：assistant 消息先正常追加，`tool_results` list 中每条 tool result 单独创建 `{role: "tool", tool_call_id, content}` 消息追加，兼容旧版单 dict 格式。
+- **验证**：人工审查代码语法正确，缩进和逻辑一致。

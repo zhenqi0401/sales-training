@@ -1,4 +1,9 @@
-"""AI question generation service backed by an OpenAI-compatible chat API."""
+"""AI question generation service backed by 火山引擎方舟 Doubao (Responses API).
+
+整体流程：视频 → ffmpeg 提取音频 → Doubao 转写（带时间戳）→ Doubao 出题。
+出题 / ASR / 方法论统一走方舟 Responses API（官方 volcenginesdkarkruntime SDK）。
+话术演练 Agent 仍走 chat/completions，见 practice_agent.py。
+"""
 
 import asyncio
 import base64
@@ -6,8 +11,6 @@ import json
 import mimetypes
 import re
 import subprocess
-import urllib.error
-import urllib.request
 from collections import Counter
 from pathlib import Path
 from typing import Any
@@ -19,13 +22,100 @@ SUPPORTED_TYPES = ("single", "multiple", "true_false")
 DIFFICULTY_TO_SCORE = {"L1": 1, "L2": 3, "L3": 5}
 DIFFICULTY_LABELS = {"L1": "基础理解", "L2": "场景应用", "L3": "综合判断"}
 
+# Doubao Base64 音频上限 25MB、时长 ≤120 分钟。这里压到 15MB 留足余量。
+MAX_AUDIO_BYTES = 15 * 1024 * 1024
+
 
 class AIQuestionGenerationError(RuntimeError):
     """Raised when the configured LLM cannot return usable question drafts."""
 
 
+# ─────────────────────────── 方舟 Responses API 客户端 ───────────────────────────
+
+_ark_client: Any = None
+
+
+def _get_client() -> Any:
+    """Lazily build a singleton AsyncArk client."""
+    global _ark_client
+    if _ark_client is None:
+        try:
+            from volcenginesdkarkruntime import AsyncArk
+        except ImportError as exc:  # pragma: no cover - 依赖缺失时给出清晰提示
+            raise AIQuestionGenerationError(
+                "未安装 volcengine-python-sdk[ark]，无法调用火山方舟"
+            ) from exc
+        _ark_client = AsyncArk(
+            base_url=settings.ai_base_url,
+            api_key=settings.ai_api_key,
+            timeout=settings.ai_request_timeout_seconds,
+        )
+    return _ark_client
+
+
+def _extract_output_text(resp: Any) -> str:
+    """Pull plain text out of a Responses API result (object or dict form)."""
+    if resp is None:
+        return ""
+    text = getattr(resp, "output_text", None)
+    if isinstance(text, str) and text.strip():
+        return text.strip()
+
+    output = getattr(resp, "output", None)
+    if output is None and isinstance(resp, dict):
+        output = resp.get("output")
+
+    parts: list[str] = []
+    for item in output or []:
+        content = getattr(item, "content", None)
+        if content is None and isinstance(item, dict):
+            content = item.get("content")
+        for block in content or []:
+            block_text = getattr(block, "text", None)
+            if block_text is None and isinstance(block, dict):
+                block_text = block.get("text")
+            if block_text:
+                parts.append(str(block_text))
+    return "".join(parts).strip()
+
+
+async def _call_responses(
+    *,
+    instructions: str,
+    content: list[dict[str, Any]],
+    temperature: float = 0.3,
+    max_output_tokens: int | None = None,
+    model: str | None = None,
+) -> str:
+    """Single seam for all Responses API calls — patched in tests."""
+    if not settings.ai_api_key:
+        raise AIQuestionGenerationError("AI_API_KEY 未配置")
+
+    client = _get_client()
+    kwargs: dict[str, Any] = {
+        "model": model or settings.ai_model,
+        "instructions": instructions,
+        "input": [{"role": "user", "content": content}],
+        "temperature": temperature,
+    }
+    if max_output_tokens:
+        kwargs["max_output_tokens"] = max_output_tokens
+
+    try:
+        resp = await client.responses.create(**kwargs)
+    except AIQuestionGenerationError:
+        raise
+    except Exception as exc:  # SDK / 网络 / 服务端错误统一收口
+        raise AIQuestionGenerationError(f"火山方舟接口调用失败：{exc}") from exc
+
+    return _extract_output_text(resp)
+
+
+# ─────────────────────────────── 语音转写（ASR） ───────────────────────────────
+
+
 async def transcribe_video_audio(video_path: Path) -> str:
-    """Extract audio from video and transcribe via DashScope paraformer-v2.
+    """Extract audio from video and transcribe via Doubao (Responses API).
 
     Returns transcript with sentence-level timestamps:
         [00:00] 第一句内容
@@ -42,8 +132,6 @@ async def transcribe_video_audio(video_path: Path) -> str:
         raise AIQuestionGenerationError("ffmpeg 未安装，无法提取视频音频")
 
     audio_path = video_path.with_suffix(".asr.mp3")
-    # DashScope data-uri 限制 20MB，base64 膨胀约 33%，原始 mp3 需 < 15MB
-    MAX_AUDIO_BYTES = 15 * 1024 * 1024
     try:
         # 用 ffprobe 快速获取视频时长，预计算合适码率，避免二次编码
         try:
@@ -77,11 +165,11 @@ async def transcribe_video_audio(video_path: Path) -> str:
         file_size = audio_path.stat().st_size
         if file_size > MAX_AUDIO_BYTES:
             raise AIQuestionGenerationError(
-                f"音频文件过大（{file_size} bytes），超过 DashScope 20MB 限制，请上传更短的视频"
+                f"音频文件过大（{file_size} bytes），超过 Doubao Base64 25MB 限制，请上传更短的视频"
             )
 
-        logger.info("正在使用 paraformer-v2 转写 video_path=%s", video_path)
-        transcript = await _call_asr_paraformer(audio_path, logger)
+        logger.info("正在使用 Doubao 转写 video_path=%s", video_path)
+        transcript = await _call_asr_doubao(audio_path, logger)
         logger.info("ASR 转写完成 chars=%s", len(transcript))
         return transcript
     except subprocess.TimeoutExpired:
@@ -90,129 +178,103 @@ async def transcribe_video_audio(video_path: Path) -> str:
         audio_path.unlink(missing_ok=True)
 
 
-async def _call_asr_paraformer(audio_path: Path, logger) -> str:
-    """Transcribe audio via DashScope paraformer-v2 (supports word-level timestamps).
+async def _call_asr_doubao(audio_path: Path, logger) -> str:
+    """Transcribe an audio file via Doubao Responses API with per-sentence timestamps.
 
-    Returns formatted transcript with sentence-level timestamps:
+    Returns formatted transcript:
         [MM:SS] sentence text
     """
-    import dashscope
-    from dashscope.audio.asr import Transcription
-
     mime_type = mimetypes.guess_type(audio_path.name)[0] or "audio/mpeg"
     base64_str = base64.b64encode(audio_path.read_bytes()).decode("ascii")
     data_uri = f"data:{mime_type};base64,{base64_str}"
 
-    # Submit sync transcription with model fallback
-    models = ["paraformer-8k-v1", "paraformer-mtl-v1", "fun-asr-2025-08-25", "fun-asr-2025-11-07", "fun-asr-mtl", "fun-asr-mtl-2025-08-25"]
-    last_error = ""
-    response = None
-    for model_name in models:
-        try:
-            response = await asyncio.to_thread(
-                Transcription.call,
-                model=model_name,
-                file_urls=[data_uri],
-                api_key=settings.ai_api_key,
-            )
-            resp_output = response.output if hasattr(response, 'output') and response.output else {}
-            if resp_output and resp_output.get("results"):
-                logger.info("ASR 模型 %s 调用成功", model_name)
-                break
-            last_error = getattr(response, 'message', '') or getattr(response, 'code', '')
-            logger.warning("ASR 模型 %s 返回空结果（%s），尝试下一个", model_name, last_error)
-        except Exception as exc:
-            last_error = str(exc)
-            logger.warning("ASR 模型 %s 异常: %s，尝试下一个", model_name, last_error)
+    instructions = (
+        "你是一个多语种语音识别专家，能够准确转写语音并捕捉其中的时序关系。"
+        "你必须严格按用户给定的模板输出，不要输出任何无关的内容。"
+    )
+    template = (
+        "请转录这段音频，按句子切分，每个句子单独占一行。"
+        "每行格式严格为：开始秒-结束秒-句子文本。"
+        "开始秒、结束秒为从音频起点起算的秒数，可保留一位小数。"
+        "示例：0.0-3.2-大家好，今天讲镜片销售技巧。"
+        "只输出转录结果，每行一句，不要输出任何额外说明、标题、编号或标点修饰。"
+    )
+    content = [
+        {"type": "input_audio", "audio_url": data_uri},
+        {"type": "input_text", "text": template},
+    ]
+    raw = await _call_responses(
+        instructions=instructions,
+        content=content,
+        temperature=0.0,
+        model=settings.ai_model,
+    )
+    if not raw:
+        raise AIQuestionGenerationError("语音转写失败：模型返回空结果")
 
-    output = response.output if response and hasattr(response, 'output') and response.output else {}
-    if not output:
-        raise AIQuestionGenerationError(
-            f"所有 ASR 模型均失败，最后错误：{last_error}"
-        )
-
-    # Get transcription JSON URL
-    results = output.get("results", [])
-    if not results:
-        raise AIQuestionGenerationError("语音转写失败：无结果返回")
-
-    transcription_url = results[0].get("transcription_url", "")
-    if not transcription_url:
-        code = results[0].get("code", "")
-        msg = results[0].get("message", "")
-        raise AIQuestionGenerationError(f"语音转写失败：{code} - {msg}")
-
-    # Download and parse the transcription JSON
-    transcript_data = await asyncio.to_thread(_download_transcription_json, transcription_url)
-
-    # Format sentences with timestamps
-    transcripts = transcript_data.get("transcripts", [])
-    lines: list[str] = []
-    for t in transcripts:
-        for sent in t.get("sentences", []):
-            start_ms = sent.get("begin_time", 0)
-            start_min = int(start_ms // 60000)
-            start_sec = int((start_ms % 60000) // 1000)
-            timestamp = f"[{start_min:02d}:{start_sec:02d}]"
-            text = sent.get("text", "").strip()
-            if text:
-                lines.append(f"{timestamp} {text}")
-
-    transcript = "\n".join(lines)
-    logger.info("paraformer-v2 转写完成 chars=%s sentences=%s", len(transcript), len(lines))
+    transcript = _format_asr_timestamps(raw)
+    if not transcript:
+        raise AIQuestionGenerationError("语音转写结果为空，请确认音频包含有效语音内容")
+    logger.info("Doubao ASR 转写完成 chars=%s", len(transcript))
     return transcript
 
 
-def _download_transcription_json(url: str) -> dict[str, Any]:
-    """Download and parse the transcription result JSON from OSS URL."""
-    import urllib.request
-    try:
-        with urllib.request.urlopen(url, timeout=30) as resp:
-            return json.loads(resp.read().decode("utf-8"))
-    except urllib.error.URLError as exc:
-        raise AIQuestionGenerationError(f"无法下载转写结果：{exc.reason}") from exc
-    except json.JSONDecodeError as exc:
-        raise AIQuestionGenerationError("转写结果 JSON 解析失败") from exc
+_ASR_LINE_RE = re.compile(r"^\s*(\d+(?:\.\d+)?)\s*[-–]\s*(\d+(?:\.\d+)?)\s*[-–]\s*(.+?)\s*$")
+
+
+def _format_asr_timestamps(raw: str) -> str:
+    """Convert Doubao '{start}-{end}-{text}' lines into '[MM:SS] text' lines.
+
+    Lines that don't match the template are kept verbatim (graceful fallback).
+    """
+    lines: list[str] = []
+    for raw_line in raw.splitlines():
+        line = raw_line.strip().rstrip(";；")
+        if not line:
+            continue
+        match = _ASR_LINE_RE.match(line)
+        if not match:
+            cleaned = strip_json_fence(line)
+            if cleaned:
+                lines.append(cleaned)
+            continue
+        start = float(match.group(1))
+        text = match.group(3).strip()
+        if not text:
+            continue
+        minutes = int(start // 60)
+        seconds = int(start % 60)
+        lines.append(f"[{minutes:02d}:{seconds:02d}] {text}")
+    return "\n".join(lines)
+
+
+# ─────────────────────────────── 通用 LLM 调用 ───────────────────────────────
 
 
 async def call_llm(messages: list[dict[str, str]], max_tokens: int = 1024) -> str:
-    """Generic LLM call returning the first assistant message text."""
-    if not settings.ai_api_key:
-        raise AIQuestionGenerationError("AI_API_KEY 未配置")
+    """Generic LLM call returning the assistant text (Responses API)."""
+    instructions_parts: list[str] = []
+    user_parts: list[str] = []
+    for message in messages:
+        role = message.get("role")
+        text = message.get("content") or ""
+        if not isinstance(text, str):
+            text = str(text)
+        if role == "system":
+            instructions_parts.append(text)
+        else:
+            user_parts.append(text)
 
-    payload = {
-        "model": settings.ai_model,
-        "messages": messages,
-        "max_tokens": max_tokens,
-        "temperature": 0.3,
-    }
-    response = await asyncio.to_thread(
-        _post_chat_completion,
-        payload,
-        settings.ai_request_timeout_seconds,
+    content = [{"type": "input_text", "text": "\n".join(user_parts)}]
+    return await _call_responses(
+        instructions="\n".join(instructions_parts),
+        content=content,
+        temperature=0.3,
+        max_output_tokens=max_tokens,
     )
-    return extract_message_content(response)
 
 
-async def call_question_llm(prompt: dict[str, Any]) -> list[dict[str, Any]]:
-    """Call Bailian's OpenAI-compatible chat completion API."""
-    if not settings.ai_api_key:
-        raise AIQuestionGenerationError("AI_API_KEY 未配置，无法调用大模型生成题目")
-
-    payload = build_chat_completion_payload(prompt)
-    response = await asyncio.to_thread(
-        _post_chat_completion,
-        payload,
-        settings.ai_request_timeout_seconds,
-    )
-    content = extract_message_content(response)
-    if not content:
-        raise AIQuestionGenerationError("大模型返回空响应，请稍后重试或调整生成内容")
-
-    questions = parse_questions_from_content(content)
-    if not questions:
-        raise AIQuestionGenerationError("大模型未返回题目，请补充视频文本或知识点后重试")
-    return questions
+# ─────────────────────────────── 出题 ───────────────────────────────
 
 
 async def generate_questions(
@@ -229,9 +291,20 @@ async def generate_questions(
     user_requirements: str | None = None,
     product_knowledge: list[dict[str, Any]] | None = None,
 ) -> list[dict[str, Any]]:
-    """Generate reviewable question drafts without persisting them."""
+    """Generate reviewable question drafts (manual ai-generate path).
+
+    管理员手动出题：提取视频音频 → Doubao 转写 → 基于转录稿 + 知识点/要求生成题目。
+    """
     if not (video_file_url or "").strip():
         raise AIQuestionGenerationError("视频文件地址为空，无法读取视频内容生成题目")
+
+    video_path = resolve_upload_path(video_file_url.strip())
+    if video_path is None or not video_path.exists():
+        raise AIQuestionGenerationError("AI 出题需要 /uploads 下的本地视频文件以提取音频")
+
+    transcript = await transcribe_video_audio(video_path)
+    if not transcript.strip():
+        raise AIQuestionGenerationError("视频转录文本为空，无法生成题目")
 
     user_requirements_text = (user_requirements or "").strip()
     knowledge_points = [item.strip() for item in (knowledge_points or []) if item.strip()]
@@ -239,33 +312,31 @@ async def generate_questions(
     question_types = expand_question_types(question_type_ratios, count)
     difficulty = DIFFICULTY_TO_SCORE.get(difficulty_level, 3)
 
-    prompt = {
-        "video": {"id": video_id, "title": video_title, "file_url": video_file_url},
-        "user_requirements": user_requirements_text,
-        "product_category_id": product_category_id,
-        "knowledge_points": knowledge_points,
-        "product_knowledge": product_knowledge,
-        "count": count,
-        "difficulty_level": difficulty_level,
-        "difficulty_label": DIFFICULTY_LABELS.get(difficulty_level, "场景应用"),
-        "question_types": question_types,
-        "schema": {
-            "questions": [
-                {
-                    "content": "题干",
-                    "type": "single|multiple|true_false",
-                    "options": {"A": "选项A", "B": "选项B", "C": "选项C", "D": "选项D"},
-                    "answer": "A 或 A,B",
-                    "analysis": "解析说明",
-                    "tags": ["标签"],
-                }
-            ]
-        },
-    }
+    system_prompt, user_prompt = build_question_prompt(
+        video_title=video_title,
+        transcript=transcript,
+        count=count,
+        difficulty_level=difficulty_level,
+        question_types=question_types,
+        knowledge_points=knowledge_points,
+        user_requirements=user_requirements_text,
+        product_knowledge=product_knowledge,
+    )
 
-    llm_questions = await call_question_llm(prompt)
+    content = [{"type": "input_text", "text": user_prompt}]
+    text = await _call_responses(
+        instructions=system_prompt,
+        content=content,
+        temperature=0.2,
+        max_output_tokens=min(32768, max(8192, count * 1200)),
+    )
+    if not text:
+        raise AIQuestionGenerationError("大模型返回空响应，请稍后重试或调整生成内容")
+
+    llm_questions = parse_questions_from_content(text)
     if not llm_questions:
         raise AIQuestionGenerationError("大模型未返回题目，请补充视频文本或知识点后重试")
+
     normalized = [
         normalize_generated_question(
             item,
@@ -293,76 +364,35 @@ async def generate_questions_from_transcript(
     category_id: int | None = None,
     video_id: int | None = None,
 ) -> list[dict[str, Any]]:
-    """Generate questions from a text transcript (after ASR), using a text-only model."""
+    """Generate questions from a text transcript (auto pipeline path)."""
     if not transcript.strip():
         raise AIQuestionGenerationError("视频转录文本为空，无法生成题目")
 
     question_types = expand_question_types(question_type_ratios, count)
     difficulty = DIFFICULTY_TO_SCORE.get(difficulty_level, 3)
-    difficulty_label = DIFFICULTY_LABELS.get(difficulty_level, "场景应用")
 
-    system_prompt = (
-        "你是销售培训系统的题库生成助手。必须只输出 JSON，不要输出 Markdown。"
-        "JSON 顶层字段必须是 questions。题型只允许 single、multiple、true_false。"
-        "single 和 true_false 的 answer 只能是单个选项字母；multiple 的 answer 使用逗号分隔选项字母。"
-        "题目必须严格依据下面提供的视频转录文本生成，不得编造视频中没有的事实。"
-        "单选题只能使用 A/B/C/D 中的一个作为 answer。"
-        "多选题只能使用 A/B/C/D，多个答案用英文逗号分隔。"
-        "true_false 只能使用 A 或 B，A=正确，B=错误，禁止返回 C 或 D。"
-        "analysis 必须和题目及答案严格对应，必须引用转录文本中的时间戳证据（如 [02:15]），"
-        "并逐项说明每个选项正确或错误的原因。"
+    system_prompt, user_prompt = build_question_prompt(
+        video_title=video_title,
+        transcript=transcript,
+        count=count,
+        difficulty_level=difficulty_level,
+        question_types=question_types,
+        knowledge_points=[],
+        user_requirements="",
+        product_knowledge=[],
     )
 
-    user_prompt = json.dumps({
-        "task": "根据视频转录文本生成题库",
-        "video_title": video_title,
-        "count": count,
-        "difficulty": difficulty_label,
-        "question_types_in_order": question_types,
-        "transcript_with_timestamps": transcript,
-        "output_schema": {
-            "questions": [{
-                "content": "题干",
-                "type": "single|multiple|true_false",
-                "options": {"A": "选项A", "B": "选项B", "C": "选项C", "D": "选项D"},
-                "answer": "A 或 A,B",
-                "analysis": "解析，引用 [MM:SS] 时间段证据",
-                "tags": ["标签"],
-            }],
-        },
-    }, ensure_ascii=False)
+    content = [{"type": "input_text", "text": user_prompt}]
+    text = await _call_responses(
+        instructions=system_prompt,
+        content=content,
+        temperature=0.2,
+        max_output_tokens=min(32768, max(8192, count * 1200)),
+    )
+    if not text:
+        raise AIQuestionGenerationError("大模型返回空响应，请稍后重试")
 
-    models = [settings.ai_question_text_model, "qwen3.6-flash-2026-04-16"]
-    last_error = ""
-    content = ""
-    for model_name in models:
-        try:
-            payload = {
-                "model": model_name,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                ],
-                "temperature": 0.2,
-                "max_tokens": min(32768, max(8192, count * 1200)),
-                "stream": True,
-            }
-            response = await asyncio.to_thread(
-                _post_chat_completion,
-                payload,
-                settings.ai_request_timeout_seconds,
-            )
-            content = extract_message_content(response)
-            if content:
-                break
-            last_error = "返回空响应"
-        except Exception as exc:
-            last_error = str(exc)
-
-    if not content:
-        raise AIQuestionGenerationError(f"大模型返回空响应（已尝试 {len(models)} 个模型），最后错误：{last_error}")
-
-    questions = parse_questions_from_content(content)
+    questions = parse_questions_from_content(text)
     if not questions:
         raise AIQuestionGenerationError("大模型未返回题目，请补充视频文本或知识点后重试")
 
@@ -383,230 +413,58 @@ async def generate_questions_from_transcript(
     return normalized
 
 
-def build_chat_completion_payload(prompt: dict[str, Any]) -> dict[str, Any]:
-    count = int(prompt.get("count") or 5)
-    question_types = prompt.get("question_types") or ["single"]
+def build_question_prompt(
+    *,
+    video_title: str,
+    transcript: str,
+    count: int,
+    difficulty_level: str,
+    question_types: list[str],
+    knowledge_points: list[str],
+    user_requirements: str,
+    product_knowledge: list[dict[str, Any]],
+) -> tuple[str, str]:
+    """Build (system_prompt, user_prompt) for transcript-based question generation."""
     system_prompt = (
         "你是销售培训系统的题库生成助手。必须只输出 JSON，不要输出 Markdown。"
         "JSON 顶层字段必须是 questions。题型只允许 single、multiple、true_false。"
         "single 和 true_false 的 answer 只能是单个选项字母；multiple 的 answer 使用逗号分隔选项字母。"
-        "题目必须严格依据随消息提供的视频画面内容和音频讲解生成。"
-        "user_requirements 只是出题角度建议，不能作为事实依据，不能覆盖或补充视频中不存在的事实。"
-        "如果建议与视频内容或音频讲解冲突，必须忽略建议。"
-        "每道题的题干、正确答案和解析都必须能从视频画面或音频讲解中直接得到支撑。"
-    )
-    system_prompt += (
+        "题目必须严格依据下面提供的视频音频转录文本生成，不得编造转录中没有的事实。"
+        "user_requirements 只是出题角度建议，不能作为事实依据，不能覆盖或补充转录中不存在的事实；"
+        "如与转录内容冲突必须忽略建议。"
         "单选题只能使用 A/B/C/D 中的一个作为 answer。"
         "多选题只能使用 A/B/C/D，多个答案用英文逗号分隔。"
         "true_false 只能使用 A 或 B，A=正确，B=错误，禁止返回 C 或 D。"
-        "analysis 必须和题目及答案严格对应，明确写出视频中的证据时间段（如 19:32-19:36），"
+        "analysis 必须和题目及答案严格对应，必须引用转录文本中的时间戳证据（如 [02:15]），"
         "并逐项说明每个选项正确或错误的原因；判断题也必须说明该陈述为何正确或错误。"
     )
-    text_prompt = {
-        "task": "为管理员生成待审核题目草稿",
-        "requirements": {
-            "count": count,
-            "difficulty": prompt.get("difficulty_level"),
-            "difficulty_label": prompt.get("difficulty_label"),
-            "question_types_in_order": question_types,
-            "option_labels": ["A", "B", "C", "D"],
-            "true_false_options": {"A": "正确", "B": "错误"},
-            "analysis_rule": "解析必须逐项对应选项，并引用视频画面或音频讲解的时间段证据。",
+
+    user_payload = {
+        "task": "根据视频音频转录文本生成题库",
+        "video_title": video_title,
+        "count": count,
+        "difficulty": DIFFICULTY_LABELS.get(difficulty_level, "场景应用"),
+        "question_types_in_order": question_types,
+        "knowledge_points": knowledge_points,
+        "user_requirements": truncate_text(user_requirements, 1000),
+        "product_knowledge": product_knowledge,
+        "true_false_options": {"A": "正确", "B": "错误"},
+        "transcript_with_timestamps": transcript,
+        "output_schema": {
+            "questions": [{
+                "content": "题干",
+                "type": "single|multiple|true_false",
+                "options": {"A": "选项A", "B": "选项B", "C": "选项C", "D": "选项D"},
+                "answer": "A 或 A,B",
+                "analysis": "解析，引用 [MM:SS] 时间段证据",
+                "tags": ["标签"],
+            }],
         },
-        "context": {
-            "video": prompt.get("video") or {},
-            "knowledge_points": prompt.get("knowledge_points") or [],
-            "user_requirements": truncate_text(prompt.get("user_requirements") or "", 1000),
-            "product_knowledge": prompt.get("product_knowledge") or [],
-        },
-        "output_schema": prompt.get("schema"),
     }
-    video = prompt.get("video") or {}
-    return {
-        "model": settings.ai_model,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {
-                "role": "user",
-                "content": [
-                    {
-                        "type": "video_url",
-                        "video_url": build_video_url_payload(str(video.get("file_url") or "")),
-                        "fps": settings.ai_video_fps,
-                    },
-                    {"type": "text", "text": json.dumps(text_prompt, ensure_ascii=False)},
-                ],
-            },
-        ],
-        "temperature": 0.2,
-        "max_tokens": min(32768, max(8192, count * 1200)),
-        "stream": True,
-        "modalities": ["text"],
-    }
+    return system_prompt, json.dumps(user_payload, ensure_ascii=False)
 
 
-def build_video_url_payload(file_url: str) -> dict[str, Any]:
-    file_url = file_url.strip()
-    if not file_url:
-        raise AIQuestionGenerationError("视频文件地址为空，无法读取视频内容生成题目")
-
-    if file_url.startswith(("http://", "https://", "data:")):
-        url = file_url
-        if url.startswith("data:") and len(url) > settings.ai_video_max_data_url_chars:
-            raise AIQuestionGenerationError(
-                "Base64 视频超过百炼 Qwen-Omni 10MB 限制，请使用 /uploads 本地视频由系统压缩，或配置公网视频 URL"
-            )
-    else:
-        video_path = resolve_upload_path(file_url)
-        if video_path is None:
-            raise AIQuestionGenerationError("视频文件地址不是可访问 URL，也不是 /uploads 本地文件")
-        if not video_path.exists():
-            raise AIQuestionGenerationError(f"视频文件不存在：{file_url}")
-        max_bytes = max(1, int(settings.ai_video_max_inline_mb)) * 1024 * 1024
-        size = video_path.stat().st_size
-        if size > max_bytes:
-            raise AIQuestionGenerationError(
-                f"视频文件过大，当前内联上限为 {settings.ai_video_max_inline_mb}MB，请配置可公网访问的视频 URL 或调高上限"
-            )
-        mime_type = mimetypes.guess_type(video_path.name)[0] or "video/mp4"
-        encoded = base64.b64encode(video_path.read_bytes()).decode("ascii")
-        url = f"data:{mime_type};base64,{encoded}"
-        if len(url) > settings.ai_video_max_data_url_chars:
-            url = build_compressed_video_data_url(video_path)
-
-    return {"url": url}
-
-
-def build_compressed_video_data_url(video_path: Path) -> str:
-    upload_root = Path(settings.upload_dir)
-    cache_dir = upload_root / "ai-cache"
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    cache_path = cache_dir / f"{video_path.stem}.omni-audio.ai.mp4"
-    if not cache_path.exists() or cache_path.stat().st_mtime < video_path.stat().st_mtime:
-        compress_video_for_ai(video_path, cache_path)
-
-    mime_type = mimetypes.guess_type(cache_path.name)[0] or "video/mp4"
-    encoded = base64.b64encode(cache_path.read_bytes()).decode("ascii")
-    data_url = f"data:{mime_type};base64,{encoded}"
-    if len(data_url) > settings.ai_video_max_data_url_chars:
-        raise AIQuestionGenerationError(
-            "视频压缩后仍超过百炼 Qwen-Omni Base64 10MB 限制，请配置可公网访问的视频 URL 或上传更短的视频"
-        )
-    return data_url
-
-
-def compress_video_for_ai(source_path: Path, output_path: Path) -> None:
-    ffmpeg = resolve_video_tool("ffmpeg")
-    if not ffmpeg:
-        raise AIQuestionGenerationError(
-            "本地视频超过百炼接口大小限制，且 ffmpeg 未安装，无法自动生成 AI 识别压缩版视频"
-        )
-
-    tmp_path = output_path.with_name(f"{output_path.stem}.tmp{output_path.suffix}")
-    tmp_path.unlink(missing_ok=True)
-    max_width = max(160, int(settings.ai_video_compress_max_width))
-    crf = min(45, max(28, int(settings.ai_video_compress_crf)))
-    cmd = [
-        ffmpeg,
-        "-y",
-        "-i",
-        str(source_path),
-        "-map",
-        "0:v:0",
-        "-map",
-        "0:a:0?",
-        "-vf",
-        f"scale='min({max_width},iw)':-2:force_original_aspect_ratio=decrease,"
-        f"fps=fps={max(1, int(settings.ai_video_fps))}",
-        "-c:v",
-        "libx264",
-        "-preset",
-        "veryfast",
-        "-crf",
-        str(crf),
-        "-c:a",
-        "aac",
-        "-b:a",
-        settings.ai_video_compress_audio_bitrate,
-        "-ac",
-        "1",
-        "-pix_fmt",
-        "yuv420p",
-        "-movflags",
-        "+faststart",
-        str(tmp_path),
-    ]
-    result = subprocess.run(cmd, capture_output=True, text=True, timeout=1800)
-    if result.returncode != 0:
-        tmp_path.unlink(missing_ok=True)
-        stderr_tail = (result.stderr or "")[-500:]
-        raise AIQuestionGenerationError(f"AI 识别视频压缩失败：{stderr_tail}")
-    tmp_path.replace(output_path)
-
-
-def _post_chat_completion(payload: dict[str, Any], timeout_seconds: int) -> dict[str, Any] | str:
-    url = f"{settings.ai_base_url.rstrip('/')}/chat/completions"
-    body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
-    request = urllib.request.Request(
-        url,
-        data=body,
-        method="POST",
-        headers={
-            "Authorization": f"Bearer {settings.ai_api_key}",
-            "Content-Type": "application/json",
-        },
-    )
-    try:
-        with urllib.request.urlopen(request, timeout=timeout_seconds) as response:
-            text = response.read().decode("utf-8")
-            if payload.get("stream"):
-                return text
-            return json.loads(text)
-    except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", errors="ignore")
-        raise AIQuestionGenerationError(f"大模型接口返回错误：HTTP {exc.code} {detail}") from exc
-    except urllib.error.URLError as exc:
-        raise AIQuestionGenerationError(f"无法连接大模型接口：{exc.reason}") from exc
-    except TimeoutError as exc:
-        raise AIQuestionGenerationError("大模型请求超时，请稍后重试") from exc
-    except json.JSONDecodeError as exc:
-        raise AIQuestionGenerationError("大模型接口返回了无法解析的响应") from exc
-
-
-def extract_message_content(response: dict[str, Any] | str) -> str:
-    if isinstance(response, str):
-        return extract_stream_message_content(response)
-    choices = response.get("choices")
-    if not isinstance(choices, list) or not choices:
-        return ""
-    message = choices[0].get("message") or {}
-    content = message.get("content") or message.get("reasoning_content") or ""
-    if isinstance(content, list):
-        return "".join(str(item.get("text") or item.get("content") or "") for item in content)
-    return str(content).strip()
-
-
-def extract_stream_message_content(stream_text: str) -> str:
-    chunks: list[str] = []
-    for raw_line in stream_text.splitlines():
-        line = raw_line.strip()
-        if not line.startswith("data:"):
-            continue
-        data = line.removeprefix("data:").strip()
-        if not data or data == "[DONE]":
-            continue
-        try:
-            payload = json.loads(data)
-        except json.JSONDecodeError:
-            continue
-        for choice in payload.get("choices") or []:
-            delta = choice.get("delta") or {}
-            content = delta.get("content")
-            if isinstance(content, list):
-                chunks.extend(str(item.get("text") or item.get("content") or "") for item in content)
-            elif content:
-                chunks.append(str(content))
-    return "".join(chunks).strip()
+# ─────────────────────────────── 响应解析 ───────────────────────────────
 
 
 def parse_questions_from_content(content: str) -> list[dict[str, Any]]:
@@ -657,7 +515,8 @@ def parse_questions_from_content(content: str) -> list[dict[str, Any]]:
         return None
 
     questions = _try_parse(cleaned)
-    if questions:
+    if questions is not None:
+        # 成功解析为 questions 数组（即使为空）也直接返回，由上层判定"未返回题目"
         return questions
 
     # Last resort: try to extract individual question objects from the text
@@ -688,9 +547,6 @@ def _fix_llm_json(text: str) -> str | None:
     if fixed != text:
         changed = True
         text = fixed
-
-    # 3. Fix single quotes used instead of double quotes (inside arrays/objects only)
-    # Skip this for now as it could break content with apostrophes
 
     return text if changed else None
 
@@ -755,29 +611,30 @@ def truncate_text(text: str, max_chars: int) -> str:
     return text if len(text) <= max_chars else text[:max_chars]
 
 
-async def call_methodology_llm(audio_path: Path) -> dict[str, str]:
-    """ASR + LLM pipeline for sales methodology extraction.
+# ─────────────────────────────── 方法论生成 ───────────────────────────────
 
-    Step 1 — ASR via paraformer-v2 (DashScope Transcription).
-    Step 2 — LLM via qwen3.6-flash (OpenAI-compatible Chat Completions).
+
+async def call_methodology_llm(audio_path: Path) -> dict[str, str]:
+    """ASR + LLM pipeline for sales methodology extraction (both on Doubao).
+
+    Step 1 — ASR via Doubao Responses API.
+    Step 2 — methodology extraction via Doubao Responses API.
     Returns ``{"title": "...", "content": "..."}``.
     """
     if not audio_path.exists():
         raise AIQuestionGenerationError(f"音频文件不存在：{audio_path}")
 
-    # ── Step 1: ASR ───────────────────────────────────────────────────
     import logging
     logger = logging.getLogger(__name__)
-    transcript = await _call_asr_paraformer(audio_path, logger)
+    transcript = await _call_asr_doubao(audio_path, logger)
     if not transcript:
         raise AIQuestionGenerationError("语音转写结果为空，请确认音频包含有效语音内容")
 
-    # ── Step 2: LLM methodology extraction ────────────────────────────
     return await _call_methodology_llm_from_text(transcript)
 
 
 async def _call_methodology_llm_from_text(transcript: str) -> dict[str, str]:
-    """Generate methodology from transcript via qwen3.6-flash."""
+    """Generate methodology from transcript via Doubao."""
     system_prompt = (
         "你是一位资深的销售培训专家。请根据以下销售对话的语音转写内容，"
         "提炼出一条可复用的销售方法论。"
@@ -785,28 +642,20 @@ async def _call_methodology_llm_from_text(transcript: str) -> dict[str, str]:
         "不要输出 Markdown 代码块。"
     )
 
-    payload = {
-        "model": settings.methodology_model,
-        "messages": [
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": f"以下是销售录音的转写文本，请提炼方法论：\n\n{transcript}"},
-        ],
-        "temperature": 0.3,
-        "max_tokens": 2048,
-        "stream": True,
-    }
-
-    response = await asyncio.to_thread(
-        _post_chat_completion,
-        payload,
-        settings.ai_request_timeout_seconds,
+    content = [{
+        "type": "input_text",
+        "text": f"以下是销售录音的转写文本，请提炼方法论：\n\n{transcript}",
+    }]
+    text = await _call_responses(
+        instructions=system_prompt,
+        content=content,
+        temperature=0.3,
+        max_output_tokens=2048,
     )
-    content = extract_message_content(response)
-    if not content:
+    if not text:
         raise AIQuestionGenerationError("大模型返回空响应，请稍后重试")
 
-    # Parse JSON from response
-    cleaned = strip_json_fence(content)
+    cleaned = strip_json_fence(text)
     try:
         result = json.loads(cleaned)
     except json.JSONDecodeError:
@@ -821,6 +670,9 @@ async def _call_methodology_llm_from_text(transcript: str) -> dict[str, str]:
         raise AIQuestionGenerationError("大模型未返回方法论内容")
 
     return {"title": title or "未命名方法论", "content": content_val}
+
+
+# ─────────────────────────────── 工具函数 ───────────────────────────────
 
 
 def resolve_upload_path(file_url: str) -> Path | None:

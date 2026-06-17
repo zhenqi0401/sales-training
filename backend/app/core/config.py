@@ -46,24 +46,19 @@ class Settings(BaseSettings):
     # ---------- Upload ----------
     upload_dir: str = str(Path(__file__).resolve().parent.parent.parent / "uploads")
 
-    # ---------- AI Question Generation ----------
+    # ---------- AI 出题 / 转写（火山引擎方舟 Doubao） ----------
+    # ai_api_key 填火山引擎 ARK API Key；出题、ASR、方法论统一走 Responses API。
     ai_api_key: str = ""
-    ai_base_url: str = "https://dashscope.aliyuncs.com/compatible-mode/v1"
-    ai_model: str = "qwen3.5-omni-flash"
-    ai_question_text_model: str = "qwen3.6-flash"
+    ai_base_url: str = "https://ark.cn-beijing.volces.com/api/v3"
+    ai_model: str = "doubao-seed-2-0-mini-260428"
+    ai_question_text_model: str = "doubao-seed-2-0-mini-260428"
     ai_request_timeout_seconds: int = 120
-    ai_video_fps: int = 1
-    ai_video_max_inline_mb: int = 100
-    ai_video_max_data_url_chars: int = 10_000_000
-    ai_video_compress_max_width: int = 480
-    ai_video_compress_crf: int = 38
-    ai_video_compress_audio_bitrate: str = "32k"
 
     # ---------- Methodology generation ----------
-    methodology_model: str = "qwen3.6-flash"
+    methodology_model: str = "doubao-seed-2-0-mini-260428"
 
-    # ---------- Practice Agent ----------
-    agent_model: str = "qwen3.5-flash-2026-02-23"
+    # ---------- Practice Agent（火山方舟 chat/completions，流式 + 工具调用） ----------
+    agent_model: str = "doubao-seed-2-0-mini-260428"
     agent_max_turns: int = 15
     agent_max_tool_iterations: int = 3
 

@@ -12,16 +12,16 @@ class SettingsEnvFileTest(unittest.TestCase):
         self.assertIn(PROJECT_ROOT / ".env", env_paths)
         self.assertIn(BACKEND_DIR / ".env", env_paths)
 
-    def test_default_ai_provider_is_bailian(self):
+    def test_default_ai_provider_is_volcengine_doubao(self):
         settings = Settings(_env_file=None)
 
         self.assertEqual(
             settings.ai_base_url,
-            "https://dashscope.aliyuncs.com/compatible-mode/v1",
+            "https://ark.cn-beijing.volces.com/api/v3",
         )
-        self.assertEqual(settings.ai_model, "qwen3.5-omni-flash")
-        self.assertEqual(settings.ai_video_max_inline_mb, 100)
-        self.assertEqual(settings.ai_video_max_data_url_chars, 10_000_000)
+        self.assertEqual(settings.ai_model, "doubao-seed-2-0-mini-260428")
+        self.assertEqual(settings.agent_model, "doubao-seed-2-0-mini-260428")
+        self.assertEqual(settings.methodology_model, "doubao-seed-2-0-mini-260428")
 
 
 if __name__ == "__main__":

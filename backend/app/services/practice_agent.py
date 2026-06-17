@@ -2,7 +2,7 @@
 
 Architecture:
   1. Build system prompt with user profile + session context + long-term memories
-  2. Send user message to LLM (qwen3.6-plus via DashScope-compatible API)
+  2. Send user message to LLM (Doubao via 火山方舟 OpenAI-compatible chat/completions)
   3. Stream SSE events: text tokens, tool_call events, tool_result events, evaluation
   4. If LLM returns tool_calls → execute tools → feed results back → continue loop
   5. On final response, evaluate user answer and save memories
@@ -461,10 +461,25 @@ async def run_practice_agent(
             entry["content"] = ctx_msg["content"]
         if ctx_msg.get("tool_calls"):
             entry["tool_calls"] = ctx_msg["tool_calls"]
-        if ctx_msg.get("tool_results"):
-            entry["content"] = ctx_msg["tool_results"].get("content", json.dumps(ctx_msg["tool_results"], ensure_ascii=False)) if isinstance(ctx_msg["tool_results"], dict) else str(ctx_msg["tool_results"])
-            entry["role"] = "tool"
         messages.append(entry)
+
+        # Append tool-result messages with correct tool_call_id
+        if ctx_msg.get("tool_results"):
+            tool_results_data = ctx_msg["tool_results"]
+            if isinstance(tool_results_data, list):
+                for tr in tool_results_data:
+                    if isinstance(tr, dict):
+                        messages.append({
+                            "role": "tool",
+                            "tool_call_id": tr.get("tool_call_id", ""),
+                            "content": tr.get("content", ""),
+                        })
+            elif isinstance(tool_results_data, dict):
+                messages.append({
+                    "role": "tool",
+                    "tool_call_id": tool_results_data.get("tool_call_id", ""),
+                    "content": tool_results_data.get("content", ""),
+                })
 
     # Add current user message
     messages.append({"role": "user", "content": user_message})
