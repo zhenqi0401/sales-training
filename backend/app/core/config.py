@@ -31,9 +31,7 @@ class Settings(BaseSettings):
 
     # ---------- Database ----------
     # Expected format: mysql+asyncmy://user:pass@host:port/dbname
-    database_url: str = (
-        "mysql+asyncmy://training:training123@localhost:3306/sales_training"
-    )
+    database_url: str = ""
 
     # ---------- JWT ----------
     jwt_secret_key: str = "change-me-in-production"
