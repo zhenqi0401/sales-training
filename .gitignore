@@ -35,11 +35,18 @@ Thumbs.db
 .env.local
 .env.*.local
 
-# Uploads
+# Uploads — videos 绝不进 git（体积大且迁 OSS 了），其余静态资源（封面/音频）随仓库
 uploads/*
 !uploads/.gitkeep
-backend/uploads/*
-!backend/uploads/.gitkeep
+backend/uploads/videos/
+backend/uploads/chunks/
+backend/uploads/ai-cache/
+backend/uploads/*.mp4
+backend/uploads/*.mov
+backend/uploads/*.avi
+!backend/uploads/covers/
+!backend/uploads/covers/**
+backend/uploads/sales-audio/
 
 # Database
 *.db
