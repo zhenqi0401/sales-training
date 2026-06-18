@@ -4,7 +4,7 @@
       ref="uploadRef"
       :auto-upload="false"
       :show-file-list="false"
-      accept=".mp4,.mov,.avi,video/mp4,video/quicktime,video/x-msvideo"
+      accept=".mp4,video/mp4"
       :on-change="handleFileChange"
       drag
       class="upload-area"
@@ -12,7 +12,7 @@
       <el-icon class="upload-icon" :size="44"><VideoCamera /></el-icon>
       <div class="upload-text">拖拽视频到此处，或<em>点击选择</em></div>
       <template #tip>
-        <div class="upload-tip">支持 MP4、MOV、AVI，单个文件最大 2GB</div>
+        <div class="upload-tip">仅支持 MP4 格式，单个文件最大 2GB</div>
       </template>
     </el-upload>
 
@@ -70,7 +70,7 @@ import {
 
 const CHUNK_SIZE = 5 * 1024 * 1024
 const MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024
-const ALLOWED_EXTENSIONS = ['mp4', 'mov', 'avi']
+const ALLOWED_EXTENSIONS = ['mp4']
 
 const emit = defineEmits<{
   (e: 'upload-success', result: VideoUploadResult): void
@@ -94,7 +94,7 @@ function handleFileChange(file: UploadFile) {
 
   const ext = rawFile.name.split('.').pop()?.toLowerCase() || ''
   if (!ALLOWED_EXTENSIONS.includes(ext)) {
-    ElMessage.warning('仅支持 MP4、MOV、AVI 格式')
+    ElMessage.warning('仅支持 MP4 格式')
     resetUpload()
     return
   }

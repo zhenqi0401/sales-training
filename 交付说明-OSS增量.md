@@ -72,17 +72,37 @@ curl -I https://<你的bucket>.oss-cn-hangzhou.aliyuncs.com   # 通即可（403 
 
 ---
 
-## 5. 历史 77G 本地视频怎么处理（需你和我确认）
+## 5. 历史视频处理 —— 已定为「全量迁移到 OSS」
 
-OSS 只对**上线后新上传**的视频生效。**老视频（约 77G）仍是本地 `/uploads/` 路径**，两条路二选一：
+> 这部分**由系统负责人（我）在本地完成后再把数据库 dump 交给你**，你这边基本不用管视频文件。
 
-| 方案 | 做法 | Nginx |
-|------|------|-------|
-| **A. 保留本地（推荐，省事）** | 照 `部署方案.md` 第 7 节把 77G rsync 进 `uploads_data` 卷 | 保留 `nginx/default.conf` 里的 `location /uploads/` |
-| **B. 全量迁移到 OSS** | 我方提供迁移脚本，把老视频传 OSS 并改库里 `file_url` | 可删 `location /uploads/`，不用传 77G |
+**现状盘点**（本地 `uploads/`）：
 
-> 默认先按 **A** 来，最稳。要走 B 我再给你迁移脚本和停机窗口安排。
-> 新老视频可共存：库里 `file_url` 是 `https://...oss...` 的走 OSS，是 `/uploads/...` 的走本地。
+| 类别 | 数量 | 大小 |
+|------|------|------|
+| 有效视频（DB 引用） | 175 | 43.0 GB |
+| 孤儿垃圾（无 DB 记录，删/重传残留） | 89 | 28.2 GB |
+
+我会在本地按顺序跑两个脚本（都默认 dry-run，确认后才 `--apply`）：
+
+```bash
+cd backend
+# ① 先清孤儿（必须在迁移之前跑）——清掉 28G 垃圾 + OSS 上 4 个测试残留
+.venv/Scripts/python.exe scripts/cleanup_orphans.py            # 列清单
+.venv/Scripts/python.exe scripts/cleanup_orphans.py --apply    # 删除
+
+# ② 迁移 43G 有效视频到 OSS 并改库 file_url（保留本地原件作备份）
+.venv/Scripts/python.exe scripts/migrate_videos_to_oss.py          # 预览
+.venv/Scripts/python.exe scripts/migrate_videos_to_oss.py --apply  # 执行
+```
+
+跑完后库里所有视频的 `file_url` 都是 OSS 地址。我再 `mysqldump` 给你（用法见 `部署方案.md` 第 6 节，**顺序务必是「先迁移→再 dump」**，这样 dump 里就是 OSS 地址），**你导入后服务器一个视频文件都不用传**。
+
+**封面图（covers，约 31M）和销售音频（sales-audio，约 3M）仍存本地**，不迁 OSS。所以：
+- 你需要让我把 `uploads/covers/` 和 `uploads/sales-audio/`（合计 ~35M，很小）一并打包发你，灌进 `uploads_data` 卷；
+- `nginx/default.conf` 里的 `location /uploads/` **保留**（服务封面/音频用），但**不再需要传 43G 视频**。
+
+> 新老视频统一走 OSS；`file_url` 是 `https://...oss...` 的由后端签名播放。
 
 ---
 
