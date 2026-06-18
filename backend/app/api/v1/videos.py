@@ -19,19 +19,13 @@ from app.models.product import Product
 from app.models.question import Question
 from app.models.video import Video
 from app.schemas.common import MessageResponse, PaginatedResponse
+from app.services import oss_storage
 from app.schemas.video import (
     VideoBatchStatusUpdate,
     VideoCreate,
     VideoResponse,
     VideoStatusUpdate,
     VideoUpdate,
-)
-from app.services.video_processing import (
-    MobileVideoResult,
-    compress_mobile_mp4_in_place,
-    ensure_video_tools_available,
-    prepare_playable_mp4_fast,
-    probe_video,
 )
 
 router = APIRouter()
@@ -40,7 +34,7 @@ UPLOAD_DIR = Path(settings.upload_dir)
 VIDEO_DIR = UPLOAD_DIR / "videos"
 COVER_DIR = UPLOAD_DIR / "covers"
 CHUNK_DIR = UPLOAD_DIR / "chunks"
-ALLOWED_VIDEO_EXTENSIONS = {".mp4", ".mov", ".avi"}
+ALLOWED_VIDEO_EXTENSIONS = {".mp4"}
 ALLOWED_COVER_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp"}
 MAX_FILE_SIZE = 2 * 1024 * 1024 * 1024
 VALID_STATUSES = {"draft", "published", "archived", "generating", "transcoding"}
@@ -51,6 +45,7 @@ async def _write_pipeline_log(video_id: int, step: str, status: str, message: st
     """Write a pipeline step entry to the video's pipeline_log JSON field."""
     from app.core.database import async_session_factory
     import logging
+
     logger = logging.getLogger(__name__)
     try:
         async with async_session_factory() as session:
@@ -60,123 +55,78 @@ async def _write_pipeline_log(video_id: int, step: str, status: str, message: st
                     return
                 log = dict(video.pipeline_log or {})
                 log[step] = {
-                    "status": status,  # running, success, failed
+                    "status": status,
                     "message": message,
                     "error": error,
                 }
                 video.pipeline_log = log
     except Exception:
-        logger.exception("写入 pipeline_log 失败 video_id=%s", video_id)
+        logger.exception("Failed to write pipeline_log video_id=%s", video_id)
 
 
-async def _transcode_generate_publish(video_id: int, file_url: str, category_id: int | None, video_title: str) -> None:
-    """后台压缩视频 → ASR 转录 → AI生成题目 → 上架。
-    若已转码完成（resolution 有值）或视频文件 ≤ 100MB 则跳过压缩。
-    任何步骤失败时回退为草稿状态，方便管理员重试。
+async def _materialize_video_for_processing(file_url: str) -> tuple[Path, bool]:
+    """Return a local file path for ASR. (path, is_temp).
+
+    OSS 视频先下载到临时文件（调用方负责在结束后删除）；本地视频直接映射到 UPLOAD_DIR。
     """
+    if oss_storage.is_oss_url(file_url):
+        path = await asyncio.to_thread(oss_storage.download_to_temp, file_url)
+        return path, True
+    return UPLOAD_DIR / file_url.removeprefix("/uploads/"), False
+
+
+async def _generate_questions_and_publish(video_id: int, file_url: str, category_id: int | None, video_title: str) -> None:
+    """Run ASR + AI question generation, then publish the video."""
     from app.core.database import async_session_factory
     import logging
+
     logger = logging.getLogger(__name__)
+    logger.info("Background pipeline started video_id=%s title=%s", video_id, video_title)
 
-    logger.info("🔧 后台任务启动 video_id=%s title=%s", video_id, video_title)
-
-    TRANSCODE_SKIP_MAX_BYTES = 1 * 1024 * 1024 * 1024  # 1GB
-
-    # 0. 重试时清理旧的 AI 生成题目，避免重复入库
     async with async_session_factory() as session:
         async with session.begin():
             from sqlalchemy import delete as sql_delete
+
             await session.execute(
                 sql_delete(Question).where(Question.video_id == video_id, Question.source == "ai")
             )
-            logger.info("后台任务: 已清理旧AI题目 video_id=%s", video_id)
+            logger.info("Cleared old AI questions video_id=%s", video_id)
 
-    await _write_pipeline_log(video_id, "init", "running", "管线启动，清理旧数据")
+    await _write_pipeline_log(video_id, "init", "running", "Pipeline started and old AI questions cleared")
 
-    final_path = UPLOAD_DIR / file_url.removeprefix("/uploads/")
-    if not final_path.exists():
-        logger.error("视频文件不存在 video_id=%s path=%s", video_id, final_path)
-    else:
-        logger.info("视频文件存在 video_id=%s size=%s", video_id, final_path.stat().st_size)
-
-    result = None
-    skip_compress = False
-
-    # 1. 检查是否需要转码
     async with async_session_factory() as session:
         video = await session.get(Video, video_id)
         if not video:
-            logger.warning("后台任务: 视频不存在 video_id=%s，退出", video_id)
+            logger.warning("Pipeline exits because video is missing video_id=%s", video_id)
             return
-        if video.status != "transcoding":
-            logger.warning("后台任务: 视频状态不是transcoding video_id=%s status=%s，退出", video_id, video.status)
-            return
-        logger.info("后台任务: 当前状态=%s file_size=%s resolution=%s", video.status, video.file_size, video.resolution)
-        if video.file_size and video.file_size <= TRANSCODE_SKIP_MAX_BYTES:
-            skip_compress = True
-            logger.info("后台任务: 小视频(≤1GB)，跳过压缩 video_id=%s size=%s", video_id, video.file_size)
-            try:
-                meta = await asyncio.to_thread(probe_video, final_path)
-                result = MobileVideoResult(
-                    file_url=file_url,
-                    file_size=video.file_size or final_path.stat().st_size,
-                    duration=meta.duration,
-                    resolution=meta.resolution,
-                    cover_url=video.cover_url or "",
-                )
-            except Exception:
-                logger.warning("读取视频元数据失败 video_id=%s，仍跳过压缩", video_id)
-        else:
-            logger.info("后台任务: 需要压缩 video_id=%s size=%s", video_id, video.file_size)
-
-    if not skip_compress:
-        await _write_pipeline_log(video_id, "transcode", "running", "开始视频压缩")
-        logger.info("后台任务: 开始压缩 video_id=%s", video_id)
-        try:
-            result = await asyncio.to_thread(compress_mobile_mp4_in_place, final_path, UPLOAD_DIR)
-            logger.info("后台任务: 压缩完成 video_id=%s new_size=%s", video_id, result.file_size)
-            await _write_pipeline_log(video_id, "transcode", "success", f"压缩完成，新大小 {result.file_size} bytes")
-        except Exception as exc:
-            logger.exception("视频转码失败 video_id=%s", video_id)
-            await _write_pipeline_log(video_id, "transcode", "failed", "视频压缩失败", str(exc))
-            # 转码失败 → 回退草稿，允许管理员重试
-            async with async_session_factory() as session:
-                async with session.begin():
-                    video = await session.get(Video, video_id)
-                    if video and video.status == "transcoding":
-                        video.status = "draft"
-                        logger.info("后台任务: 转码失败，回退草稿 video_id=%s", video_id)
+        if video.status != "generating":
+            logger.warning(
+                "Pipeline exits because status is not generating video_id=%s status=%s",
+                video_id,
+                video.status,
+            )
             return
 
-    if skip_compress:
-        await _write_pipeline_log(video_id, "transcode", "skipped", "跳过压缩（已转码或小视频）")
-
-    # 2. 更新转码结果并标记为 generating
-    async with async_session_factory() as session:
-        async with session.begin():
-            video = await session.get(Video, video_id)
-            if not video or video.status != "transcoding":
-                logger.warning("后台任务: 步骤2状态检查失败 video_id=%s status=%s", video_id, video.status if video else 'None')
-                return
-            if result:
-                video.file_size = result.file_size
-                video.resolution = result.resolution
-                if result.cover_url:
-                    video.cover_url = result.cover_url
-            video.status = "generating"
-            logger.info("后台任务: 状态→generating video_id=%s", video_id)
-
-    # 3. ASR 转录 + AI 生成题目
     generated_questions: list[dict[str, Any]] = []
+    final_path: Path | None = None
+    is_temp = False
     try:
-        from app.services.ai_service import transcribe_video_audio, generate_questions_from_transcript
-        logger.info("后台任务: 开始ASR转录 video_id=%s", video_id)
-        await _write_pipeline_log(video_id, "asr", "running", "开始语音转文字")
+        from app.services.ai_service import generate_questions_from_transcript, transcribe_video_audio
+
+        final_path, is_temp = await _materialize_video_for_processing(file_url)
+        if not final_path.exists():
+            logger.error("Video file does not exist video_id=%s path=%s", video_id, final_path)
+        else:
+            logger.info("Video file exists video_id=%s size=%s", video_id, final_path.stat().st_size)
+
+        logger.info("Start ASR video_id=%s", video_id)
+        await _write_pipeline_log(video_id, "asr", "running", "Start audio transcription")
         transcript = await transcribe_video_audio(final_path)
-        logger.info("后台任务: ASR完成 video_id=%s chars=%s", video_id, len(transcript))
-        await _write_pipeline_log(video_id, "asr", "success", f"转写完成，{len(transcript)} 字符")
-        logger.info("后台任务: 开始AI生成题目 (文本模式) video_id=%s", video_id)
-        await _write_pipeline_log(video_id, "ai_generate", "running", "开始 AI 生成题目")
+        logger.info("ASR completed video_id=%s chars=%s", video_id, len(transcript))
+        await _write_pipeline_log(video_id, "asr", "success", f"Transcribed {len(transcript)} characters")
+
+        logger.info("Start AI question generation video_id=%s", video_id)
+        await _write_pipeline_log(video_id, "ai_generate", "running", "Start AI question generation")
         generated_questions = await generate_questions_from_transcript(
             transcript=transcript,
             video_title=video_title,
@@ -186,39 +136,47 @@ async def _transcode_generate_publish(video_id: int, file_url: str, category_id:
             category_id=category_id,
             video_id=video_id,
         )
-        logger.info("后台任务: AI生成完成 video_id=%s count=%s", video_id, len(generated_questions))
-        await _write_pipeline_log(video_id, "ai_generate", "success", f"生成 {len(generated_questions)} 道题目")
+        logger.info("AI question generation completed video_id=%s count=%s", video_id, len(generated_questions))
+        await _write_pipeline_log(video_id, "ai_generate", "success", f"Generated {len(generated_questions)} questions")
     except Exception as exc:
-        logger.exception("AI 生成题目失败 video_id=%s", video_id)
-        await _write_pipeline_log(video_id, "ai_generate", "failed", "ASR 或 AI 生成失败", str(exc))
+        logger.exception("AI question generation failed video_id=%s", video_id)
+        await _write_pipeline_log(video_id, "ai_generate", "failed", "ASR or AI generation failed", str(exc))
+    finally:
+        if is_temp and final_path is not None:
+            final_path.unlink(missing_ok=True)
 
-    # 4. 持久化题目并上架
     async with async_session_factory() as session:
         async with session.begin():
             video = await session.get(Video, video_id)
             if not video or video.status != "generating":
-                logger.warning("后台任务: 步骤4状态检查失败 video_id=%s status=%s", video_id, video.status if video else 'None')
-                # 状态已被外部修改（如管理员回退为 draft），不再写入
+                logger.warning(
+                    "Pipeline final status check failed video_id=%s status=%s",
+                    video_id,
+                    video.status if video else "None",
+                )
                 return
 
             if generated_questions:
                 try:
                     for item in generated_questions:
                         item["source"] = "ai"
-                        question = Question(**item)
-                        session.add(question)
+                        session.add(Question(**item))
                     video.status = "published"
                     video.published_at = datetime.now(timezone.utc)
-                    logger.info("后台任务: ✅完成 video_id=%s status=published questions=%s", video_id, len(generated_questions))
-                    await _write_pipeline_log(video_id, "done", "success", f"管线完成，入库 {len(generated_questions)} 道题目")
+                    logger.info(
+                        "Pipeline completed video_id=%s status=published questions=%s",
+                        video_id,
+                        len(generated_questions),
+                    )
+                    await _write_pipeline_log(video_id, "done", "success", f"Published with {len(generated_questions)} questions")
                 except Exception:
-                    logger.exception("保存AI题目失败 video_id=%s", video_id)
+                    logger.exception("Saving AI questions failed video_id=%s", video_id)
                     video.status = "draft"
-                    await _write_pipeline_log(video_id, "done", "failed", "保存题目失败")
+                    await _write_pipeline_log(video_id, "done", "failed", "Saving generated questions failed")
             else:
-                logger.warning("后台任务: AI生成题目为空，回退草稿 video_id=%s", video_id)
+                logger.warning("Pipeline generated no questions; reverting to draft video_id=%s", video_id)
                 video.status = "draft"
-                await _write_pipeline_log(video_id, "done", "failed", "AI 未生成任何题目")
+                await _write_pipeline_log(video_id, "done", "failed", "AI generated no questions")
 
 
 def ensure_upload_dirs() -> None:
@@ -226,13 +184,6 @@ def ensure_upload_dirs() -> None:
     VIDEO_DIR.mkdir(parents=True, exist_ok=True)
     COVER_DIR.mkdir(parents=True, exist_ok=True)
     CHUNK_DIR.mkdir(parents=True, exist_ok=True)
-
-
-def ensure_video_compression_ready() -> None:
-    try:
-        ensure_video_tools_available()
-    except RuntimeError as exc:
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
 
 
 def validate_status(status: str) -> None:
@@ -334,8 +285,8 @@ async def build_video_response(
         resolution=video.resolution or "",
         file_size=video.file_size or 0,
         status=video.status,
-        sort_order=video.sort_order,
-        is_required=video.is_required,
+        sort_order=video.sort_order or 0,
+        is_required=bool(video.is_required),
         est_duration=video.est_duration or 0,
         published_at=video.published_at,
         created_at=video.created_at,
@@ -425,7 +376,6 @@ async def create_video(body: VideoCreate, session: SessionDep, user: CurrentUser
     await ensure_video_schema(session)
     data = normalize_video_payload(body.model_dump())
     category = await require_active_category(session, data.get("category_id"))
-    # 上传后固定为草稿状态，不自动转码
     data["status"] = "draft"
     data.pop("published_at", None)
     video = Video(**data)
@@ -437,7 +387,13 @@ async def create_video(body: VideoCreate, session: SessionDep, user: CurrentUser
 
 @router.put("/{video_id:int}", response_model=VideoResponse, summary="Update video",
             dependencies=[Depends(require_admin())])
-async def update_video(video_id: int, body: VideoUpdate, session: SessionDep, user: CurrentUserDep, background_tasks: BackgroundTasks):
+async def update_video(
+    video_id: int,
+    body: VideoUpdate,
+    session: SessionDep,
+    user: CurrentUserDep,
+    background_tasks: BackgroundTasks,
+):
     await ensure_video_schema(session)
     video = await session.get(Video, video_id)
     if not video:
@@ -447,23 +403,25 @@ async def update_video(video_id: int, body: VideoUpdate, session: SessionDep, us
     category: Category | None = None
     if "category_id" in data:
         category = await require_active_category(session, data["category_id"])
-    trigger_transcode = False
+
+    trigger_generation = False
     if "status" in data:
         validate_status(data["status"])
         if data["status"] == "published" and video.status == "draft":
-            data["status"] = "transcoding"
+            data["status"] = "generating"
             data["published_at"] = datetime.now(timezone.utc)
-            trigger_transcode = True
+            trigger_generation = True
         elif data["status"] == "published" and video.status == "archived":
             data["published_at"] = datetime.now(timezone.utc)
         elif data["status"] != "published":
             data["published_at"] = None
+
     for field, value in data.items():
         setattr(video, field, value)
 
     await session.flush()
-    if trigger_transcode:
-        background_tasks.add_task(_transcode_generate_publish, video.id, video.file_url, video.category_id, video.title)
+    if trigger_generation:
+        background_tasks.add_task(_generate_questions_and_publish, video.id, video.file_url, video.category_id, video.title)
     if category is None:
         category = await session.get(Category, video.category_id) if video.category_id else None
     _, products = await load_lookup_data(session, [video])
@@ -484,18 +442,17 @@ async def update_video_status(
     if not video:
         raise HTTPException(status_code=404, detail="Video not found")
     validate_status(body.status)
-    # 上架时触发后台转码（仅草稿需要，已下架的直接上架）
+
     if body.status == "published" and video.status == "draft":
-        video.status = "transcoding"
+        video.status = "generating"
         video.published_at = datetime.now(timezone.utc)
         await session.flush()
-        background_tasks.add_task(_transcode_generate_publish, video.id, video.file_url, video.category_id, video.title)
+        background_tasks.add_task(_generate_questions_and_publish, video.id, video.file_url, video.category_id, video.title)
     elif body.status == "published" and video.status == "archived":
         video.status = "published"
         video.published_at = datetime.now(timezone.utc)
         await session.flush()
     elif body.status == "draft" and video.status in ("transcoding", "generating"):
-        # 允许将卡住的管线回退为草稿
         video.status = "draft"
         video.published_at = None
         await session.flush()
@@ -503,6 +460,7 @@ async def update_video_status(
         video.status = body.status
         video.published_at = datetime.now(timezone.utc) if body.status == "published" else None
         await session.flush()
+
     category = await session.get(Category, video.category_id) if video.category_id else None
     _, products = await load_lookup_data(session, [video])
     return await build_video_response(video, category, products)
@@ -516,21 +474,18 @@ async def retry_video_pipeline(
     user: CurrentUserDep,
     background_tasks: BackgroundTasks,
 ):
-    """重新触发转码 → ASR → AI 出题管线。
-    适用于卡在 transcoding 或 generating 状态的视频。
-    """
+    """Retry ASR + AI question generation for draft, generating, or legacy transcoding videos."""
     await ensure_video_schema(session)
     video = await session.get(Video, video_id)
     if not video:
         raise HTTPException(status_code=404, detail="Video not found")
     if video.status not in ("transcoding", "generating", "draft"):
-        raise HTTPException(status_code=400, detail="只有草稿、转码中或生成中状态的视频可以重新处理")
+        raise HTTPException(status_code=400, detail="只有草稿、处理中或生成中的视频可以重新处理")
 
-    # 重置为 transcoding 并触发后台管线
-    video.status = "transcoding"
+    video.status = "generating"
     video.published_at = datetime.now(timezone.utc)
     await session.flush()
-    background_tasks.add_task(_transcode_generate_publish, video.id, video.file_url, video.category_id, video.title)
+    background_tasks.add_task(_generate_questions_and_publish, video.id, video.file_url, video.category_id, video.title)
 
     category = await session.get(Category, video.category_id) if video.category_id else None
     _, products = await load_lookup_data(session, [video])
@@ -544,7 +499,6 @@ async def get_pipeline_log(
     session: SessionDep,
     user: CurrentUserDep,
 ):
-    """返回最近一次管线执行的日志摘要，前端可据此显示进度。"""
     await ensure_video_schema(session)
     video = await session.get(Video, video_id)
     if not video:
@@ -570,14 +524,13 @@ async def batch_update_video_status(
         raise HTTPException(status_code=400, detail="No videos selected")
 
     videos = (await session.execute(select(Video).where(Video.id.in_(body.ids)))).scalars().all()
-    # 上架时触发后台转码（仅草稿需要，已下架的直接上架）
     if body.status == "published":
         published_at = datetime.now(timezone.utc)
         for video in videos:
             if video.status == "draft":
-                video.status = "transcoding"
+                video.status = "generating"
                 video.published_at = published_at
-                background_tasks.add_task(_transcode_generate_publish, video.id, video.file_url, video.category_id, video.title)
+                background_tasks.add_task(_generate_questions_and_publish, video.id, video.file_url, video.category_id, video.title)
             elif video.status == "archived":
                 video.status = "published"
                 video.published_at = published_at
@@ -597,8 +550,20 @@ async def delete_video(video_id: int, session: SessionDep, user: CurrentUserDep)
     video = await session.get(Video, video_id)
     if not video:
         raise HTTPException(status_code=404, detail="Video not found")
+
+    file_url = video.file_url
     await session.delete(video)
     await session.flush()
+
+    # 视频在 OSS 上时顺带清理对象（best-effort，失败不影响删除结果）
+    if file_url and oss_storage.is_oss_url(file_url):
+        import logging
+
+        try:
+            await asyncio.to_thread(oss_storage.delete_object, file_url)
+        except Exception:
+            logging.getLogger(__name__).warning("删除 OSS 视频对象失败 url=%s", file_url, exc_info=True)
+
     return MessageResponse(message="Video deleted")
 
 
@@ -622,10 +587,9 @@ async def init_chunked_upload(
     user: CurrentUserDep = None,
 ):
     ensure_upload_dirs()
-    ensure_video_compression_ready()
     ext = Path(filename).suffix.lower()
     if ext not in ALLOWED_VIDEO_EXTENSIONS:
-        raise HTTPException(status_code=400, detail="Only mp4, mov and avi videos are supported")
+        raise HTTPException(status_code=400, detail="Only mp4 videos are supported")
     if file_size > MAX_FILE_SIZE:
         raise HTTPException(status_code=400, detail="File size exceeds 2GB limit")
 
@@ -658,7 +622,7 @@ async def upload_chunk(
     return {"upload_id": upload_id, "chunk": chunk_index, "size": len(content)}
 
 
-@router.post("/upload/merge", summary="Merge chunks and compress for mobile")
+@router.post("/upload/merge", summary="Merge uploaded video chunks")
 async def merge_chunks(
     upload_id: str = Form(...),
     user: CurrentUserDep = None,
@@ -676,7 +640,7 @@ async def merge_chunks(
     expected_size = int(meta.get("file_size") or 0)
     ext = Path(original_filename).suffix.lower()
     if ext not in ALLOWED_VIDEO_EXTENSIONS:
-        raise HTTPException(status_code=400, detail="Only mp4, mov and avi videos are supported")
+        raise HTTPException(status_code=400, detail="Only mp4 videos are supported")
 
     chunk_files = sorted(c for c in chunk_path.glob("*") if c.name != "meta.json")
     if not chunk_files:
@@ -696,24 +660,23 @@ async def merge_chunks(
         raise HTTPException(status_code=400, detail="Merged file size is invalid")
 
     shutil.rmtree(chunk_path, ignore_errors=True)
-    try:
-        playable = prepare_playable_mp4_fast(out_path, UPLOAD_DIR)
-    except Exception as exc:
+
+    if oss_storage.is_enabled():
+        object_key = oss_storage.build_object_key("videos", ext)
+        file_url = await asyncio.to_thread(oss_storage.upload_file, out_path, object_key)
         out_path.unlink(missing_ok=True)
-        raise HTTPException(
-            status_code=500,
-            detail=str(exc) or "视频快速处理失败，请重新上传或更换格式",
-        ) from exc
+    else:
+        file_url = public_upload_url(out_path)
 
     return {
-        "filename": Path(playable.file_url).name,
+        "filename": out_path.name,
         "upload_id": upload_id,
-        "file_url": playable.file_url,
-        "file_size": playable.file_size,
-        "duration": playable.duration,
-        "resolution": playable.resolution,
-        "cover_url": playable.cover_url,
+        "file_url": file_url,
+        "file_size": total_size,
+        "duration": 0,
+        "resolution": "",
+        "cover_url": "",
         "sha256": digest.hexdigest(),
         "compressed": False,
-        "compression_pending": True,
+        "compression_pending": False,
     }

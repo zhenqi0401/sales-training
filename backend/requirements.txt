@@ -1,6 +1,6 @@
 # ── Python dependencies ───────────────────────────────────────────────
 # ── System dependencies (not pip-installable) ────────────────────────
-#   ffmpeg (含 ffprobe) — 视频上传后自动压缩为手机端 H.264 MP4
+#   ffmpeg (含 ffprobe) — 发布时从视频提取音频用于 ASR 转写
 #   安装: brew install ffmpeg / apt install ffmpeg / winget install ffmpeg
 
 fastapi==0.115.0
@@ -20,3 +20,4 @@ cryptography==43.0.1
 volcengine-python-sdk[ark]>=4.0.7
 mcp>=1.0.0
 pypinyin>=0.55.0
+oss2>=2.19.1

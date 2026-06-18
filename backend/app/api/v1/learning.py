@@ -15,6 +15,7 @@ from app.models.user import User
 from app.models.video import Video
 from app.schemas.common import PaginatedResponse
 from app.schemas.user import ApiResponse
+from app.services import oss_storage
 
 
 class ProgressUpdate(BaseModel):
@@ -79,7 +80,7 @@ def video_payload(video: Video, progress: LearningProgress | None = None) -> dic
         "categoryId": video.category_id,
         "title": video.title,
         "cover": video.cover_url or "",
-        "url": video.file_url or "",
+        "url": oss_storage.to_playable_url(video.file_url or ""),
         "duration": video.duration or (video.est_duration or 0) * 60,
         "watchDuration": watch_duration,
         "completed": completed,

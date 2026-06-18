@@ -46,6 +46,15 @@ class Settings(BaseSettings):
     # ---------- Upload ----------
     upload_dir: str = str(Path(__file__).resolve().parent.parent.parent / "uploads")
 
+    # ---------- OSS 对象存储（阿里云）----------
+    # oss_enabled 打开后，视频上传/发布走 OSS；关闭时回退本地 uploads。
+    oss_enabled: bool = False
+    oss_access_key_id: str = ""
+    oss_access_key_secret: str = ""
+    oss_bucket: str = ""
+    oss_endpoint: str = ""  # 如 oss-cn-hangzhou.aliyuncs.com
+    oss_public_base_url: str = ""  # 可选：CDN/自定义域名；留空则用 https://{bucket}.{endpoint}
+
     # ---------- AI 出题 / 转写（火山引擎方舟 Doubao） ----------
     # ai_api_key 填火山引擎 ARK API Key；出题、ASR、方法论统一走 Responses API。
     ai_api_key: str = ""
