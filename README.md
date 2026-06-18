@@ -6,104 +6,141 @@
 
 ```
 销售培训系统/
-├── backend/          # FastAPI 后端 (Python 3.12)
-├── admin-web/        # 管理端 (Vue 3 + Element Plus)
-├── training-web/     # 培训端 (Vue 3 + Vant 移动优先)
+├── backend/              # FastAPI 后端 (Python 3.12)
+│   ├── app/
+│   ├── scripts/          # 运维脚本（OSS 迁移、孤儿清理）
+│   └── requirements.txt
+├── admin-web/            # 管理端 (Vue 3 + Element Plus)
+├── training-web/         # 培训端 (Vue 3 + Vant 移动优先)
+├── nginx/
+│   └── default.conf      # Nginx 站点配置（docker compose 使用）
 ├── docker-compose.yml
 └── README.md
 ```
-
-## 快速启动
-
-### 0. 系统依赖
-
-视频上传后会自动压缩为适配手机端播放的 H.264 MP4，需要 **ffmpeg**（含 ffprobe）：
-
-```bash
-# macOS
-brew install ffmpeg
-
-# Debian / Ubuntu
-sudo apt install ffmpeg
-
-# Windows
-winget install ffmpeg
-```
-
-验证：`ffmpeg -version`
-
-### 1. 启动基础设施
-
-```bash
-docker-compose up -d mysql
-```
-
-### 2. 启动后端
-
-```bash
-cd backend
-pip install -r requirements.txt --break-system-packages
-alembic upgrade head
-python seed_data/seed_all.py
-uv run python -m uvicorn app.main:app --reload --port 8080
-```
-
-API 文档：http://localhost:8080/api/docs
-
-AI 出题 / 语音转写 / 话术演练统一使用火山引擎方舟 Doubao（全模态），后端启动前需配置：
-
-```bash
-SALES_TRAINING_AI_API_KEY=ark-你的火山方舟APIKey
-SALES_TRAINING_AI_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
-SALES_TRAINING_AI_MODEL=doubao-seed-2-0-mini-260428
-SALES_TRAINING_AI_QUESTION_TEXT_MODEL=doubao-seed-2-0-mini-260428
-SALES_TRAINING_METHODOLOGY_MODEL=doubao-seed-2-0-mini-260428
-SALES_TRAINING_AGENT_MODEL=doubao-seed-2-0-mini-260428
-SALES_TRAINING_AGENT_MAX_TURNS=15
-SALES_TRAINING_AGENT_MAX_TOOL_ITERATIONS=3
-SALES_TRAINING_AI_REQUEST_TIMEOUT_SECONDS=120
-```
-
-出题流程为：视频上传后由 ffmpeg 提取音频（自动压到 15MB 以内）→ Doubao 转写为带 `[MM:SS]` 时间戳的转录稿（方舟 Responses API，音频以 Base64 内联传入，上限 25MB / 120 分钟）→ Doubao 依据转录稿生成题目，解析引用时间戳作为证据。语音转写、方法论提取走 Responses API，话术演练 Agent 走方舟 OpenAI 兼容的 chat/completions（流式 + 工具调用）。`SALES_TRAINING_AI_API_KEY` 填火山引擎 ARK API Key。使用 Docker Compose 启动时，可在宿主机环境或本地 `.env` 中设置上述变量；不要将真实 API Key 提交到仓库。
-
-### 3. 启动管理端
-
-```bash
-cd admin-web
-npm install
-npm run dev
-```
-
-管理端：http://localhost:3000（需要 `admin` 角色账号登录）
-
-### 4. 启动培训端
-
-```bash
-cd training-web
-npm install
-npm run dev
-```
-
-培训端：http://localhost:3001（3000 已被管理端占用时自动顺延；需要 `sales` 或 `student` 角色）
-
-### 默认账号
-
-| 角色 | 账号 | 密码 | 手机号 | 登录端 |
-|------|------|------|--------|--------|
-| 管理员 | admin | admin123 | 13800000000 | 管理端 |
-| 销售 | sales1 | sales123 | 13800000002 | 培训端（密码登录）|
-| 学员 | student | student123 | 13800000003 | 培训端（验证码 123456）|
 
 ## 技术栈
 
 | 层级 | 技术 |
 |------|------|
 | 管理端 | Vue 3 + Element Plus + Pinia + Vite |
-| 培训端 | Vue 3 + Vant 4 + Pinia + Vite (移动优先) |
+| 培训端 | Vue 3 + Vant 4 + Pinia + Vite（移动优先） |
 | 后端 | FastAPI + SQLAlchemy Async |
 | 数据库 | MySQL 8.0 |
+| 视频存储 | 阿里云 OSS（私有桶 + 签名 URL 播放） |
+| AI | 火山引擎方舟 Doubao（ASR 转写 / 出题 / 话术演练） |
 | 认证 | JWT + bcrypt |
-| 异步任务 | FastAPI BackgroundTasks (视频处理 / AI 出题) |
+| 部署 | Docker Compose + Nginx |
+
+---
+
+## 本地开发启动
+
+### 0. 系统依赖
+
+| 工具 | 用途 | 安装 |
+|------|------|------|
+| **ffmpeg**（含 ffprobe） | 发布视频时提取音频做 ASR 转写 | `winget install ffmpeg` / `brew install ffmpeg` / `apt install ffmpeg` |
+| **Docker Compose v2** | 本地数据库 | `curl -fsSL https://get.docker.com \| sh` |
+| **Node.js 18+** | 前端开发 | https://nodejs.org |
+
+验证：`ffmpeg -version`、`docker compose version`
+
+### 1. 启动数据库
+
+```bash
+docker compose up -d mysql
+```
+
+### 2. 配置环境变量
+
+```bash
+cd backend
+```
+
+创建 `backend/.env`，至少填以下内容：
+
+```bash
+# 数据库
+SALES_TRAINING_DATABASE_URL=mysql+asyncmy://training:training123@localhost:3306/sales_training
+
+# 火山引擎方舟 API Key（AI 出题 / ASR / 话术演练）
+SALES_TRAINING_AI_API_KEY=ark-你的Key
+
+# OSS（可选，本地开发可不填，视频存本地）
+SALES_TRAINING_OSS_ENABLED=false
+```
+
+所有可用配置项见 `backend/app/core/config.py`。
+
+### 3. 启动后端
+
+```bash
+cd backend
+pip install -r requirements.txt --break-system-packages
+alembic upgrade head
+python seed_data/seed_all.py   # 首次灌入默认数据
+uvicorn app.main:app --reload --port 8080
+```
+
+API 文档：http://localhost:8080/api/docs
+
+### 4. 启动管理端
+
+```bash
+cd admin-web && npm install && npm run dev
+```
+
+管理端：http://localhost:3000
+
+### 5. 启动培训端
+
+```bash
+cd training-web && npm install && npm run dev
+```
+
+培训端：http://localhost:3001
+
+---
+
+## 视频上传流程
+
+```
+管理端分片上传 MP4
+  → 后端合并
+  → OSS_ENABLED=true：上传到 OSS videos/{YYYYMM}/{uuid}.mp4，删本地
+  → OSS_ENABLED=false：保存到本地 uploads/videos/
+  → 管理员发布 → 后台任务：从 OSS/本地读取视频
+  → ffmpeg 提取音频（16kHz MP3）→ Doubao ASR 转写
+  → Doubao 依转录稿生成考题 → 视频状态 published
+```
+
+**学员端播放**：后端实时签发 12 小时 HTTPS 签名 URL，浏览器直连 OSS，不经 Nginx。
+
+**上传格式**：仅支持 MP4。
+
+---
+
+## 默认账号（seed 数据）
+
+| 角色 | 账号 | 密码 | 手机号 | 登录端 |
+|------|------|------|--------|--------|
+| 管理员 | admin | admin123 | 13800000000 | 管理端 |
+| 销售 | sales1 | sales123 | 13800000002 | 培训端 |
+| 学员 | student | student123 | 13800000003 | 培训端 |
+
+> 管理端与培训端相互隔离：`admin` 只能登录管理端，`sales`/`student` 只能登录培训端。
+
+---
+
+## 用户角色
+
+| 角色 | 使用端 | 权限 |
+|------|--------|------|
+| `admin` | 管理端 | 用户/门店/课程/题库/试卷/数据看板/销售语音/方法论管理 |
+| `sales` | 培训端 | 通用学习 + 销售看板、方法论查看、上传个人销售语音 |
+| `student` | 培训端 | 课程学习、话术、考试、Agent 演练、收藏、学习记录 |
+
+---
 
 ## 产品分类编码
 
@@ -117,12 +154,8 @@ npm run dev
 | gongneng | 功能性眼镜 |
 | qiwenhua | 企业文化 |
 
-## 用户角色
+---
 
-| 角色 | 值 | 使用端 | 权限范围 |
-|------|----|--------|---------|
-| 管理员 | `admin` | 管理端 | 全部后台功能：用户/门店/课程/题库/试卷/数据看板/销售语音文件查看/销售方法论管理 |
-| 销售 | `sales` | 培训端 | 通用学习能力 + 销售看板、销售方法论查看、上传个人销售语音文件 |
-| 学员 | `student` | 培训端 | 课程学习、话术学习、考试、Agent 话术演练、收藏、学习记录 |
+## 生产部署
 
-> 管理端与培训端相互隔离：`admin` 只能登录管理端，`sales`/`student` 只能登录培训端。
+见 [`交付说明-给同事完整版.md`](交付说明-给同事完整版.md)。
