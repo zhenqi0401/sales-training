@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     ai_base_url: str = "https://ark.cn-beijing.volces.com/api/v3"
     ai_model: str = "doubao-seed-2-0-mini-260428"
     ai_question_text_model: str = "doubao-seed-2-0-mini-260428"
-    ai_request_timeout_seconds: int = 120
+    ai_request_timeout_seconds: int = 300
 
     # ---------- Methodology generation ----------
     methodology_model: str = "doubao-seed-2-0-mini-260428"

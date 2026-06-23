@@ -15,6 +15,8 @@ from collections import Counter
 from pathlib import Path
 from typing import Any
 
+import httpx
+
 from app.core.config import settings
 from app.services.video_processing import probe_video, resolve_video_tool
 
@@ -22,7 +24,9 @@ SUPPORTED_TYPES = ("single", "multiple", "true_false")
 DIFFICULTY_TO_SCORE = {"L1": 1, "L2": 3, "L3": 5}
 DIFFICULTY_LABELS = {"L1": "基础理解", "L2": "场景应用", "L3": "综合判断"}
 
-# Doubao Base64 音频上限 25MB、时长 ≤120 分钟。这里压到 15MB 留足余量。
+# Doubao Base64 audio is sent inline in the JSON request. Keep the target well
+# below the hard guard so slow server egress has room before httpx write timeout.
+TARGET_AUDIO_BYTES = 8 * 1024 * 1024
 MAX_AUDIO_BYTES = 15 * 1024 * 1024
 
 
@@ -33,6 +37,13 @@ class AIQuestionGenerationError(RuntimeError):
 # ─────────────────────────── 方舟 Responses API 客户端 ───────────────────────────
 
 _ark_client: Any = None
+
+
+def _build_ark_timeout() -> httpx.Timeout:
+    """Use a short connect timeout but allow large audio request bodies to upload."""
+    timeout_seconds = max(1, int(settings.ai_request_timeout_seconds))
+    connect_timeout = min(30, timeout_seconds)
+    return httpx.Timeout(timeout_seconds, connect=connect_timeout, pool=connect_timeout)
 
 
 def _get_client() -> Any:
@@ -48,7 +59,7 @@ def _get_client() -> Any:
         _ark_client = AsyncArk(
             base_url=settings.ai_base_url,
             api_key=settings.ai_api_key,
-            timeout=settings.ai_request_timeout_seconds,
+            timeout=_build_ark_timeout(),
         )
     return _ark_client
 
@@ -140,10 +151,10 @@ async def transcribe_video_audio(video_path: Path) -> str:
         except Exception:
             duration_sec = 0
 
-        # 计算刚好不超过 15MB 的最大码率（留 10% 余量）
+        # 计算刚好不超过目标体积的最大码率（留 10% 余量）
         bitrate = "24k"  # 默认
         if duration_sec > 0:
-            max_bps = int((MAX_AUDIO_BYTES * 8) / duration_sec * 0.9)
+            max_bps = int((TARGET_AUDIO_BYTES * 8) / duration_sec * 0.9)
             for candidate in ["64k", "48k", "32k", "24k", "16k"]:
                 candidate_bps = int(candidate.replace("k", "")) * 1000
                 if candidate_bps <= max_bps:
@@ -163,9 +174,10 @@ async def transcribe_video_audio(video_path: Path) -> str:
             raise AIQuestionGenerationError(f"音频提取失败：{(result.stderr or '')[-300:]}")
 
         file_size = audio_path.stat().st_size
+        logger.info("音频提取完成 bitrate=%s duration=%ss size=%s", bitrate, duration_sec, file_size)
         if file_size > MAX_AUDIO_BYTES:
             raise AIQuestionGenerationError(
-                f"音频文件过大（{file_size} bytes），超过 Doubao Base64 25MB 限制，请上传更短的视频"
+                f"音频文件过大（{file_size} bytes），超过系统 ASR 安全上限 {MAX_AUDIO_BYTES} bytes，请上传更短的视频"
             )
 
         logger.info("正在使用 Doubao 转写 video_path=%s", video_path)
